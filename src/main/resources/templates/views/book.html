@@ -1,0 +1,80 @@
+<div class="p-2">
+    <form class="grid grid-cols-2 gap-2">
+        <div class="bg-gray-200 rounded p-2 col-span-2">
+            <label class="block text-xs font-bold pb-2">COURT</label>
+            <select name="fromSlot" class="block w-full rounded p-1">
+                <option value=""></option>
+                <option value="Court 1">Court 1</option>
+                <option value="Court 2">Court 2</option>
+                <option value="Court 3">Court 3</option>
+            </select>
+        </div>
+
+        <div class="bg-gray-200 rounded p-2 col-span-2">
+            <label class="block text-xs font-bold pb-2">DATE</label>
+            <input class="block w-full rounded p-1" name="date" type="date">
+        </div>
+
+        <div class="bg-gray-200 rounded p-2">
+            <label class="block text-xs font-bold pb-2">FROM TIME</label>
+            <select name="fromSlot" class="block w-full rounded p-1">
+                <option value="">---</option>
+                <option value="12">06:00</option>
+                <option value="13">06:30</option>
+                <option value="14">07:00</option>
+                <option value="15">07:30</option>
+            </select>
+        </div>
+
+        <div class="bg-gray-200 rounded p-2">
+            <label class="block text-xs font-bold pb-2">TO TIME</label>
+            <select name="toSlot" class="block w-full rounded p-1">
+                <option value="">---</option>
+                <option value="12">06:00</option>
+                <option value="13">06:30</option>
+                <option value="14">07:00</option>
+                <option value="15">07:30</option>
+            </select>
+        </div>
+
+        <div class="bg-gray-200 rounded p-2">
+            <label class="block text-xs font-bold pb-2">PLAYER 1</label>
+            <input class="block w-full rounded p-1" name="player1" type="text" disabled value="Tom Lausmann"/>
+        </div>
+
+        <div class="bg-gray-200 rounded p-2">
+            <label class="block text-xs font-bold pb-2">PLAYER 2</label>
+            <select class="block w-full rounded p-1" name="player2">
+                <option value="">---</option>
+                <option value="tla">Tom Lausmann</option>
+                <option value="hal">Hong Ahn Le</option>
+                <option value="akk">Ann Katzinski</option>
+                <option value="tpf">Tobias Pfeifer</option>
+            </select>
+        </div>
+
+        <div class="bg-gray-200 rounded p-2">
+            <label class="block text-xs font-bold pb-2">PLAYER 3 (doubles, not required)</label>
+            <select class="block w-full rounded p-1" name="player3">
+                <option value="">---</option>
+                <option value="tla">Tom Lausmann</option>
+                <option value="hal">Hong Ahn Le</option>
+                <option value="akk">Ann Katzinski</option>
+                <option value="tpf">Tobias Pfeifer</option>
+            </select>
+        </div>
+
+        <div class="bg-gray-200 rounded p-2">
+            <label class="block text-xs font-bold pb-2">PLAYER 4 (doubles, not required)</label>
+            <select class="block w-full rounded p-1" name="player4">
+                <option value="">---</option>
+                <option value="tla">Tom Lausmann</option>
+                <option value="hal">Hong Ahn Le</option>
+                <option value="akk">Ann Katzinski</option>
+                <option value="tpf">Tobias Pfeifer</option>
+            </select>
+        </div>
+
+        <button class="col-span-2 bg-orange-300 hover:bg-orange-400 rounded p-2 font-bold" type="submit">BOOK</button>
+    </form>
+</div>

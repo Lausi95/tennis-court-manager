@@ -1,0 +1,7 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+.grid-rows-33 {
+    grid-template-rows: repeat(33, minmax(0, 1fr));
+}

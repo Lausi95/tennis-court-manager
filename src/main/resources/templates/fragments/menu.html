@@ -1,0 +1,11 @@
+<nav th:fragment="nav(currentPage)" class="p-3 font-bold gap-4 shadow-md flex items-center z-50 relative">
+    <img src="/assets/logo.png" class="h-[30px]" alt="Borussia Friedrichsfelde - Vereins Logo" />
+
+    <th:block th:replace="~{fragments/menu :: nav-link('Home', ${currentPage}, '/')}" />
+    <th:block th:replace="~{fragments/menu :: nav-link('Buchen', ${currentPage}, '/book')}" />
+</nav>
+
+<th:block th:fragment="nav-link(name, currentName, target)">
+    <a th:if="${currentName == name}" class="bg-gray-200 px-2 py-1 rounded" th:href="${target}" th:text="${name}"></a>
+    <a th:unless="${currentName == name}" class="hover:bg-gray-100 px-2 py-1 rounded" th:href="${target}" th:text="${name}"></a>
+</th:block>

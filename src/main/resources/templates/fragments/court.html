@@ -1,0 +1,27 @@
+<th:block th:fragment="block(block)" th:switch="${block.type.name()}">
+    <!-- FREE -->
+    <div th:case="'FREE'" th:class="'p-1 bg-orange-100 rounded row-span-' + ${block.span}">
+        <div class="text-xs font-bold" th:text="${block.fromTime + ' -  ' + block.toTime}"></div>
+        <div class="text-xs">frei</div>
+    </div>
+
+    <!-- FREE_PLAY -->
+    <div th:case="'FREE_PLAY'" th:class="'p-1 bg-orange-900 text-white rounded row-span-' + ${block.span}">
+        <div class="text-xs font-bold" th:text="${block.fromTime + ' -  ' + block.toTime}"></div>
+        <div class="text-xs" th:text="${block.text}"></div>
+    </div>
+
+    <!-- TRAINING -->
+    <div th:case="'TRAINING'" th:class="'p-1 bg-blue-900 text-white rounded row-span-' + ${block.span}">
+        <div class="text-xs font-bold" th:text="${block.fromTime + ' -  ' + block.toTime}"></div>
+        <div class="text-xs font-bold">Training</div>
+        <div class="text-xs" th:text="${block.text}"></div>
+    </div>
+
+    <!-- MATCH -->
+    <div th:case="'MATCH'" th:class="'p-1 bg-red-900 text-white rounded row-span-' + ${block.span}">
+        <div class="text-xs font-bold" th:text="${block.fromTime + ' -  ' + block.toTime}"></div>
+        <div class="text-xs font-bold">Match</div>
+        <div class="text-xs" th:text="${'vs. ' + block.text}"></div>
+    </div>
+</th:block>

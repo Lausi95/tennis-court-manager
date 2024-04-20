@@ -1,0 +1,35 @@
+<div>
+    <div class="p-3 font-bold gap-4 grid grid-cols-3">
+        <div class="text-center cursor-pointer bg-gray-100 hover:bg-gray-200 rounded p-1"
+             th:hx-get="${courtsCollection.prevDateUrl}"
+             hx-target="#view">
+            <i class="fa-solid fa-arrow-left"></i>
+        </div>
+
+        <input class="bg-gray-100 rounded p-1 text-center"
+               type="date" name="date" required
+               hx-get="/api/courts"
+               hx-trigger="change"
+               hx-target="#view"
+               th:value="${courtsCollection.date}"
+               th:min="${courtsCollection.date}"/>
+
+        <div class="text-center cursor-pointer bg-gray-100 hover:bg-gray-200 rounded p-1"
+             th:hx-get="${courtsCollection.nextDateUrl}"
+             hx-target="#view">
+            <i class="fa-solid fa-arrow-right"></i>
+        </div>
+    </div>
+
+    <div class="grid grid-rows-33 gap-1 grid-flow-col p-1 bg-orange-400">
+        <th:block th:each="court: ${courtsCollection.courts}">
+            <div class="bg-orange-200 rounded text-center flex items-center justify-center">
+                <span th:text="${court.name}" class="font-bold align-middle"></span>
+            </div>
+
+            <th:block th:each="block: ${court.blocks}">
+                <th:block th:replace="~{fragments/court :: block(${block})}"></th:block>
+            </th:block>
+        </th:block>
+    </div>
+</div>
