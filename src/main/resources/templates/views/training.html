@@ -1,0 +1,91 @@
+<div class="p-2">
+    <div>
+        <form class="grid grid-cols-2 gap-2" method="post">
+            <div th:if="${errors != null}" th:each="error: ${errors}" class="bg-red-900 text-white p-2 col-span-2 font-bold">
+                <span th:text="${error}"></span>
+            </div>
+
+            <div class="bg-gray-200 rounded p-2 col-span-2">
+                <label class="block text-xs font-bold pb-2">PLATZ</label>
+                <select name="courtId" class="block w-full rounded p-1">
+                    <option value=""></option>
+                    <th:block th:each="court: ${courtCollection.items}">
+                        <th:block th:switch="${param.courtId != null && param.courtId[0] == court.id}">
+                            <option th:case="${true}" selected th:value="${court.id}" th:text="${court.name}"></option>
+                            <option th:case="${false}" th:value="${court.id}" th:text="${court.name}"></option>
+                        </th:block>
+                    </th:block>
+                </select>
+            </div>
+
+            <div class="bg-gray-200 rounded p-2 col-span-2">
+                <label class="block text-xs font-bold pb-2">WOCHENTAG</label>
+                <select name="dayOfWeek" class="block w-full rounded p-1">
+                    <option value=""></option>
+                    <th:block th:each="dayOfWeek: ${trainingCollection.daysOfWeek}">
+                        <th:block th:switch="${param.dayOfWeek != null && param.dayOfWeek[0] == dayOfWeek.id.toString()}">
+                            <option th:case="${true}"  selected th:value="${dayOfWeek.id}" th:text="${dayOfWeek.name}"></option>
+                            <option th:case="${false}" th:value="${dayOfWeek.id}" th:text="${dayOfWeek.name}"></option>
+                        </th:block>
+                    </th:block>
+                </select>
+            </div>
+
+            <div class="bg-gray-200 rounded p-2">
+                <label class="block text-xs font-bold pb-2">START-ZEIT</label>
+                <select name="fromSlot" class="block w-full rounded p-1">
+                    <option value="">---</option>
+                    <th:block th:each="slot : ${slotCollection.items}">
+                        <th:block th:switch="${param.fromSlot != null && param.fromSlot[0] == slot.id.toString()}">
+                            <option th:case="${true}" selected th:value="${slot.id}" th:text="${slot.time}"></option>
+                            <option th:case="${false}" th:value="${slot.id}" th:text="${slot.time}"></option>
+                        </th:block>
+                    </th:block>
+                </select>
+            </div>
+
+            <div class="bg-gray-200 rounded p-2">
+                <label class="block text-xs font-bold pb-2">END-ZEIT</label>
+                <select name="toSlot" class="block w-full rounded p-1">
+                    <option value="">---</option>
+                    <th:block th:each="slot : ${slotCollection.items}">
+                        <th:block th:switch="${param.toSlot != null && param.toSlot[0] == slot.id.toString()}">
+                            <option th:case="${true}" selected th:value="${slot.id}" th:text="${slot.endTime}"></option>
+                            <option th:case="${false}" th:value="${slot.id}" th:text="${slot.endTime}"></option>
+                        </th:block>
+                    </th:block>
+                </select>
+            </div>
+
+            <div class="bg-gray-200 rounded p-2 col-span-2">
+                <label class="block text-xs font-bold pb-2">BESCHREIBUNG</label>
+                <input name="description" class="block w-full rounded p-1" th:value="${param.description}" />
+            </div>
+
+            <button class="col-span-2 bg-orange-300 hover:bg-orange-400 rounded p-2 font-bold" type="submit">Erstellen</button>
+        </form>
+    </div>
+
+    <div class="mt-2" th:each="dayOfWeek : ${trainingCollection.daysOfWeek}">
+        <div class="font-bold text-lg" th:text="${dayOfWeek.name}"></div>
+        <div class="grid grid-rows-1 gap-1 grid-flow-col rounded bg-orange-100 p-2">
+            <div class="flex flex-col gap-1" th:each="court : ${courtCollection.items}">
+                <div class="text-center italic" th:text="${court.name}"></div>
+                <th:block th:each="training: ${trainingCollection.items}">
+                   <div class="bg-blue-900 rounded p-2 text-white text-xs" th:if="${training.dayOfWeek.id == dayOfWeek.id && training.court.id == court.id}">
+                       <div class="font-bold">
+                           <span th:text="${training.fromTime}"></span> - <span th:text="${training.toTime}"></span>
+                       </div>
+                       <div>
+                           <span th:text="${training.description}"></span>
+                       </div>
+                       <div class="flex flex-row-reverse gap-2">
+                           <button><i class="fa-solid fa-pen-to-square"></i></button>
+                           <button th:hx-delete="${'/training/' + training.id}"><i class="fa-solid fa-trash"></i></button>
+                       </div>
+                   </div>
+                </th:block>
+            </div>
+        </div>
+    </div>
+</div>

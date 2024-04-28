@@ -1,21 +1,17 @@
 package de.lausi.tcm.adapter.web
 
 import de.lausi.tcm.IsoDate
-import de.lausi.tcm.adapter.web.api.CourtController
-import de.lausi.tcm.adapter.web.api.MemberController
-import de.lausi.tcm.adapter.web.api.OccupancyPlanController
-import de.lausi.tcm.adapter.web.api.SlotController
-import de.lausi.tcm.domain.model.OccupancyPlanService
-import de.lausi.tcm.domain.model.Reservation
-import de.lausi.tcm.domain.model.ReservationRespository
-import de.lausi.tcm.domain.model.ReservationService
-import org.slf4j.LoggerFactory
+import de.lausi.tcm.adapter.web.api.*
+import de.lausi.tcm.domain.model.*
 import org.springframework.stereotype.Controller
 import org.springframework.ui.Model
+import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestParam
 import java.security.Principal
+import java.time.DayOfWeek
 import java.time.LocalDate
 
 data class PostReservationParams(
@@ -29,6 +25,14 @@ data class PostReservationParams(
   val memberId4: String,
 )
 
+data class PostTrainingParams(
+  val dayOfWeek: DayOfWeek,
+  val courtId: String,
+  val fromSlot: Int,
+  val toSlot: Int,
+  val description: String,
+)
+
 @Controller
 private class HomeController(
   private val occupancyPlanController: OccupancyPlanController,
@@ -38,6 +42,8 @@ private class HomeController(
   private val reservationRepository: ReservationRespository,
   private val occupancyPlanService: OccupancyPlanService,
   private val reservationService: ReservationService,
+  private val trainingController: TrainingController,
+  private val trainingRepository: TrainingRepository,
 ) {
 
   @GetMapping("/")
@@ -47,6 +53,48 @@ private class HomeController(
     occupancyPlanController.getOccupancyPlan(date ?: LocalDate.now(), model)
 
     return "home"
+  }
+
+  @GetMapping("/training")
+  fun getTrainig(model: Model): String {
+    model.addAttribute("currentPage", "training")
+
+    courtController.getCourts(model)
+    slotController.getSlots(model)
+    trainingController.getTrainings(model)
+
+    return "training"
+  }
+
+  @PostMapping("/training")
+  fun createTrainig(model: Model, params: PostTrainingParams): String {
+    val errors = mutableListOf<String>()
+
+    val training = Training(
+      params.dayOfWeek,
+      params.courtId,
+      params.fromSlot,
+      params.toSlot,
+      params.description
+    )
+
+    val trainings = trainingRepository.findByDayOfWeekAndCourtId(training.dayOfWeek, training.courtId)
+    if (trainings.any { it.collidesWith(training) }) {
+      errors.add("Zu dem angegebenen Zeitraum ist bereits Training")
+    }
+
+    if (errors.isNotEmpty()) {
+      return getTrainig(model)
+    }
+
+    trainingRepository.save(training)
+    return "redirect:/training"
+  }
+
+  @DeleteMapping("/training/{trainingId}")
+  fun deleteTraining(@PathVariable trainingId: String): String {
+    trainingRepository.deleteById(trainingId)
+    return "redirect:/training"
   }
 
   @GetMapping("/book")

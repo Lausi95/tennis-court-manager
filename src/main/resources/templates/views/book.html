@@ -3,6 +3,7 @@
         <div th:if="${errors != null}" th:each="error: ${errors}" class="bg-red-900 text-white p-2 col-span-2 font-bold">
             <span th:text="${error}"></span>
         </div>
+
         <div class="bg-gray-200 rounded p-2 col-span-2">
             <label class="block text-xs font-bold pb-2">DATUM</label>
             <input name="date" type="date"
