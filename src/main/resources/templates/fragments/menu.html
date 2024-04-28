@@ -6,6 +6,6 @@
 </nav>
 
 <th:block th:fragment="nav-link(name, currentName, target)">
-    <a th:if="${currentName == name}" class="bg-gray-200 px-2 py-1 rounded" th:href="${target}" th:text="${name}"></a>
-    <a th:unless="${currentName == name}" class="hover:bg-gray-100 px-2 py-1 rounded" th:href="${target}" th:text="${name}"></a>
+    <a th:if="${currentName == name}" class="px-2 py-1" th:href="${target}" th:text="${name}"></a>
+    <a th:unless="${currentName == name}" class="px-2 py-1 text-gray-300" th:href="${target}" th:text="${name}"></a>
 </th:block>

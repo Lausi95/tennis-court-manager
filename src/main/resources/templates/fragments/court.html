@@ -1,27 +1,40 @@
 <th:block th:fragment="block(block)" th:switch="${block.type.name()}">
     <!-- FREE -->
-    <div th:case="'FREE'" th:class="'p-1 bg-orange-100 rounded row-span-' + ${block.span}">
-        <div class="text-xs font-bold" th:text="${block.fromTime + ' -  ' + block.toTime}"></div>
+    <a th:case="'FREE'" th:class="'p-1 ' + ${block.core ? 'bg-orange-200' : 'bg-orange-100'} + ' rounded row-span-' + ${block.slots}" th:href="${block.links.get('book')}">
+        <div th:replace="~{fragments/court :: duration(${block.fromTime}, ${block.toTime})}"></div>
         <div class="text-xs">frei</div>
-    </div>
+    </a>
 
     <!-- FREE_PLAY -->
-    <div th:case="'FREE_PLAY'" th:class="'p-1 bg-orange-900 text-white rounded row-span-' + ${block.span}">
-        <div class="text-xs font-bold" th:text="${block.fromTime + ' -  ' + block.toTime}"></div>
+    <div th:case="'FREE_PLAY'" th:class="'p-1 bg-orange-900 text-white rounded row-span-' + ${block.slots}">
+        <div th:replace="~{fragments/court :: duration(${block.fromTime}, ${block.toTime})}"></div>
         <div class="text-xs" th:text="${block.text}"></div>
     </div>
 
     <!-- TRAINING -->
-    <div th:case="'TRAINING'" th:class="'p-1 bg-blue-900 text-white rounded row-span-' + ${block.span}">
-        <div class="text-xs font-bold" th:text="${block.fromTime + ' -  ' + block.toTime}"></div>
+    <div th:case="'TRAINING'" th:class="'p-1 bg-blue-900 text-white rounded row-span-' + ${block.slots}">
+        <div th:replace="~{fragments/court :: duration(${block.fromTime}, ${block.toTime})}"></div>
         <div class="text-xs font-bold">Training</div>
         <div class="text-xs" th:text="${block.text}"></div>
     </div>
 
     <!-- MATCH -->
-    <div th:case="'MATCH'" th:class="'p-1 bg-red-900 text-white rounded row-span-' + ${block.span}">
-        <div class="text-xs font-bold" th:text="${block.fromTime + ' -  ' + block.toTime}"></div>
+    <div th:case="'MATCH'" th:class="'p-1 bg-red-900 text-white rounded row-span-' + ${block.slots}">
+        <div th:replace="~{fragments/court :: duration(${block.fromTime}, ${block.toTime})}"></div>
         <div class="text-xs font-bold">Match</div>
         <div class="text-xs" th:text="${'vs. ' + block.text}"></div>
     </div>
+
+    <!-- EVENT -->
+    <div th:case="'EVENT'" th:class="'p-1 bg-green-900 text-white rounded row-span-' + ${block.slots}">
+        <div th:replace="~{fragments/court :: duration(${block.fromTime}, ${block.toTime})}"></div>
+        <div class="text-xs font-bold">Match</div>
+        <div class="text-xs" th:text="${block.text}"></div>
+    </div>
 </th:block>
+
+<div th:fragment="duration(fromTime, toTime)" class="text-xs">
+    <span class="font-bold" th:text="${fromTime}"></span>
+    <span class="text-gray-400">-</span>
+    <span class="text-gray-400" th:text="${toTime}"></span>
+</div>
