@@ -3,6 +3,7 @@ package de.lausi.tcm.adapter.web
 import de.lausi.tcm.IsoDate
 import de.lausi.tcm.adapter.web.api.OccupancyPlanController
 import de.lausi.tcm.adapter.web.api.ReservationController
+import de.lausi.tcm.adapter.web.api.TeamController
 import de.lausi.tcm.adapter.web.api.TrainingController
 import org.springframework.stereotype.Controller
 import org.springframework.ui.Model
@@ -19,6 +20,7 @@ private class HomeController(
   private val occupancyPlanController: OccupancyPlanController,
   private val trainingController: TrainingController,
   private val reservationController: ReservationController,
+  private val teamController: TeamController,
 ) {
 
   @GetMapping("/")
@@ -44,5 +46,12 @@ private class HomeController(
     model.addAttribute("currentPage", "book")
     reservationController.getReservations(model, principal)
     return "pages/reservations"
+  }
+
+  @GetMapping("/teams")
+  fun getTeams(model: Model): String {
+    model.addAttribute("currentPage", "teams")
+    teamController.getTeams(model)
+    return "pages/teams"
   }
 }
