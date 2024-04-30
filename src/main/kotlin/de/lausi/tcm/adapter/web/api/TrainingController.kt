@@ -1,15 +1,10 @@
 package de.lausi.tcm.adapter.web.api
 
-import de.lausi.tcm.domain.model.CourtRepository
+import de.lausi.tcm.domain.model.*
 
-import de.lausi.tcm.domain.model.TrainingRepository
-import de.lausi.tcm.domain.model.formatFromTime
-import de.lausi.tcm.domain.model.formatToTime
 import org.springframework.stereotype.Controller
 import org.springframework.ui.Model
-import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.ResponseBody
+import org.springframework.web.bind.annotation.*
 import java.time.DayOfWeek
 import java.time.format.DateTimeFormatter
 
@@ -46,8 +41,11 @@ data class TrainingCollection(
 @Controller
 @RequestMapping("/api/trainings")
 class TrainingController(
+  private val courtController: CourtController,
+  private val slotController: SlotController,
   private val courtRepository: CourtRepository,
-  private val trainingRepository: TrainingRepository) {
+  private val trainingRepository: TrainingRepository
+) {
 
   @GetMapping(headers = ["accept: application/json"])
   @ResponseBody
@@ -63,7 +61,10 @@ class TrainingController(
         formatToTime(training.toSlot),
         training.description,
         training.skippedDates.map { it.format(DateTimeFormatter.ISO_DATE) },
-        mapOf(),
+        mapOf(
+          "self" to "/api/trainings/${training.id}",
+          "delete" to "/api/trainings/${training.id}",
+        ),
       )
     }
 
@@ -72,7 +73,41 @@ class TrainingController(
 
   @GetMapping
   fun getTrainings(model: Model): String {
+    courtController.getCourts(model)
+    slotController.getSlots(model)
+
     model.addAttribute("trainingCollection", getTrainings())
-    return "views/training"
+
+    return "views/trainings"
+  }
+
+  @PostMapping
+  fun createTrainig(model: Model, params: PostTrainingParams): String {
+    val errors = mutableListOf<String>()
+
+    val training = Training(
+      params.dayOfWeek,
+      params.courtId,
+      params.fromSlot,
+      params.toSlot,
+      params.description
+    )
+
+    val trainings = trainingRepository.findByDayOfWeekAndCourtId(training.dayOfWeek, training.courtId)
+    if (trainings.any { it.collidesWith(training) }) {
+      errors.add("Zu dem angegebenen Zeitraum ist bereits Training")
+    }
+
+    if (errors.isEmpty()) {
+      trainingRepository.save(training)
+    }
+
+    return getTrainings(model)
+  }
+
+  @DeleteMapping("/{trainingId}")
+  fun deleteTraining(model: Model, @PathVariable trainingId: String): String {
+    trainingRepository.deleteById(trainingId)
+    return getTrainings(model)
   }
 }

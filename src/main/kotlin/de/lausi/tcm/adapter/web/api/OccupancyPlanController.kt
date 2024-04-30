@@ -64,7 +64,7 @@ class OccupancyPlanController(
       val blockModels = occupancyPlan.render(court.id).map {
         val blockLinks = mutableMapOf<String, String>()
         if (it.type == BlockType.FREE) {
-          blockLinks["book"] = "/book?date=${planDateString}&slotId=${it.fromSlot}&courtId=${court.id}"
+          blockLinks["book"] = "/reservations?date=${planDateString}&slotId=${it.fromSlot}&courtId=${court.id}"
         }
 
         BlockModel(
@@ -81,12 +81,12 @@ class OccupancyPlanController(
       CourtOccupancyPlanModel(court.name, blockModels)
     }
 
-    val links = mutableMapOf<String, String>(
-      "self" to "/api/occupancy-plan?date=$planDateString",
-      "nextPlan" to "/api/occupancy-plan?date=$nextCourtDateString",
+    val links = mutableMapOf(
+      "self" to "?date=$planDateString",
+      "nextPlan" to "/?date=$nextCourtDateString",
     )
     if (planDate > todayDate) {
-      links["prevPlan"] = "/api/occupancy-plan?date=$prevCourtDateString"
+      links["prevPlan"] = "/?date=$prevCourtDateString"
     }
 
     return OccupancyPlanModel(
@@ -98,8 +98,8 @@ class OccupancyPlanController(
   }
 
   @GetMapping
-  fun getOccupancyPlan(@RequestParam(name = "date") @IsoDate courtDate: LocalDate, model: Model): String {
-    model.addAttribute("occupancyPlan", getCourtCollection(courtDate))
+  fun getOccupancyPlan(model: Model, @RequestParam @IsoDate date: LocalDate): String {
+    model.addAttribute("occupancyPlan", getCourtCollection(date))
     return "views/occupancy-plan"
   }
 }

@@ -1,15 +1,14 @@
-package de.lausi.tcm.adapter.web
+package de.lausi.tcm.adapter.web.api
 
-import de.lausi.tcm.IsoDate
-import de.lausi.tcm.adapter.web.api.*
-import de.lausi.tcm.domain.model.*
+import de.lausi.tcm.domain.model.OccupancyPlanService
+import de.lausi.tcm.domain.model.Reservation
+import de.lausi.tcm.domain.model.ReservationRespository
+import de.lausi.tcm.domain.model.ReservationService
 import org.springframework.stereotype.Controller
 import org.springframework.ui.Model
-import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
-import org.springframework.web.bind.annotation.RequestParam
+import org.springframework.web.bind.annotation.RequestMapping
 import java.security.Principal
 import java.time.DayOfWeek
 import java.time.LocalDate
@@ -34,71 +33,19 @@ data class PostTrainingParams(
 )
 
 @Controller
-private class HomeController(
-  private val occupancyPlanController: OccupancyPlanController,
+@RequestMapping("/api/reservations")
+class ReservationController(
   private val courtController: CourtController,
   private val slotController: SlotController,
   private val memberController: MemberController,
   private val reservationRepository: ReservationRespository,
-  private val occupancyPlanService: OccupancyPlanService,
   private val reservationService: ReservationService,
-  private val trainingController: TrainingController,
-  private val trainingRepository: TrainingRepository,
+  private val occupancyPlanService: OccupancyPlanService,
+  private val occupancyPlanController: OccupancyPlanController,
 ) {
 
-  @GetMapping("/")
-  fun getHome(model: Model, @RequestParam(name = "date") @IsoDate date: LocalDate?): String {
-    model.addAttribute("currentPage", "home")
-
-    occupancyPlanController.getOccupancyPlan(date ?: LocalDate.now(), model)
-
-    return "home"
-  }
-
-  @GetMapping("/training")
-  fun getTrainig(model: Model): String {
-    model.addAttribute("currentPage", "training")
-
-    courtController.getCourts(model)
-    slotController.getSlots(model)
-    trainingController.getTrainings(model)
-
-    return "training"
-  }
-
-  @PostMapping("/training")
-  fun createTrainig(model: Model, params: PostTrainingParams): String {
-    val errors = mutableListOf<String>()
-
-    val training = Training(
-      params.dayOfWeek,
-      params.courtId,
-      params.fromSlot,
-      params.toSlot,
-      params.description
-    )
-
-    val trainings = trainingRepository.findByDayOfWeekAndCourtId(training.dayOfWeek, training.courtId)
-    if (trainings.any { it.collidesWith(training) }) {
-      errors.add("Zu dem angegebenen Zeitraum ist bereits Training")
-    }
-
-    if (errors.isNotEmpty()) {
-      return getTrainig(model)
-    }
-
-    trainingRepository.save(training)
-    return "redirect:/training"
-  }
-
-  @DeleteMapping("/training/{trainingId}")
-  fun deleteTraining(@PathVariable trainingId: String): String {
-    trainingRepository.deleteById(trainingId)
-    return "redirect:/training"
-  }
-
-  @GetMapping("/book")
-  fun getBook(model: Model, principal: Principal): String {
+  @GetMapping
+  fun getReservations(model: Model, principal: Principal): String {
     model.addAttribute("currentPage", "book")
     model.addAttribute("userId", principal.name)
 
@@ -106,11 +53,11 @@ private class HomeController(
     slotController.getSlots(model)
     memberController.getMembers(model)
 
-    return "book"
+    return "views/reservations"
   }
 
-  @PostMapping("/book")
-  fun postBook(model: Model, params: PostReservationParams, principal: Principal): String {
+  @PostMapping
+  fun createReservation(model: Model, params: PostReservationParams, principal: Principal): String {
     val errors = mutableListOf<String>()
 
     val courtId = params.courtId.split(",")[0]
@@ -142,10 +89,10 @@ private class HomeController(
 
     if (errors.isEmpty()) {
       reservationRepository.save(reservation)
-      return "redirect:/?date=${params.date}"
+      return occupancyPlanController.getOccupancyPlan(model, params.date)
     } else {
       model.addAttribute("errors", errors)
-      return getBook(model, principal)
+      return getReservations(model, principal)
     }
   }
 }

@@ -1,13 +1,13 @@
 <div>
     <div class="p-3 font-bold gap-4 grid grid-cols-3">
-        <div>
-            <div th:if="${occupancyPlan.links.get('prevPlan')}"
-                 th:hx-get="${occupancyPlan.links.get('prevPlan')}"
-                 hx-target="#view"
-                 class="text-center cursor-pointer bg-gray-100 hover:bg-gray-200 rounded p-1">
+        <th:block th:switch="${occupancyPlan.links.get('prevPlan') != null}">
+            <a th:case="${true}"
+                    th:href="${occupancyPlan.links.get('prevPlan')}"
+                    class="text-center cursor-pointer bg-gray-100 hover:bg-gray-200 rounded p-1">
                 <i  class="fa-solid fa-arrow-left"></i>
-            </div>
-        </div>
+            </a>
+            <div th:case="${false}"></div>
+        </th:block>
 
         <input class="bg-gray-100 rounded p-1 text-center text-xs"
                type="date" name="date" required
@@ -17,11 +17,10 @@
                th:value="${occupancyPlan.planDate}"
                th:min="${occupancyPlan.todayDate}"/>
 
-        <div class="text-center cursor-pointer bg-gray-100 hover:bg-gray-200 rounded p-1"
-             th:hx-get="${occupancyPlan.links.get('nextPlan')}"
-             hx-target="#view">
+        <a class="text-center cursor-pointer bg-gray-100 hover:bg-gray-200 rounded p-1"
+             th:href="${occupancyPlan.links.get('nextPlan')}">
             <i class="fa-solid fa-arrow-right"></i>
-        </div>
+        </a>
     </div>
 
     <div class="grid grid-rows-33 gap-1 grid-flow-col p-1 bg-orange-400">

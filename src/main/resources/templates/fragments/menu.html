@@ -2,7 +2,7 @@
     <img src="/assets/logo.png" class="h-[30px]" alt="Borussia Friedrichsfelde - Vereins Logo" />
 
     <th:block th:replace="~{fragments/menu :: nav-link('Home', ${currentPage}, '/')}" />
-    <th:block th:replace="~{fragments/menu :: nav-link('Buchen', ${currentPage}, '/book')}" />
+    <th:block th:replace="~{fragments/menu :: nav-link('Buchen', ${currentPage}, '/reservations')}" />
 </nav>
 
 <th:block th:fragment="nav-link(name, currentName, target)">

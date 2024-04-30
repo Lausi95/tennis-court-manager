@@ -1,6 +1,6 @@
 <div class="p-2">
     <div>
-        <form class="grid grid-cols-2 gap-2" method="post">
+        <form class="grid grid-cols-2 gap-2" hx-post="/api/trainings" hx-target="#view">
             <div th:if="${errors != null}" th:each="error: ${errors}" class="bg-red-900 text-white p-2 col-span-2 font-bold">
                 <span th:text="${error}"></span>
             </div>
@@ -81,7 +81,7 @@
                        </div>
                        <div class="flex flex-row-reverse gap-2">
                            <button><i class="fa-solid fa-pen-to-square"></i></button>
-                           <button th:hx-delete="${'/training/' + training.id}"><i class="fa-solid fa-trash"></i></button>
+                           <button th:hx-delete="${training.links.get('delete')}" hx-target="#view"><i class="fa-solid fa-trash"></i></button>
                        </div>
                    </div>
                 </th:block>
