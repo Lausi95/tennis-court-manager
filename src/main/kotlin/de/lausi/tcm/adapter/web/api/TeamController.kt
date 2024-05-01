@@ -12,12 +12,12 @@ data class TeamModel(
   val id: String,
   val name: String,
   val captainName: String,
-  val links: Map<String, String>
+  val links: Map<String, String> = mapOf(),
 )
 
 data class TeamCollection(
   val items: List<TeamModel>,
-  val links: Map<String, String>
+  val links: Map<String, String> = mapOf(),
 )
 
 data class CreateTeamRequest(
@@ -41,12 +41,13 @@ class TeamController(
         .orElse("???")
 
       TeamModel(team.id, team.name, captainName, mapOf(
-        "create" to "/api/teams",
         "delete" to "/api/teams/${team.id}"
       ))
     }
 
-    val teamCollection = TeamCollection(items, mapOf())
+    val teamCollection = TeamCollection(items, mapOf(
+      "create" to "/api/teams",
+    ))
     model.addAttribute("teamCollection", teamCollection)
 
     memberController.getMembers(model)

@@ -15,7 +15,16 @@ data class Member(
   val id: String,
   val firstname: String,
   val lastname: String
-)
+) {
+
+  fun formatName(): String {
+    return "$firstname $lastname"
+  }
+
+  fun formatShortName(): String {
+    return "$firstname ${lastname.substring(0..1)}."
+  }
+}
 
 interface MemberRepository : MongoRepository<Member, String> {
 

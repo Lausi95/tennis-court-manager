@@ -75,7 +75,7 @@ class ReservationService(
 
   fun Reservation.toBlock(): Block {
     val members = memberRepository.findAllById(memberIds)
-    val description = members.joinToString(" & ") { it.firstname + " " + it.lastname.substring(0..1) + "." }
+    val description = members.joinToString(" & ") { it.formatShortName() }
     return Block(BlockType.FREE_PLAY, fromSlot, toSlot, description)
   }
 }

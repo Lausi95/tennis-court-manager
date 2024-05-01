@@ -22,7 +22,7 @@
     <div th:case="'MATCH'" th:class="'p-1 bg-red-900 text-white rounded row-span-' + ${block.slots}">
         <div th:replace="~{fragments/court :: duration(${block.fromTime}, ${block.toTime})}"></div>
         <div class="text-xs font-bold">Match</div>
-        <div class="text-xs" th:text="${'vs. ' + block.text}"></div>
+        <div class="text-xs" th:text="${block.text}"></div>
     </div>
 
     <!-- EVENT -->

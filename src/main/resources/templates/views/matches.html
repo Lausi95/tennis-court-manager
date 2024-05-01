@@ -1,0 +1,66 @@
+<div class="p-2">
+    <form th:hx-post="${matchCollection.links.get('create')}" hx-target="#view" class="grid grid-cols-2 gap-2">
+        <div class="font-bold text-lg col-span-2">
+            Match erstellen
+        </div>
+
+        <div th:if="${errors}" th:each="error: ${errors}" class="bg-red-900 text-white p-2 col-span-2 font-bold">
+            <span th:text="${error}"></span>
+        </div>
+
+        <div class="bg-gray-200 rounded p-2">
+            <label class="block text-xs font-bold pb-2">DATUM</label>
+            <input name="date" type="date" th:value="${param.date}" class="block w-full rounded p-1">
+        </div>
+
+        <div class="bg-gray-200 rounded p-2">
+            <label class="block text-xs font-bold pb-2">START-ZEIT</label>
+            <select name="fromSlotId" class="block w-full rounded p-1">
+                <option value="">---</option>
+                <option th:value="18">09:00</option>
+                <option th:value="20">10:00</option>
+                <option th:value="28">14:00</option>
+            </select>
+        </div>
+
+        <div class="bg-gray-200 rounded p-2 col-span-2">
+            <label class="block text-xs font-bold pb-2">PLAETZE</label>
+            <div th:each="court : ${courtCollection.items}">
+                <input th:id="${'court-' + court.id}" th:value="${court.id}" type="checkbox" name="courtIds" />
+                <label th:for="${'court-' + court.id}" th:text="${court.name}"></label>
+            </div>
+        </div>
+
+        <div class="bg-gray-200 rounded p-2 col-span-2">
+            <label class="block text-xs font-bold pb-2">TEAM</label>
+            <select name="teamId" class="block w-full rounded p-1">
+                <option th:each="team : ${teamCollection.items}" th:value="${team.id}" th:text="${team.name}"></option>
+            </select>
+        </div>
+
+        <div class="bg-gray-200 rounded p-2 col-span-2">
+            <label class="block text-xs font-bold pb-2">GEGNER</label>
+            <input name="opponentTeamName" class="block w-full rounded p-1" th:value="${param.opponentTeamName}"/>
+        </div>
+
+        <button class="col-span-2 bg-orange-300 hover:bg-orange-400 rounded p-2 font-bold" type="submit">Erstellen</button>
+    </form>
+
+    <div class="grid grid-cols-1 gap-2 pt-2">
+        <div class="font-bold text-lg">
+            Punktspiele
+        </div>
+        <div th:each="match : ${matchCollection.items}" class="text-xs bg-blue-900 text-white rounded p-2">
+            <div class="font-bold" th:text="${match.team.name + ' vs. ' + match.oppenentTeamName}"></div>
+            <div th:text="${match.date}"></div>
+            <div>
+                <span th:text="${match.fromTime}"></span> - <span th:text="${match.toTime}"></span>
+            </div>
+            <div class="pt-2 font-bold italic">Plaetze</div>
+            <div th:each="court : ${match.courts}" th:text="${court.name}"></div>
+            <div class="flex flex-row-reverse gap-2 text-cs">
+                <button th:hx-delete="${match.links.get('delete')}" hx-target="#view"><i class="fa-solid fa-trash"></i></button>
+            </div>
+        </div>
+    </div>
+</div>
