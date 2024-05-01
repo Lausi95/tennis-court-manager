@@ -1,0 +1,82 @@
+<div class="p-2">
+    <form th:hx-post="${uniqueTrainingCollection.links.get('create')}" hx-target="#view" class="grid grid-cols-2 gap-2">
+        <div class="font-bold text-lg">
+            Einzeltraining Erstellen
+        </div>
+
+        <div th:if="${errors}" th:each="error: ${errors}" class="bg-red-900 text-white p-2 col-span-2 font-bold">
+            <span th:text="${error}"></span>
+        </div>
+
+        <div class="bg-gray-200 rounded p-2 col-span-2">
+            <label class="block text-xs font-bold pb-2">DATUM</label>
+            <input name="date" type="date" th:value="${param.date}" class="block w-full rounded p-1">
+        </div>
+
+        <div class="bg-gray-200 rounded p-2 col-span-2">
+            <label class="block text-xs font-bold pb-2">PLATZ</label>
+            <select name="courtId" class="block w-full rounded p-1">
+                <option value=""></option>
+                <th:block th:each="court: ${courtCollection.items}">
+                    <th:block th:switch="${param.courtId != null && param.courtId[0] == court.id}">
+                        <option th:case="${true}" selected th:value="${court.id}" th:text="${court.name}"></option>
+                        <option th:case="${false}" th:value="${court.id}" th:text="${court.name}"></option>
+                    </th:block>
+                </th:block>
+            </select>
+        </div>
+
+        <div class="bg-gray-200 rounded p-2">
+            <label class="block text-xs font-bold pb-2">VON</label>
+            <select name="fromSlotId" class="block w-full rounded p-1">
+                <option value="">---</option>
+                <th:block th:each="slot : ${slotCollection.items}">
+                    <th:block th:switch="${param.slotId != null && param.slotId[0] == slot.id.toString()}">
+                        <option th:case="${true}" selected th:value="${slot.id}" th:text="${slot.time}"></option>
+                        <option th:case="${false}" th:value="${slot.id}" th:text="${slot.time}"></option>
+                    </th:block>
+                </th:block>
+            </select>
+        </div>
+
+        <div class="bg-gray-200 rounded p-2">
+            <label class="block text-xs font-bold pb-2">BIS</label>
+            <select name="toSlotId" class="block w-full rounded p-1">
+                <option value="">---</option>
+                <th:block th:each="slot : ${slotCollection.items}">
+                    <th:block th:switch="${param.slotId != null && param.slotId[0] == slot.id.toString()}">
+                        <option th:case="${true}" selected th:value="${slot.id}" th:text="${slot.endTime}"></option>
+                        <option th:case="${false}" th:value="${slot.id}" th:text="${slot.endTime}"></option>
+                    </th:block>
+                </th:block>
+            </select>
+        </div>
+
+        <div class="bg-gray-200 rounded p-2 col-span-2">
+            <label class="block text-xs font-bold pb-2">BESCHREIBUNG</label>
+            <input name="description" class="block w-full rounded p-1" th:value="${param.description}"/>
+        </div>
+
+        <button class="col-span-2 bg-orange-300 hover:bg-orange-400 rounded p-2 font-bold" type="submit">Erstellen</button>
+    </form>
+
+    <div class="grid grid-cols-1 gap-2 pt-2">
+        <div class="font-bold text-lg">
+            Einzeltrainings
+        </div>
+        <div th:each="training : ${uniqueTrainingCollection.items}" class="text-xs bg-blue-900 text-white rounded p-2">
+            <div class="font-bold">
+                <span th:text="${training.court.name}"></span>
+                -
+                <span th:text="${training.date}"></span>
+            </div>
+            <div>
+                <span th:text="${training.fromTime}"></span> - <span th:text="${training.toTime}"></span>
+            </div>
+            <div th:text="${training.description}"></div>
+            <div class="flex flex-row-reverse gap-2">
+                <button th:hx-delete="${training.links.get('delete')}" hx-target="#view"><i class="fa-solid fa-trash"></i></button>
+            </div>
+        </div>
+    </div>
+</div>

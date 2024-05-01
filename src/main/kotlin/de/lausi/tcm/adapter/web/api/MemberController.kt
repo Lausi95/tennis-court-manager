@@ -11,33 +11,30 @@ data class MemberModel(
   val id: String,
   val firstname: String,
   val lastname: String,
-  val links: Map<String, String>)
+  val links: Map<String, String> = mapOf())
 
 data class MemberCollection(
   val items: List<MemberModel>,
   val count: Int,
-  val links: Map<String, String>)
+  val links: Map<String, String> = mapOf())
 
 @Controller
 @RequestMapping("/api/members")
 class MemberController(private val memberRepository: MemberRepository) {
 
-  @ResponseBody
-  @GetMapping(headers = ["accept=application/json"])
-  fun getMemberCollection(): MemberCollection {
+  @GetMapping
+  fun getMembers(model: Model): String {
     val memberModels = memberRepository.findAll()
       .map { MemberModel(it.id, it.firstname, it.lastname, mapOf("self" to "/api/members/${it.id}")) }
       .sortedBy { it.firstname }
 
-    return MemberCollection(
+    val memberCollection = MemberCollection(
       memberModels,
       memberModels.size,
       mapOf("self" to "/api/members"))
-  }
 
-  @GetMapping
-  fun getMembers(model: Model): String {
-    model.addAttribute("memberCollection", getMemberCollection())
+    model.addAttribute("memberCollection", memberCollection)
+
     return "views/members"
   }
 }

@@ -1,9 +1,6 @@
 package de.lausi.tcm.adapter.web.api
 
-import de.lausi.tcm.domain.model.OccupancyPlanService
-import de.lausi.tcm.domain.model.Reservation
-import de.lausi.tcm.domain.model.ReservationRespository
-import de.lausi.tcm.domain.model.ReservationService
+import de.lausi.tcm.domain.model.*
 import org.springframework.stereotype.Controller
 import org.springframework.ui.Model
 import org.springframework.web.bind.annotation.GetMapping
@@ -12,6 +9,22 @@ import org.springframework.web.bind.annotation.RequestMapping
 import java.security.Principal
 import java.time.DayOfWeek
 import java.time.LocalDate
+import java.time.format.DateTimeFormatter
+
+data class ReservationModel(
+  val id: String,
+  val date: String,
+  val court: CourtModel,
+  val fromTime: String,
+  val toTime: String,
+  val players: List<MemberModel>,
+  val links: Map<String, String> = mapOf(),
+)
+
+data class ReservationCollection(
+  val items: List<ReservationModel>,
+  val links: Map<String, String> = mapOf(),
+)
 
 data class PostReservationParams(
   val date: LocalDate,
@@ -42,12 +55,31 @@ class ReservationController(
   private val reservationService: ReservationService,
   private val occupancyPlanService: OccupancyPlanService,
   private val occupancyPlanController: OccupancyPlanController,
+  private val reservationRespository: ReservationRespository,
+  private val courtRepository: CourtRepository,
+  private val memberRepository: MemberRepository,
 ) {
 
   @GetMapping
   fun getReservations(model: Model, principal: Principal): String {
-    model.addAttribute("currentPage", "book")
     model.addAttribute("userId", principal.name)
+
+    val items = reservationRespository.findByCreatorIdAndDateGreaterThanEqual(principal.getName(), LocalDate.now()).map { reservation ->
+      val court = courtRepository.findById(reservation.courtId).map { CourtModel(it.id, it.name) }.orElseGet { CourtModel("", "???") }
+      val members = reservation.memberIds
+        .map { memberId -> memberRepository.findById(memberId).map { MemberModel(it.id, it.firstname, it.lastname) }.orElseGet { MemberModel("", "", "???") } }
+
+      ReservationModel(reservation.id,
+        reservation.date.format(DateTimeFormatter.ISO_DATE),
+        court,
+        formatFromTime(reservation.fromSlot),
+        formatToTime(reservation.toSlot),
+        members,
+      )
+    }
+
+    val reservationCollection = ReservationCollection(items)
+    model.addAttribute("reservationCollection", reservationCollection)
 
     courtController.getCourts(model)
     slotController.getSlots(model)
@@ -79,7 +111,7 @@ class ReservationController(
       errors.add("Du kannst maximal 14 Tage in die Zukunft buchen")
     }
 
-    with (reservationService) {
+    with(reservationService) {
       val reservationBlock = reservation.toBlock()
       val occupancyPlan = occupancyPlanService.getOccupancyPlan(params.date, listOf(courtId))
       if (!occupancyPlan.canPlace(courtId, reservationBlock)) {

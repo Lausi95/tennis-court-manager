@@ -41,9 +41,8 @@ class OccupancyPlanController(
   private val occupancyPlanService: OccupancyPlanService,
 ) {
 
-  @ResponseBody
-  @GetMapping(headers = ["accept=application/json"])
-  fun getCourtCollection(@RequestParam(name = "date") @IsoDate planDate: LocalDate): OccupancyPlanModel {
+  @GetMapping
+  fun getOccupancyPlan(model: Model, @RequestParam(name = "date") @IsoDate planDate: LocalDate): String {
     val dateFormatter = DateTimeFormatter.ISO_DATE
 
     val todayDate = LocalDate.now()
@@ -89,17 +88,15 @@ class OccupancyPlanController(
       links["prevPlan"] = "/?date=$prevCourtDateString"
     }
 
-    return OccupancyPlanModel(
+    val occupancyPlanModel = OccupancyPlanModel(
       courtModels,
       todayDateString,
       planDateString,
       links,
     )
-  }
 
-  @GetMapping
-  fun getOccupancyPlan(model: Model, @RequestParam @IsoDate date: LocalDate): String {
-    model.addAttribute("occupancyPlan", getCourtCollection(date))
+    model.addAttribute("occupancyPlan", occupancyPlanModel)
+
     return "views/occupancy-plan"
   }
 }

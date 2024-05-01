@@ -47,9 +47,8 @@ class TrainingController(
   private val trainingRepository: TrainingRepository
 ) {
 
-  @GetMapping(headers = ["accept: application/json"])
-  @ResponseBody
-  fun getTrainings(): TrainingCollection {
+  @GetMapping
+  fun getTrainings(model: Model): String {
     val courts = courtRepository.findAll()
     val items = trainingRepository.findAll().map { training ->
       val court = courts.find { it.id == training.courtId } ?: error("Could not find court for training.")
@@ -68,15 +67,12 @@ class TrainingController(
       )
     }
 
-    return TrainingCollection(items, items.size, DAY_OF_WEEK_MODELS, mapOf())
-  }
+    val trainingCollection = TrainingCollection(items, items.size, DAY_OF_WEEK_MODELS, mapOf())
 
-  @GetMapping
-  fun getTrainings(model: Model): String {
+    model.addAttribute("trainingCollection", trainingCollection)
+
     courtController.getCourts(model)
     slotController.getSlots(model)
-
-    model.addAttribute("trainingCollection", getTrainings())
 
     return "views/trainings"
   }

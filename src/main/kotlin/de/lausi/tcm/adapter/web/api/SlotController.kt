@@ -4,7 +4,6 @@ import de.lausi.tcm.domain.model.*
 import org.springframework.stereotype.Controller
 import org.springframework.ui.Model
 import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestMapping
 
 data class SlotModel(
@@ -12,13 +11,12 @@ data class SlotModel(
   val time: String,
   val endTime: String,
   val core: Boolean,
-  val links: Map<String, String>,
+  val links: Map<String, String> = mapOf(),
 )
 
 data class SlotCollection(
   val items: List<SlotModel>,
-  val count: Int,
-  val links: Map<String, String>,
+  val links: Map<String, String> = mapOf(),
 )
 
 @Controller
@@ -26,14 +24,12 @@ data class SlotCollection(
 class SlotController {
 
   @GetMapping(headers = ["accept=application/json"])
-  fun getSlotCollection(): SlotCollection {
-    val items = (MIN_SLOT..MAX_SLOT).map { SlotModel(it, formatFromTime(it), formatToTime(it), isCoreTimeSlot(it), mapOf()) }
-    return SlotCollection(items, items.size, mapOf())
-  }
-
-  @GetMapping
   fun getSlots(model: Model): String {
-    model.addAttribute("slotCollection", getSlotCollection())
+    val items = (MIN_SLOT..MAX_SLOT).map { SlotModel(it, formatFromTime(it), formatToTime(it), isCoreTimeSlot(it), mapOf()) }
+    val slotCollection = SlotCollection(items)
+
+    model.addAttribute("slotCollection", slotCollection)
+
     return "views/slots"
   }
 }

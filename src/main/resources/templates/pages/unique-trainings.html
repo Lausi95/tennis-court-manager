@@ -1,0 +1,9 @@
+<!DOCTYPE html>
+<html lang="de">
+<head th:replace="~{fragments/header}"><title>None</title></head>
+
+<body>
+<nav th:replace="~{fragments/menu :: nav('Training')}"></nav>
+<div id="view" th:insert="~{views/unique-trainings}"></div>
+</body>
+</html>

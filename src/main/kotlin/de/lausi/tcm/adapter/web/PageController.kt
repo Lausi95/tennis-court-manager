@@ -1,16 +1,12 @@
 package de.lausi.tcm.adapter.web
 
 import de.lausi.tcm.IsoDate
-import de.lausi.tcm.adapter.web.api.OccupancyPlanController
-import de.lausi.tcm.adapter.web.api.ReservationController
-import de.lausi.tcm.adapter.web.api.TeamController
-import de.lausi.tcm.adapter.web.api.TrainingController
+import de.lausi.tcm.adapter.web.api.*
 import org.springframework.stereotype.Controller
 import org.springframework.ui.Model
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RequestParam
 import java.security.Principal
-import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
@@ -21,6 +17,7 @@ private class HomeController(
   private val trainingController: TrainingController,
   private val reservationController: ReservationController,
   private val teamController: TeamController,
+  private val uniqueTrainingController: UniqueTrainingController,
 ) {
 
   @GetMapping("/")
@@ -39,6 +36,13 @@ private class HomeController(
     model.addAttribute("currentPage", "training")
     trainingController.getTrainings(model)
     return "pages/trainings"
+  }
+
+  @GetMapping("/unique-trainings")
+  fun getUniqueTrainig(model: Model): String {
+    model.addAttribute("currentPage", "unique-training")
+    uniqueTrainingController.getUniqueTrainings(model)
+    return "pages/unique-trainings"
   }
 
   @GetMapping("/reservations")

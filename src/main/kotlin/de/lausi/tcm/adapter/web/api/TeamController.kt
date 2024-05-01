@@ -33,25 +33,22 @@ class TeamController(
   private val memberController: MemberController,
 ) {
 
-  @GetMapping(headers = ["accept=application/json"])
-  @ResponseBody
-  fun getTeams(): TeamCollection {
+  @GetMapping
+  fun getTeams(model: Model): String {
     val items = teamRepository.findAll().map { team ->
       val captainName = memberRepository.findById(team.captainMemberId)
         .map { member -> member.firstname + " " + member.lastname }
         .orElse("???")
 
       TeamModel(team.id, team.name, captainName, mapOf(
+        "create" to "/api/teams",
         "delete" to "/api/teams/${team.id}"
       ))
     }
 
-    return TeamCollection(items, mapOf())
-  }
+    val teamCollection = TeamCollection(items, mapOf())
+    model.addAttribute("teamCollection", teamCollection)
 
-  @GetMapping
-  fun getTeams(model: Model): String {
-    model.addAttribute("teamCollection", getTeams())
     memberController.getMembers(model)
     return "views/teams"
   }
