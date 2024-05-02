@@ -19,6 +19,7 @@ private class HomeController(
   private val teamController: TeamController,
   private val uniqueTrainingController: UniqueTrainingController,
   private val matchController: MatchController,
+  private val eventController: EventController,
 ) {
 
   @GetMapping("/")
@@ -65,5 +66,12 @@ private class HomeController(
     model.addAttribute("currentPage", "matches")
     matchController.getMatches(model)
     return "pages/matches"
+  }
+
+  @GetMapping("/events")
+  fun getEvents(model: Model): String {
+    model.addAttribute("currentPage", "events")
+    eventController.getEvents(model)
+    return "pages/events"
   }
 }
