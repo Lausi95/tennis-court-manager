@@ -4,7 +4,8 @@ services:
   tcm:
     image: lausi95/tennis-court-manager
     networks: [traefik]
-    env_file: [ tcm.env ]
+    env_file: [tcm.env]
+    restart: unless-stopped
     labels:
       - traefik.enable=true
       - traefik.http.routers.tcm.rule=Host(`test.tennislichtenberg.de`)
@@ -15,7 +16,8 @@ services:
     image: mongo
     networks: [traefik]
     env_file: [mongo.env]
-    volumes: [ tcm-mongodb:/etc/mongodb ]
+    volumes: [tcm-mongodb:/etc/mongodb]
+    restart: unless-stopped
 
 networks:
   traefik:
