@@ -25,11 +25,6 @@ class SetUp(private val courtRepository: CourtRepository, private val memberRepo
     putCourt("Platz 1")
     putCourt("Platz 2")
     putCourt("Platz 3")
-
-    putMember("tom.lausmann", "Tom", "Lausmann")
-    putMember("tobias@pfeifer.de", "Tobias", "Pfeifer")
-    putMember("add.katzinsky@gmail.com", "Ann", "Katzinsky")
-    putMember("hong.ahnle@gmaia.com", "Hong", "Le")
   }
 
   fun putCourt(courtName: String) {
