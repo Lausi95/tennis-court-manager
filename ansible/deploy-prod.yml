@@ -1,0 +1,30 @@
+---
+- name: Deploy
+  hosts: all
+  vars:
+    directory: ~/tennislichtenberg.de
+  tasks:
+    - name: application directory
+      file:
+        path: "{{ directory }}"
+        state: directory
+
+    - name: sync files
+      copy:
+        src: "files/"
+        dest: "{{ directory }}/"
+
+    - name: pull images
+      shell:
+        chdir: "{{ directory }}"
+        cmd: docker compose pull
+
+    - name: start images
+      shell:
+        chdir: "{{ directory }}"
+        cmd: docker compose up -d --remove-orphans
+
+    - name: cleanup docker
+      shell:
+        chdir: "{{ directory }}"
+        cmd: docker system prune --all -f
