@@ -1,5 +1,54 @@
 <div class="p-2">
-    <div id="create-event">
-        <button hx-get="/api/events/form" hx-target="#create-event">Event erstellen</button>
+    <form th:hx-post="${eventCollection.links.get('create')}">
+        <div class="font-bold text-lg">
+            Event erstellen
+        </div>
+
+        <div th:if="${errors}" th:each="error: ${errors}" class="bg-red-900 text-white p-2 col-span-2 font-bold">
+            <span th:text="${error}"></span>
+        </div>
+
+        <div class="bg-gray-200 rounded p-2">
+            <label class="block text-xs font-bold pb-2">DATUM</label>
+            <input name="date" type="date" th:value="${param.date}" class="block w-full rounded p-1">
+        </div>
+
+        <div class="bg-gray-200 rounded p-2">
+            <label class="block text-xs font-bold pb-2">START-ZEIT</label>
+            <select name="fromSlotId" class="block w-full rounded p-1">
+                <option value="">---</option>
+                <th:block th:each="slot : ${slotCollection.items}">
+                    <option th:value="${slot.id}" th:text="${slot.time}"></option>
+                </th:block>
+            </select>
+        </div>
+
+        <div class="bg-gray-200 rounded p-2">
+            <label class="block text-xs font-bold pb-2">END-ZEIT</label>
+            <select name="toSlotId" class="block w-full rounded p-1">
+                <option value="">---</option>
+                <th:block th:each="slot : ${slotCollection.items}">
+                    <option th:value="${slot.id}" th:text="${slot.time}"></option>
+                </th:block>
+            </select>
+        </div>
+
+        <div class="bg-gray-200 rounded p-2 col-span-2">
+            <label class="block text-xs font-bold pb-2">PLAETZE</label>
+            <div th:each="court : ${courtCollection.items}">
+                <input th:id="${'court-' + court.id}" th:value="${court.id}" type="checkbox" name="courtIds" />
+                <label th:for="${'court-' + court.id}" th:text="${court.name}"></label>
+            </div>
+        </div>
+
+        <div class="bg-gray-200 rounded p-2 col-span-2">
+            <label class="block text-xs font-bold pb-2">BESCHREIBUNG</label>
+            <input name="description" class="block w-full rounded p-1" th:value="${param.description}"/>
+        </div>
+
+        <button class="col-span-2 bg-orange-300 hover:bg-orange-400 rounded p-2 font-bold" type="submit">Erstellen</button>
+    </form>
+    <div class="font-bold text-lg mt-2">
+        Match erstellen
     </div>
 </div>

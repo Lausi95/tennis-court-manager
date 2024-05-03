@@ -63,18 +63,13 @@ class EventController(
 
     model.addAttribute("eventCollection", EventCollection(items, mapOf(
       "self" to "/api/events",
-      "create" to "/api/events/form",
+      "create" to "/api/events",
     )))
 
-    return "views/events"
-  }
-
-  @GetMapping("/form")
-  fun getCreateEventForm(model: Model): String {
     courtController.getCourts(model)
     slotController.getSlots(model)
 
-    return "forms/create-event"
+    return "views/events"
   }
 
   @PostMapping
