@@ -74,4 +74,11 @@ private class HomeController(
     eventController.getEvents(model)
     return "pages/events"
   }
+
+  @GetMapping("/admin")
+  fun getAdmin(model: Model): String {
+    model.addAttribute("currentPage", "admin")
+    eventController.getEvents(model)
+    return "pages/admin"
+  }
 }

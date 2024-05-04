@@ -3,6 +3,7 @@
 
     <th:block th:replace="~{fragments/menu :: nav-link('Home', ${currentPage}, '/')}" />
     <th:block th:replace="~{fragments/menu :: nav-link('Buchen', ${currentPage}, '/reservations')}" />
+    <th:block th:replace="~{fragments/menu :: nav-link('Admin', ${currentPage}, '/admin')}" />
 </nav>
 
 <th:block th:fragment="nav-link(name, currentName, target)">

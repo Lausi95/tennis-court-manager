@@ -57,6 +57,7 @@ class EventController(
         event.description,
         mapOf(
           "self" to "/api/events/${event.id}",
+          "delete" to "/api/events/${event.id}"
         )
       )
     }
