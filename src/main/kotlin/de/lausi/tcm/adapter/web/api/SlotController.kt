@@ -4,6 +4,7 @@ import de.lausi.tcm.domain.model.*
 import org.springframework.stereotype.Controller
 import org.springframework.ui.Model
 import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RequestMapping
 
 data class SlotModel(
@@ -23,13 +24,39 @@ data class SlotCollection(
 @RequestMapping("/api/slots")
 class SlotController {
 
-  @GetMapping(headers = ["accept=application/json"])
+  @GetMapping
   fun getSlots(model: Model): String {
-    val items = (MIN_SLOT..MAX_SLOT).map { SlotModel(it, formatFromTime(it), formatToTime(it), isCoreTimeSlot(it), mapOf()) }
-    val slotCollection = SlotCollection(items)
+    val slots = (MIN_SLOT..MAX_SLOT)
+    return model.slotCollection(slots.toList())
+  }
 
-    model.addAttribute("slotCollection", slotCollection)
+  @GetMapping("/{slotId}")
+  fun getSlot(model: Model, @PathVariable slotId: Int): String {
+    return model.slot(slotId)
+  }
 
-    return "views/slots"
+  fun Int.toModel(): SlotModel {
+    return SlotModel(
+      this,
+      formatFromTime(this),
+      formatToTime(this),
+      isCoreTimeSlot(this),
+      mapOf(
+        "self" to "/api/slots/$this"
+      )
+    )
+  }
+
+  fun Model.slot(slot: Int): String {
+    addAttribute("slot", slot.toModel())
+    return "entity/slot"
+  }
+
+  fun Model.slotCollection(slots: List<Int>): String {
+    val items = slots.map { it.toModel() }
+    addAttribute("slotCollection", SlotCollection(items, mapOf(
+      "self" to "/api/slots"
+    )))
+    return "collection/slot"
   }
 }
