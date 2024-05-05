@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestMapping
+import java.security.Principal
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.util.UUID
@@ -35,10 +36,11 @@ data class CreateUniqueTrainingRequest(
 @Controller
 @RequestMapping("/api/unique-trainings")
 class UniqueTrainingController(
-  val courtRepository: CourtRepository,
-  val courtController: CourtController,
-  val uniqueTrainingRepository: UniqueTrainingRepository,
-  private val slotController: SlotController
+  private val courtRepository: CourtRepository,
+  private val courtController: CourtController,
+  private val uniqueTrainingRepository: UniqueTrainingRepository,
+  private val slotController: SlotController,
+  private val memberService: MemberService,
 ) {
 
   @GetMapping
@@ -70,7 +72,9 @@ class UniqueTrainingController(
   }
 
   @PostMapping
-  fun createUniqueTraining(model: Model, request: CreateUniqueTrainingRequest): String {
+  fun createUniqueTraining(model: Model, principal: Principal, request: CreateUniqueTrainingRequest): String {
+    memberService.getMember(principal.name).assertRoles(Group.TRAINER)
+
     val errors = mutableListOf<String>()
 
     if (!courtRepository.existsById(request.courtId)) {
@@ -103,7 +107,8 @@ class UniqueTrainingController(
   }
 
   @DeleteMapping("/{uniqueTrainingId}")
-  fun deleteUniqueTraining(model: Model, @PathVariable uniqueTrainingId: String): String {
+  fun deleteUniqueTraining(model: Model, principal: Principal, @PathVariable uniqueTrainingId: String): String {
+    memberService.getMember(principal.name).assertRoles(Group.TRAINER)
     uniqueTrainingRepository.deleteById(uniqueTrainingId)
     return getUniqueTrainings(model)
   }

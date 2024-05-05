@@ -1,11 +1,10 @@
 package de.lausi.tcm.adapter.web.api
 
-import de.lausi.tcm.domain.model.MemberRepository
-import de.lausi.tcm.domain.model.Team
-import de.lausi.tcm.domain.model.TeamRepository
+import de.lausi.tcm.domain.model.*
 import org.springframework.stereotype.Controller
 import org.springframework.ui.Model
 import org.springframework.web.bind.annotation.*
+import java.security.Principal
 import java.util.UUID
 
 data class TeamModel(
@@ -31,6 +30,7 @@ class TeamController(
   private val teamRepository: TeamRepository,
   private val memberRepository: MemberRepository,
   private val memberController: MemberController,
+  private val memberService: MemberService,
 ) {
 
   @GetMapping
@@ -55,7 +55,9 @@ class TeamController(
   }
 
   @PostMapping
-  fun createTeam(model: Model, request: CreateTeamRequest): String {
+  fun createTeam(model: Model, principal: Principal, request: CreateTeamRequest): String {
+    memberService.getMember(principal.name).assertRoles(Group.TEAM_CAPTAIN)
+
     val errors = mutableListOf<String>()
 
     if (teamRepository.existsByName(request.name)) {
@@ -78,7 +80,8 @@ class TeamController(
   }
 
   @DeleteMapping("/{teamId}")
-  fun deleteTeam(model: Model, @PathVariable teamId: String): String {
+  fun deleteTeam(model: Model, principal: Principal, @PathVariable teamId: String): String {
+    memberService.getMember(principal.name).assertRoles(Group.TEAM_CAPTAIN)
     teamRepository.deleteById(teamId)
     return getTeams(model)
   }

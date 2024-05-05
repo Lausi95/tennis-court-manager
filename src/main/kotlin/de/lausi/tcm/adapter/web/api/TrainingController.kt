@@ -5,6 +5,7 @@ import de.lausi.tcm.domain.model.*
 import org.springframework.stereotype.Controller
 import org.springframework.ui.Model
 import org.springframework.web.bind.annotation.*
+import java.security.Principal
 import java.time.DayOfWeek
 import java.time.format.DateTimeFormatter
 
@@ -44,7 +45,8 @@ class TrainingController(
   private val courtController: CourtController,
   private val slotController: SlotController,
   private val courtRepository: CourtRepository,
-  private val trainingRepository: TrainingRepository
+  private val trainingRepository: TrainingRepository,
+  private val memberService: MemberService,
 ) {
 
   @GetMapping
@@ -78,7 +80,9 @@ class TrainingController(
   }
 
   @PostMapping
-  fun createTrainig(model: Model, params: PostTrainingParams): String {
+  fun createTrainig(model: Model, principal: Principal, params: PostTrainingParams): String {
+    memberService.getMember(principal.name).assertRoles(Group.TRAINER)
+
     val errors = mutableListOf<String>()
 
     val training = Training(
@@ -102,7 +106,8 @@ class TrainingController(
   }
 
   @DeleteMapping("/{trainingId}")
-  fun deleteTraining(model: Model, @PathVariable trainingId: String): String {
+  fun deleteTraining(model: Model, principal: Principal, @PathVariable trainingId: String): String {
+    memberService.getMember(principal.name).assertRoles(Group.TRAINER)
     trainingRepository.deleteById(trainingId)
     return getTrainings(model)
   }

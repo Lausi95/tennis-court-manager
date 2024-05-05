@@ -1,0 +1,27 @@
+<div th:fragment="member(member)" class="flex gap-3" hx-swap="outerHTML" hx-target="this">
+    <div class="flex-grow" th:text="${member.firstname + ' ' + member.lastname}"></div>
+    <form th:hx-post="${member.links.get('update')}">
+        <input name="group" type="hidden" value="ADMIN"/>
+        <button th:class="${member.groups.contains('ADMIN') ? '' : 'text-gray-400'}">
+            <i class="fa-solid fa-lock"></i>
+        </button>
+    </form>
+    <form th:hx-post="${member.links.get('update')}">
+        <input name="group" type="hidden" value="EVENT_MANAGEMENT"/>
+        <button th:class="${member.groups.contains('EVENT_MANAGEMENT') ? '' : 'text-gray-400'}">
+            <i class="fa-solid fa-calendar-days"></i>
+        </button>
+    </form>
+    <form th:hx-post="${member.links.get('update')}">
+        <input name="group" type="hidden" value="TEAM_CAPTAIN"/>
+        <button th:class="${member.groups.contains('TEAM_CAPTAIN') ? '' : 'text-gray-400'}">
+            <i class="fa-solid fa-trophy"></i>
+        </button>
+    </form>
+    <form th:hx-post="${member.links.get('update')}">
+        <input name="group" type="hidden" value="TRAINER"/>
+        <button th:class="${member.groups.contains('TRAINER') ? '' : 'text-gray-400'}">
+            <i class="fa-solid fa-dumbbell"></i>
+        </button>
+    </form>
+</div>

@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestMapping
+import java.security.Principal
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.util.UUID
@@ -46,6 +47,7 @@ class MatchController(
   private val courtController: CourtController,
   private val teamController: TeamController,
   private val slotController: SlotController,
+  private val memberService: MemberService,
 ) {
 
   @GetMapping
@@ -86,7 +88,9 @@ class MatchController(
   }
 
   @PostMapping
-  fun createMatch(model: Model, request: CreateMatchRequest): String {
+  fun createMatch(model: Model, principal: Principal, request: CreateMatchRequest): String {
+    memberService.getMember(principal.name).assertRoles(Group.EVENT_MANAGEMENT)
+
     val errors = mutableListOf<String>()
 
     if (request.courtIds.isEmpty()) {
@@ -121,7 +125,9 @@ class MatchController(
   }
 
   @DeleteMapping("/{matchId}")
-  fun deleteMatch(model: Model, @PathVariable matchId: String): String {
+  fun deleteMatch(model: Model, principal: Principal, @PathVariable matchId: String): String {
+    memberService.getMember(principal.name).assertRoles(Group.EVENT_MANAGEMENT)
+
     matchRepository.deleteById(matchId)
     return getMatches(model)
   }

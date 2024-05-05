@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestMapping
+import java.security.Principal
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.util.UUID
@@ -42,6 +43,7 @@ class EventController(
   private val courtRepository: CourtRepository,
   private val courtController: CourtController,
   private val slotController: SlotController,
+  private val memberService: MemberService,
 ) {
 
   @GetMapping
@@ -74,7 +76,9 @@ class EventController(
   }
 
   @PostMapping
-  fun createEvent(model: Model, request: CreateEventRequest): String {
+  fun createEvent(model: Model, principal: Principal, request: CreateEventRequest): String {
+    memberService.getMember(principal.name).assertRoles(Group.EVENT_MANAGEMENT)
+
     val errors = mutableListOf<String>()
 
     if (!request.courtIds.all { courtRepository.existsById(it) }) {
@@ -103,7 +107,8 @@ class EventController(
   }
 
   @DeleteMapping("/{eventId}")
-  fun deleteEvent(model: Model, @PathVariable eventId: String): String {
+  fun deleteEvent(model: Model, principal: Principal, @PathVariable eventId: String): String {
+    memberService.getMember(principal.name).assertRoles(Group.EVENT_MANAGEMENT)
     eventRepository.deleteById(eventId)
     return getEvents(model)
   }

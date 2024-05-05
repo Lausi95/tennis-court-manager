@@ -1,0 +1,5 @@
+<div th:fragment="member-collection(memberCollection)">
+    <th:block th:each="member: ${memberCollection.items}">
+        <div th:replace="~{entity/member :: member(${member})}"></div>
+    </th:block>
+</div>

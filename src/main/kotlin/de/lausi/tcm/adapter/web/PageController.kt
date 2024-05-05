@@ -20,65 +20,84 @@ private class HomeController(
   private val uniqueTrainingController: UniqueTrainingController,
   private val matchController: MatchController,
   private val eventController: EventController,
+  private val memberController: MemberController,
+  private val apiController: ApiController,
 ) {
 
+  fun Model.preparePage(currentPage: String, view: String, principal: Principal, func: (model: Model) -> Any): String {
+    apiController.getApi(this, principal)
+    addAttribute("currentPage", currentPage)
+    addAttribute("view", view)
+
+    func(this)
+
+    return "page"
+  }
+
   @GetMapping("/")
-  fun getOccupancyPlan(model: Model, @RequestParam(name = "date") @IsoDate date: LocalDate?): String {
+  fun getOccupancyPlan(model: Model, principal: Principal, @RequestParam(name = "date") @IsoDate date: LocalDate?): String {
     if (date == null) {
       return "redirect:/?date=${LocalDate.now().format(DateTimeFormatter.ISO_DATE)}"
     }
 
-    model.addAttribute("currentPage", "home")
-    occupancyPlanController.getOccupancyPlan(model, date)
-    return "pages/occupancy-plan"
+    return model.preparePage("Home", "views/occupancy-plan", principal) {
+      occupancyPlanController.getOccupancyPlan(model, date)
+    }
   }
 
   @GetMapping("/trainings")
-  fun getTrainig(model: Model): String {
-    model.addAttribute("currentPage", "training")
-    trainingController.getTrainings(model)
-    return "pages/trainings"
+  fun getTrainig(model: Model, principal: Principal): String {
+    return model.preparePage("Trainings", "views/trainings", principal) {
+      trainingController.getTrainings(model)
+    }
   }
 
   @GetMapping("/unique-trainings")
-  fun getUniqueTrainig(model: Model): String {
-    model.addAttribute("currentPage", "unique-training")
-    uniqueTrainingController.getUniqueTrainings(model)
-    return "pages/unique-trainings"
+  fun getUniqueTrainig(model: Model, principal: Principal): String {
+    return model.preparePage("Einzeltrainings", "views/unique-trainings", principal) {
+      uniqueTrainingController.getUniqueTrainings(model)
+    }
   }
 
   @GetMapping("/reservations")
   fun getBook(model: Model, principal: Principal): String {
-    model.addAttribute("currentPage", "book")
-    reservationController.getReservations(model, principal)
-    return "pages/reservations"
+    return model.preparePage("Buchen", "views/reservations", principal) {
+      reservationController.getReservations(model, principal)
+    }
   }
 
   @GetMapping("/teams")
-  fun getTeams(model: Model): String {
-    model.addAttribute("currentPage", "teams")
-    teamController.getTeams(model)
-    return "pages/teams"
+  fun getTeams(model: Model, principal: Principal): String {
+    return model.preparePage("Teams", "views/teams", principal) {
+      teamController.getTeams(model)
+    }
   }
 
   @GetMapping("/matches")
-  fun getMatches(model: Model): String {
-    model.addAttribute("currentPage", "matches")
-    matchController.getMatches(model)
-    return "pages/matches"
+  fun getMatches(model: Model, principal: Principal): String {
+    return model.preparePage("Punktspiele", "views/matches", principal) {
+      matchController.getMatches(model)
+    }
   }
 
   @GetMapping("/events")
-  fun getEvents(model: Model): String {
-    model.addAttribute("currentPage", "events")
-    eventController.getEvents(model)
-    return "pages/events"
+  fun getEvents(model: Model, principal: Principal): String {
+    return model.preparePage("Events", "views/events", principal) {
+      eventController.getEvents(model)
+    }
+  }
+
+  @GetMapping("/members")
+  fun getMembers(model: Model, principal: Principal): String {
+    return model.preparePage("Mitglieder", "views/members", principal) {
+      memberController.getMembers(model)
+    }
   }
 
   @GetMapping("/admin")
-  fun getAdmin(model: Model): String {
-    model.addAttribute("currentPage", "admin")
-    eventController.getEvents(model)
-    return "pages/admin"
+  fun getAdmin(model: Model, principal: Principal): String {
+    return model.preparePage("Admin", "views/admin", principal) {
+      memberController.getMember(model, principal.name)
+    }
   }
 }

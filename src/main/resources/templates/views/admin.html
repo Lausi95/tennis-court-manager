@@ -1,0 +1,39 @@
+<div class="p-2 grid grid-cols-3 gap-2">
+    <!-- Event Management -->
+    <th:block th:if="${member.groups.contains('EVENT_MANAGEMENT')}">
+        <div class="col-span-3 font-bold text-lg">Event-Management</div>
+        <a href="/events" class="p-3 col-span-3 bg-orange-100 text-gray-700 rounded text-center font-bold">
+            Events
+        </a>
+    </th:block>
+
+    <!-- Team Captains -->
+    <th:block th:if="${member.groups.contains('TEAM_CAPTAIN')}">
+        <div class="col-span-3 font-bold text-lg">Punktspielverwaltung</div>
+        <a href="/matches" class="col-span-2 p-3 bg-orange-100 text-gray-700 rounded text-center font-bold">
+            Punktspiele
+        </a>
+        <a href="/teams" class="p-3 bg-orange-100 text-gray-700 rounded text-center font-bold">
+            Teams
+        </a>
+    </th:block>
+
+    <!-- Trainer -->
+    <th:block th:if="${member.groups.contains('TRAINER')}">
+        <div class="col-span-3 font-bold text-lg">Trainingsplan</div>
+        <a href="/trainings" class="col-span-2 p-3 bg-orange-100 text-gray-700 rounded text-center font-bold">
+            Trainingsplan
+        </a>
+        <a href="/unique-trainings" class="p-3 bg-orange-100 text-gray-700 rounded text-center font-bold">
+            Einzeltraining
+        </a>
+    </th:block>
+
+    <!-- Admin -->
+    <th:block th:if="${member.groups.contains('ADMIN')}">
+        <div class="col-span-3 font-bold text-lg">Mitgliederverwaltung</div>
+        <a href="/members" class="col-span-3 p-3 bg-orange-100 text-gray-700 rounded text-center font-bold">
+            Mitglieder
+        </a>
+    </th:block>
+</div>

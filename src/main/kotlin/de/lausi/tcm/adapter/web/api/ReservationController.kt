@@ -67,7 +67,7 @@ class ReservationController(
     val items = reservationRespository.findByCreatorIdAndDateGreaterThanEqual(principal.getName(), LocalDate.now()).map { reservation ->
       val court = courtRepository.findById(reservation.courtId).map { CourtModel(it.id, it.name) }.orElseGet { CourtModel("", "???") }
       val members = reservation.memberIds
-        .map { memberId -> memberRepository.findById(memberId).map { MemberModel(it.id, it.firstname, it.lastname) }.orElseGet { MemberModel("", "", "???") } }
+        .map { memberId -> memberRepository.findById(memberId).map { MemberModel(it.id, it.firstname, it.lastname, it.groups.map { it.toString() }) }.orElseGet { MemberModel("", "", "???", emptyList()) } }
 
       ReservationModel(reservation.id,
         reservation.date.format(DateTimeFormatter.ISO_DATE),

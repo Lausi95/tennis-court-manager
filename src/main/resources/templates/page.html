@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <title th:text="${'TCM - ' + currentPage}"></title>
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link rel="stylesheet" href="/style.css" />
+
+    <script src="https://unpkg.com/htmx.org@1.9.11"></script>
+    <script src="https://kit.fontawesome.com/2e37175346.js" crossorigin="anonymous"></script>
+</head>
+
+<body>
+<nav class="p-3 font-bold gap-4 shadow-md flex items-center z-50 relative">
+    <img src="/assets/logo.png" class="h-[30px]" alt="Borussia Friedrichsfelde - Vereins Logo" />
+    <th:block th:each="navLink : ${rootCollection.navLinks}">
+        <a th:if="${currentPage == navLink.name}" class="px-2 py-1" th:href="${navLink.target}" th:text="${navLink.name}"></a>
+        <a th:unless="${currentPage == navLink.name}" class="px-2 py-1 text-gray-300" th:href="${navLink.target}" th:text="${navLink.name}"></a>
+    </th:block>
+</nav>
+
+<div id="view" th:insert="~{${view}}"></div>
+
+</body>
+</html>
