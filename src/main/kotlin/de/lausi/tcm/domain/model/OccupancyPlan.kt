@@ -3,7 +3,7 @@ package de.lausi.tcm.domain.model
 import org.springframework.stereotype.Component
 import java.time.LocalDate
 
-enum class BlockType(priority: Int) {
+enum class BlockType(val priority: Int) {
   FREE(0),
   FREE_PLAY(1),
   TRAINING(2),
@@ -21,6 +21,11 @@ data class Block(
   fun contains(slot: Int): Boolean {
     return slot in fromSlot..toSlot
   }
+
+  fun collidesWith(other: Block): Boolean {
+    val otherSlots = (other.fromSlot..other.toSlot)
+    return (fromSlot..toSlot).any { it in otherSlots }
+  }
 }
 
 interface OccupancyPlanResolver {
@@ -36,16 +41,27 @@ class OccupancyPlan(courtIds: List<String>, private val minSlot: Int, private va
     courtIds.forEach { blocksByCourt[it] = mutableSetOf() }
   }
 
-  fun addBlock(courtId: String, block: Block) {
-    blocksByCourt[courtId]?.add(block)
+  fun addBlock(courtId: String, block: Block){
+    blocksByCourt[courtId]?.let { blocks ->
+      val collidingBlocks = blocks.filter { it.collidesWith(block) }
+      if (collidingBlocks.all { it.type.priority < block.type.priority }) {
+        collidingBlocks.forEach { blocks.remove(it) }
+        blocks.add(block)
+      }
+      if (collidingBlocks.isEmpty()) {
+        blocks.add(block)
+      }
+    }
   }
 
   fun canPlace(courtId: String, block: Block): Boolean {
-    val blocks = blocksByCourt[courtId] ?: return false
-    for (slot in block.fromSlot..block.toSlot) {
-      if (blocks.any { it.contains(slot) }) return false
+    blocksByCourt[courtId]?.let { blocks ->
+      val collidingBlocks = blocks.filter { it.collidesWith(block) }
+      if (collidingBlocks.isEmpty() || collidingBlocks.all { it.type.priority < block.type.priority }) {
+        return true
+      }
     }
-    return true
+    return false
   }
 
   fun render(courtId: String): List<Block> {
