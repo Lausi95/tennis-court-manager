@@ -1,4 +1,4 @@
-import de.lausi.tcm.adapter.web.api.*
+package de.lausi.tcm.adapter.web.api
 
 import de.lausi.tcm.domain.model.*
 import org.springframework.stereotype.Controller

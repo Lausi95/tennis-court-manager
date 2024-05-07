@@ -11,7 +11,6 @@ import java.security.Principal
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
-
 @Controller
 private class HomeController(
   private val occupancyPlanController: OccupancyPlanController,
