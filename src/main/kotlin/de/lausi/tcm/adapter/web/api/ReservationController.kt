@@ -107,6 +107,10 @@ class ReservationController(
       errors.add("Du hast bereits eine Buchung inder Kernzeit. Du kannst maximal 1 Buchung in der Kernzeit haben. Die Kernzeit ist das Wochenende und unter der Woche 17:00 - 20:00 Uhr")
     }
 
+    if (reservation.hasCoreTimeSlot() && reservation.memberIds.size < 2) {
+      errors.add("Du musst mit mindestens einer anderen Person in der Kernzeit spielen. (Kein Aufschlagtraining in der Kernzeit)")
+    }
+
     if (LocalDate.now().plusDays(14) <= params.date) {
       errors.add("Du kannst maximal 14 Tage in die Zukunft buchen")
     }
