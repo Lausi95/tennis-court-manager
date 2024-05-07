@@ -1,5 +1,6 @@
 package de.lausi.tcm.adapter.web.api
 
+import de.lausi.tcm.domain.model.Court
 import de.lausi.tcm.domain.model.CourtRepository
 import org.springframework.stereotype.Controller
 import org.springframework.ui.Model
@@ -23,11 +24,19 @@ class CourtController(private val courtRepository: CourtRepository) {
 
   @GetMapping
   fun getCourts(model: Model): String {
-    val items = courtRepository.findAll().map { CourtModel(it.id, it.name, mapOf()) }
+    val items = courtRepository.findAll().map { it.toModel() }
     val courtCollection = CourtCollection(items)
 
     model.addAttribute("courtCollection", courtCollection)
 
     return "views/courts"
+  }
+
+  fun Court.toModel(): CourtModel {
+    return CourtModel(
+      id,
+      name,
+      mapOf()
+    )
   }
 }

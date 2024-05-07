@@ -5,6 +5,7 @@ import de.lausi.tcm.adapter.web.api.*
 import org.springframework.stereotype.Controller
 import org.springframework.ui.Model
 import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RequestParam
 import java.security.Principal
 import java.time.LocalDate
@@ -46,9 +47,16 @@ private class HomeController(
   }
 
   @GetMapping("/trainings")
-  fun getTrainig(model: Model, principal: Principal): String {
+  fun getTrainigs(model: Model, principal: Principal): String {
     return model.preparePage("Trainings", "views/trainings", principal) {
       trainingController.getTrainings(model)
+    }
+  }
+
+  @GetMapping("/trainings/{trainingId}")
+  fun getTraining(model: Model, principal: Principal, @PathVariable trainingId: String): String {
+    return model.preparePage("Training", "views/training", principal) {
+      trainingController.getTraining(model, principal, trainingId)
     }
   }
 

@@ -78,7 +78,7 @@
                             <span th:text="${training.description}"></span>
                         </div>
                         <div class="flex flex-row-reverse gap-2">
-                            <button><i class="fa-solid fa-pen-to-square"></i></button>
+                            <a th:href="${training.links.get('self')}"><i class="fa-solid fa-pen-to-square"></i></a>
                             <button th:hx-delete="${training.links.get('delete')}" hx-target="#view"><i class="fa-solid fa-trash"></i></button>
                         </div>
                     </div>

@@ -1,13 +1,19 @@
 package de.lausi.tcm.adapter.web.api
 
 import de.lausi.tcm.domain.model.*
+import de.lausi.tcm.ger
+import de.lausi.tcm.iso
+import org.springframework.http.HttpStatus
 
 import org.springframework.stereotype.Controller
 import org.springframework.ui.Model
 import org.springframework.web.bind.annotation.*
+import org.springframework.web.server.ResponseStatusException
 import java.security.Principal
 import java.time.DayOfWeek
+import java.time.LocalDate
 import java.time.format.DateTimeFormatter
+import java.util.UUID
 
 data class DayOfWeekModel(val id: DayOfWeek, val name: String)
 
@@ -28,7 +34,7 @@ data class TrainingModel(
   val fromTime: String,
   val toTime: String,
   val description: String,
-  val skippedDays: List<String>,
+  val skippedDays: Set<SkippedDateModel>,
   val links: Map<String, String>
 )
 
@@ -37,6 +43,15 @@ data class TrainingCollection(
   val count: Int,
   val daysOfWeek: List<DayOfWeekModel>,
   val links: Map<String, String>
+)
+
+data class SkippedDateModel(
+  val date: String,
+  val links: Map<String, String>,
+)
+
+data class AddSkippedDateRequest(
+  val date: LocalDate,
 )
 
 @Controller
@@ -51,23 +66,7 @@ class TrainingController(
 
   @GetMapping
   fun getTrainings(model: Model): String {
-    val courts = courtRepository.findAll()
-    val items = trainingRepository.findAll().map { training ->
-      val court = courts.find { it.id == training.courtId } ?: error("Could not find court for training.")
-      TrainingModel(
-        training.id,
-        CourtModel(court.id, court.name, mapOf()),
-        DAY_OF_WEEK_MODELS.find { it.id == training.dayOfWeek }!!,
-        formatFromTime(training.fromSlot),
-        formatToTime(training.toSlot),
-        training.description,
-        training.skippedDates.map { it.format(DateTimeFormatter.ISO_DATE) },
-        mapOf(
-          "self" to "/api/trainings/${training.id}",
-          "delete" to "/api/trainings/${training.id}",
-        ),
-      )
-    }
+    val items = trainingRepository.findAll().map { it.toModel() }
 
     val trainingCollection = TrainingCollection(items, items.size, DAY_OF_WEEK_MODELS, mapOf())
 
@@ -77,6 +76,67 @@ class TrainingController(
     slotController.getSlots(model)
 
     return "views/trainings"
+  }
+
+  fun Training.toModel(): TrainingModel {
+    val courtModel = with (courtController) {
+      return@with courtRepository.findById(courtId).orElseThrow().toModel()
+    }
+
+    return TrainingModel(
+      id,
+      courtModel,
+      DAY_OF_WEEK_MODELS.find { it.id == dayOfWeek }!!,
+      formatFromTime(fromSlot),
+      formatToTime(toSlot),
+      description,
+      skippedDates.map { it.toModel(id) }.toSet(),
+      mapOf(
+        "self" to "/trainings/${id}",
+        "delete" to "/api/trainings/${id}",
+        "skippedDateFrom" to "/api/trainings/$id/add-skipped-date-form"
+      ),
+    )
+  }
+
+  fun LocalDate.toModel(trainingId: String): SkippedDateModel {
+    return SkippedDateModel(ger(), mapOf(
+      "delete" to "/api/trainings/$trainingId/skipped-dates/${iso()}"
+    ))
+  }
+
+  @GetMapping("/{trainingId}")
+  fun getTraining(model: Model, principal: Principal, @PathVariable trainingId: String): String {
+    val training = trainingRepository.findById(trainingId).orElseThrow { ResponseStatusException(HttpStatus.NOT_FOUND) }
+    model.addAttribute("training", training.toModel())
+    return "entity/training"
+  }
+
+  @GetMapping("/{trainingId}/add-skipped-date-form")
+  fun getSkippedDateForm(model: Model, @PathVariable trainingId: String): String {
+    model.addAttribute("submit", "/api/trainings/$trainingId/skippedDates")
+    return "form/training-add-skipped-date"
+  }
+
+  @PostMapping("{trainingId}/skippedDates")
+  fun addSkippedDate(model: Model, @PathVariable trainingId: String, request: AddSkippedDateRequest): String {
+    val training = trainingRepository.findById(trainingId).orElseThrow()
+    if (training.skippedDates.contains(request.date)) {
+      throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Already contained")
+    }
+
+    trainingRepository.save(training.copy(skippedDates = training.skippedDates.plus(request.date)))
+
+    model.addAttribute("skippedDate", request.date.toModel(training.id))
+    return "entity/training-skipped-date"
+  }
+
+  @ResponseBody
+  @DeleteMapping("{trainingId}/skipped-dates/{date}")
+  fun deleteSkippedDate(@PathVariable trainingId: String, @PathVariable date: LocalDate) {
+    trainingRepository.findById(trainingId).ifPresent {
+      trainingRepository.save(it.copy(skippedDates = it.skippedDates.minus(date)))
+    }
   }
 
   @PostMapping

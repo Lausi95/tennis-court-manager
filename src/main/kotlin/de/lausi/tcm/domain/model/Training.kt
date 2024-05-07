@@ -16,7 +16,7 @@ data class Training(
   val fromSlot: Int,
   val toSlot: Int,
   val description: String,
-  val skippedDates: List<LocalDate>,
+  val skippedDates: Set<LocalDate>,
 ) {
 
   constructor(dayOfWeek: DayOfWeek, courtId: String, fromSlot: Int, toSlot: Int, description: String) : this(
@@ -26,7 +26,7 @@ data class Training(
     fromSlot,
     toSlot,
     description,
-    listOf(),
+    setOf(),
   )
 
   fun collidesWith(other: Training): Boolean {
