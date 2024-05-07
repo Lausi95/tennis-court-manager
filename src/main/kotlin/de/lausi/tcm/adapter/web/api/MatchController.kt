@@ -1,4 +1,4 @@
-package de.lausi.tcm.adapter.web.api
+import de.lausi.tcm.adapter.web.api.*
 
 import de.lausi.tcm.domain.model.*
 import org.springframework.stereotype.Controller
@@ -48,6 +48,8 @@ class MatchController(
   private val teamController: TeamController,
   private val slotController: SlotController,
   private val memberService: MemberService,
+  private val matchService: MatchService,
+  private val occupancyPlanService: OccupancyPlanService,
 ) {
 
   @GetMapping
@@ -105,11 +107,6 @@ class MatchController(
       errors.add("Das ausgewaehlte team existiert nicht")
     }
 
-    if (errors.isNotEmpty()) {
-      model.addAttribute("errors", errors)
-      return getMatches(model)
-    }
-
     val match = Match(
       UUID.randomUUID().toString(),
       request.date,
@@ -118,6 +115,21 @@ class MatchController(
       request.teamId,
       request.opponentTeamName,
     )
+
+    with(matchService) {
+      val reservationBlock = match.toBlock()
+      val occupancyPlan = occupancyPlanService.getOccupancyPlan(request.date, request.courtIds)
+      request.courtIds.forEach { courtId ->
+        if (!occupancyPlan.canPlace(courtId, reservationBlock)) {
+          errors.add("Der Platz ist zu dem Zeitraum schon belegt.")
+        }
+      }
+    }
+
+    if (errors.isNotEmpty()) {
+      model.addAttribute("errors", errors)
+      return getMatches(model)
+    }
 
     matchRepository.save(match)
 

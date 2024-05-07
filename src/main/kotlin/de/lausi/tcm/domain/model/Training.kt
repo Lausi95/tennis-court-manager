@@ -47,8 +47,6 @@ data class Training(
 
 interface TrainingRepository : MongoRepository<Training, String> {
 
-  fun findByDayOfWeek(dayOfWeek: DayOfWeek): List<Training>
-
   fun findByDayOfWeekAndCourtId(dayOfWeek: DayOfWeek, courtId: String): List<Training>
 }
 
@@ -65,7 +63,7 @@ class TrainingService(private val trainingRepository: TrainingRepository): Occup
     }
   }
 
-  private fun Training.toBlock(): Block {
+  fun Training.toBlock(): Block {
     return Block(BlockType.TRAINING, fromSlot, toSlot, description)
   }
 }

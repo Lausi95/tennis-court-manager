@@ -44,6 +44,8 @@ class EventController(
   private val courtController: CourtController,
   private val slotController: SlotController,
   private val memberService: MemberService,
+  private val eventService: EventService,
+  private val occupancyPlanService: OccupancyPlanService,
 ) {
 
   @GetMapping
@@ -89,19 +91,31 @@ class EventController(
       errors.add("Es muss mindestens ein Platz ausgewaehlt werden")
     }
 
-    if (errors.isNotEmpty()) {
-      model.addAttribute("errors", errors)
-      return getEvents(model)
-    }
-
-    eventRepository.save(Event(
+    val event = Event(
       UUID.randomUUID().toString(),
       request.date,
       request.courtIds,
       request.fromSlotId,
       request.toSlotId,
       request.description
-    ))
+    )
+
+    with(eventService) {
+      val reservationBlock = event.toBlock()
+      val occupancyPlan = occupancyPlanService.getOccupancyPlan(request.date, request.courtIds)
+      request.courtIds.forEach { courtId ->
+        if (!occupancyPlan.canPlace(courtId, reservationBlock)) {
+          errors.add("Der Platz ist zu dem Zeitraum schon belegt.")
+        }
+      }
+    }
+
+    if (errors.isNotEmpty()) {
+      model.addAttribute("errors", errors)
+      return getEvents(model)
+    }
+
+    eventRepository.save(event)
 
     return getEvents(model)
   }

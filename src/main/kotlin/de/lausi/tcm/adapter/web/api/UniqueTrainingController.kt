@@ -41,6 +41,8 @@ class UniqueTrainingController(
   private val uniqueTrainingRepository: UniqueTrainingRepository,
   private val slotController: SlotController,
   private val memberService: MemberService,
+  private val uniqueTrainingService: UniqueTrainingService,
+  private val occupancyPlanService: OccupancyPlanService,
 ) {
 
   @GetMapping
@@ -85,13 +87,6 @@ class UniqueTrainingController(
       errors.add("Die End-Zeit kann nicht vor der Start-Zeit liegen.")
     }
 
-    // TODO collision test
-
-    if (errors.isNotEmpty()) {
-      model.addAttribute("errors", errors)
-      return getUniqueTrainings(model)
-    }
-
     val uniqueTraining = UniqueTraining(
       UUID.randomUUID().toString(),
       request.date,
@@ -100,6 +95,19 @@ class UniqueTrainingController(
       request.toSlotId,
       request.description
     )
+
+    with(uniqueTrainingService) {
+      val reservationBlock = uniqueTraining.toBlock()
+      val occupancyPlan = occupancyPlanService.getOccupancyPlan(request.date, listOf(request.courtId))
+      if (!occupancyPlan.canPlace(request.courtId, reservationBlock)) {
+        errors.add("Der Platz ist zu dem Zeitraum schon belegt.")
+      }
+    }
+
+    if (errors.isNotEmpty()) {
+      model.addAttribute("errors", errors)
+      return getUniqueTrainings(model)
+    }
 
     uniqueTrainingRepository.save(uniqueTraining)
 

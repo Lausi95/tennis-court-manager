@@ -12,8 +12,6 @@ import org.springframework.web.server.ResponseStatusException
 import java.security.Principal
 import java.time.DayOfWeek
 import java.time.LocalDate
-import java.time.format.DateTimeFormatter
-import java.util.UUID
 
 data class DayOfWeekModel(val id: DayOfWeek, val name: String)
 
