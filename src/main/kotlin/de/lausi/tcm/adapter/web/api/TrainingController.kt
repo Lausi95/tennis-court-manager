@@ -64,7 +64,7 @@ class TrainingController(
 
   @GetMapping
   fun getTrainings(model: Model): String {
-    val items = trainingRepository.findAll().map { it.toModel() }
+    val items = trainingRepository.findAll().sortedWith(compareBy(Training::dayOfWeek, Training::fromSlot)).map { it.toModel() }
 
     val trainingCollection = TrainingCollection(items, items.size, DAY_OF_WEEK_MODELS, mapOf())
 
