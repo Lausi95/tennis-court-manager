@@ -46,12 +46,14 @@ class EventController(
   private val memberService: MemberService,
   private val eventService: EventService,
   private val occupancyPlanService: OccupancyPlanService,
+  private val courtService: CourtService,
 ) {
 
   @GetMapping
   fun getEvents(model: Model): String {
     val items = eventRepository.findByDateGreaterThanEqual(LocalDate.now()).map { event ->
-      val courts = event.courtIds.map { courtId -> courtRepository.findById(courtId).map { CourtModel(it.id, it.name) }.orElseThrow() }
+      val courts = with (courtController) { courtService.getCourts(event.courtIds).map { it.toModel() } }
+
       EventModel(
         event.id,
         event.date.format(DateTimeFormatter.ISO_LOCAL_DATE),

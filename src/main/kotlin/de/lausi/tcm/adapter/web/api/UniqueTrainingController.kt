@@ -3,15 +3,11 @@ package de.lausi.tcm.adapter.web.api
 import de.lausi.tcm.domain.model.*
 import org.springframework.stereotype.Controller
 import org.springframework.ui.Model
-import org.springframework.web.bind.annotation.DeleteMapping
-import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.PathVariable
-import org.springframework.web.bind.annotation.PostMapping
-import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.*
 import java.security.Principal
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
-import java.util.UUID
+import java.util.*
 
 data class UniqueTrainingModel(
   val id: String,
@@ -43,12 +39,14 @@ class UniqueTrainingController(
   private val memberService: MemberService,
   private val uniqueTrainingService: UniqueTrainingService,
   private val occupancyPlanService: OccupancyPlanService,
+  private val courtService: CourtService,
 ) {
 
   @GetMapping
   fun getUniqueTrainings(model: Model): String {
     val items = uniqueTrainingRepository.findByDateGreaterThanEqual(LocalDate.now()).map {
-      val court = courtRepository.findById(it.courtId).map { c -> CourtModel(c.id, c.name) }.orElseGet { CourtModel("", "???") }
+      val court = with (courtController) { courtService.getCourt(it.courtId).toModel() }
+
       UniqueTrainingModel(
         it.id,
         it.date.format(DateTimeFormatter.ISO_LOCAL_DATE),

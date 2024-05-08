@@ -1,0 +1,22 @@
+<div th:fragment="f(courtCollection)">
+    <!-- headline -->
+    <div>Plaetze</div>
+
+    <!-- items -->
+    <div id="courts">
+        <th:block th:each="court : ${courtCollection.items}">
+            <div th:replace="~{courts/item :: f(${court})}"></div>
+        </th:block>
+    </div>
+
+    <!-- actions -->
+    <div>
+        <!-- create court action -->
+        <button th:hx-get="${courtCollection.links.get('create-form')}"
+                hx-target="#courts"
+                hx-swap="beforeend"
+                class="bg-blue-100 p-2 rounded">
+            <i class="fa-solid fa-plus"></i>
+        </button>
+    </div>
+</div>

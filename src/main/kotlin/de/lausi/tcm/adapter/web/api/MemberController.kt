@@ -16,6 +16,7 @@ data class MemberModel(
   val id: String,
   val firstname: String,
   val lastname: String,
+  val fullname: String,
   val groups: List<String>,
   val links: Map<String, String> = mapOf())
 
@@ -53,7 +54,7 @@ class MemberController(
   }
 
   fun Member.toModel(): MemberModel {
-    return MemberModel(id, firstname, lastname, groups.map { it.toString() }, mapOf(
+    return MemberModel(id, firstname, lastname, formatName(), groups.map { it.toString() }, mapOf(
       "self" to "/api/members/$id",
       "update" to "/api/members/$id",
     ))

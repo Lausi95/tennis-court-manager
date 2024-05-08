@@ -1,0 +1,34 @@
+<div th:fragment="f(reservation)" class="grid grid-cols-2 gap-2 p-2 rounded bg-orange-900 text-white text-xs" hx-target="this" hx-swap="outerHTML">
+    <div>
+        <div class="font-bold">Datum</div>
+        <div th:text="${reservation.date}"></div>
+    </div>
+    <div>
+        <div class="font-bold">Platz</div>
+        <div th:text="${reservation.court.name}"></div>
+    </div>
+
+    <div>
+        <div class="font-bold">Start-Zeit</div>
+        <div th:text="${reservation.fromTime}"></div>
+    </div>
+    <div>
+        <div class="font-bold">End-Zeit</div>
+        <div th:text="${reservation.toTime}"></div>
+    </div>
+
+    <div>
+        <div class="font-bold">Spieler/innen</div>
+        <div th:each="player: ${reservation.players}" th:text="${player.fullname}"></div>
+    </div>
+
+    <!-- controls -->
+    <div class="flex flex-row-reverse gap-2 col-span-2">
+
+        <!-- cancel reservation -->
+        <button th:hx-delete="${reservation.links.get('delete')}"
+                hx-confirm="Bist du sicher, dass du die reservierung stonieren willst?">
+            <i class="fa-solid fa-trash"></i>
+        </button>
+    </div>
+</div>

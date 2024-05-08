@@ -1,100 +1,112 @@
-<form class="p-2 grid grid-cols-2 gap-2" hx-post="/api/reservations" hx-target="#view">
-    <div th:if="${errors != null}" th:each="error: ${errors}" class="bg-red-900 text-white p-2 col-span-2 font-bold">
-        <span th:text="${error}"></span>
-    </div>
+<div class="p-2 grid grid-cols-1 gap-2">
+    <form class="grid grid-cols-2 gap-2" hx-post="/api/reservations" hx-target="#view">
+        <div class="text-lg font-bold">Buchen</div>
 
-    <div class="bg-gray-200 rounded p-2 col-span-2">
-        <label class="block text-xs font-bold pb-2">DATUM</label>
-        <input name="date" type="date"
-               th:value="${param.date != null ? param.date[0] : ''}"
-               class="block w-full rounded p-1">
-    </div>
+        <div th:if="${errors != null}" th:each="error: ${errors}" class="bg-red-900 text-white p-2 col-span-2 font-bold">
+            <span th:text="${error}"></span>
+        </div>
 
-    <div class="bg-gray-200 rounded p-2 col-span-2">
-        <label class="block text-xs font-bold pb-2">PLATZ</label>
-        <select name="courtId" class="block w-full rounded p-1">
-            <option value=""></option>
-            <th:block th:each="court: ${courtCollection.items}">
-                <th:block th:switch="${param.courtId != null && param.courtId[0] == court.id}">
-                    <option th:case="${true}" selected th:value="${court.id}" th:text="${court.name}"></option>
-                    <option th:case="${false}" th:value="${court.id}" th:text="${court.name}"></option>
+        <div class="bg-gray-200 rounded p-2 col-span-2">
+            <label class="block text-xs font-bold pb-2">DATUM</label>
+            <input name="date" type="date"
+                   th:value="${param.date != null ? param.date[0] : ''}"
+                   th:min="${minDate}"
+                   th:max="${maxDate}"
+                   class="block w-full rounded p-1">
+        </div>
+
+        <div class="bg-gray-200 rounded p-2 col-span-2">
+            <label class="block text-xs font-bold pb-2">PLATZ</label>
+            <select name="courtId" class="block w-full rounded p-1">
+                <option value=""></option>
+                <th:block th:each="court: ${courtCollection.items}">
+                    <th:block th:switch="${param.courtId != null && param.courtId[0] == court.id}">
+                        <option th:case="${true}" selected th:value="${court.id}" th:text="${court.name}"></option>
+                        <option th:case="${false}" th:value="${court.id}" th:text="${court.name}"></option>
+                    </th:block>
                 </th:block>
-            </th:block>
-        </select>
-    </div>
+            </select>
+        </div>
 
-    <div class="bg-gray-200 rounded p-2">
-        <label class="block text-xs font-bold pb-2">ZEIT</label>
-        <select name="slotId" class="block w-full rounded p-1">
-            <option value="">---</option>
-            <th:block th:each="slot : ${slotCollection.items}">
-                <th:block th:switch="${param.slotId != null && param.slotId[0] == slot.id.toString()}">
-                    <option th:case="${true}" selected th:value="${slot.id}" th:text="${slot.time}"></option>
-                    <option th:case="${false}" th:value="${slot.id}" th:text="${slot.time}"></option>
+        <div class="bg-gray-200 rounded p-2">
+            <label class="block text-xs font-bold pb-2">ZEIT</label>
+            <select name="slotId" class="block w-full rounded p-1">
+                <option value="">---</option>
+                <th:block th:each="slot : ${slotCollection.items}">
+                    <th:block th:switch="${param.slotId != null && param.slotId[0] == slot.id.toString()}">
+                        <option th:case="${true}" selected th:value="${slot.id}" th:text="${slot.time}"></option>
+                        <option th:case="${false}" th:value="${slot.id}" th:text="${slot.time}"></option>
+                    </th:block>
                 </th:block>
-            </th:block>
-        </select>
-    </div>
+            </select>
+        </div>
 
-    <div class="bg-gray-200 rounded p-2">
-        <label class="block text-xs font-bold pb-2">DURATION</label>
-        <select name="duration" class="block w-full rounded p-1">
-            <option value="0">00:30</option>
-            <option value="1" selected>01:00</option>
-            <option value="2">01:30</option>
-            <option value="3">02:00</option>
-        </select>
-    </div>
+        <div class="bg-gray-200 rounded p-2">
+            <label class="block text-xs font-bold pb-2">DURATION</label>
+            <select name="duration" class="block w-full rounded p-1">
+                <option value="0">00:30</option>
+                <option value="1" selected>01:00</option>
+                <option value="2">01:30</option>
+                <option value="3">02:00</option>
+            </select>
+        </div>
 
-    <div class="bg-gray-200 rounded p-2">
-        <label class="block text-xs font-bold pb-2">PLAYER 1</label>
-        <select class="block w-full rounded p-1" name="memberId1">
-            <th:block th:each="member: ${memberCollection.items}">
-                <th:block th:if="${userId == member.id}">
-                    <option selected th:value="${member.id}" th:text="${member.firstname + ' ' + member.lastname}"></option>
+        <div class="bg-gray-200 rounded p-2">
+            <label class="block text-xs font-bold pb-2">PLAYER 1</label>
+            <select class="block w-full rounded p-1" name="memberId1">
+                <th:block th:each="member: ${memberCollection.items}">
+                    <th:block th:if="${userId == member.id}">
+                        <option selected th:value="${member.id}" th:text="${member.firstname + ' ' + member.lastname}"></option>
+                    </th:block>
                 </th:block>
-            </th:block>
-        </select>
-    </div>
+            </select>
+        </div>
 
-    <div class="bg-gray-200 rounded p-2">
-        <label class="block text-xs font-bold pb-2">PLAYER 2</label>
-        <select class="block w-full rounded p-1" name="memberId2">
-            <option value="">---</option>
-            <th:block th:each="member: ${memberCollection.items}">
-                <th:block th:if="${userId != member.id}" th:switch="${param.memberId2 != null && param.memberId2[0] == member.id}">
-                    <option th:case="${true}" selected th:value="${member.id}" th:text="${member.firstname + ' ' + member.lastname}"></option>
-                    <option th:case="${false}" th:value="${member.id}" th:text="${member.firstname + ' ' + member.lastname}"></option>
+        <div class="bg-gray-200 rounded p-2">
+            <label class="block text-xs font-bold pb-2">PLAYER 2</label>
+            <select class="block w-full rounded p-1" name="memberId2">
+                <option value="">---</option>
+                <th:block th:each="member: ${memberCollection.items}">
+                    <th:block th:if="${userId != member.id}" th:switch="${param.memberId2 != null && param.memberId2[0] == member.id}">
+                        <option th:case="${true}" selected th:value="${member.id}" th:text="${member.firstname + ' ' + member.lastname}"></option>
+                        <option th:case="${false}" th:value="${member.id}" th:text="${member.firstname + ' ' + member.lastname}"></option>
+                    </th:block>
                 </th:block>
-            </th:block>
-        </select>
-    </div>
+            </select>
+        </div>
 
-    <div class="bg-gray-200 rounded p-2">
-        <label class="block text-xs font-bold pb-2">PLAYER 3 (doubles, not required)</label>
-        <select class="block w-full rounded p-1" name="memberId3">
-            <option value="">---</option>
-            <th:block th:each="member: ${memberCollection.items}">
-                <th:block th:if="${userId != member.id}" th:switch="${param.memberId3 != null && param.memberId3[0] == member.id}">
-                    <option th:case="${true}" selected th:value="${member.id}" th:text="${member.firstname + ' ' + member.lastname}"></option>
-                    <option th:case="${false}" th:value="${member.id}" th:text="${member.firstname + ' ' + member.lastname}"></option>
+        <div class="bg-gray-200 rounded p-2">
+            <label class="block text-xs font-bold pb-2">PLAYER 3 (doubles, not required)</label>
+            <select class="block w-full rounded p-1" name="memberId3">
+                <option value="">---</option>
+                <th:block th:each="member: ${memberCollection.items}">
+                    <th:block th:if="${userId != member.id}" th:switch="${param.memberId3 != null && param.memberId3[0] == member.id}">
+                        <option th:case="${true}" selected th:value="${member.id}" th:text="${member.firstname + ' ' + member.lastname}"></option>
+                        <option th:case="${false}" th:value="${member.id}" th:text="${member.firstname + ' ' + member.lastname}"></option>
+                    </th:block>
                 </th:block>
-            </th:block>
-        </select>
-    </div>
+            </select>
+        </div>
 
-    <div class="bg-gray-200 rounded p-2">
-        <label class="block text-xs font-bold pb-2">PLAYER 4 (doubles, not required)</label>
-        <select class="block w-full rounded p-1" name="memberId4">
-            <option value="">---</option>
-            <th:block th:each="member: ${memberCollection.items}">
-                <th:block th:if="${userId != member.id}" th:switch="${param.memberId4 != null && param.memberId4[0] == member.id}">
-                    <option th:case="${true}" selected th:value="${member.id}" th:text="${member.firstname + ' ' + member.lastname}"></option>
-                    <option th:case="${false}" th:value="${member.id}" th:text="${member.firstname + ' ' + member.lastname}"></option>
+        <div class="bg-gray-200 rounded p-2">
+            <label class="block text-xs font-bold pb-2">PLAYER 4 (doubles, not required)</label>
+            <select class="block w-full rounded p-1" name="memberId4">
+                <option value="">---</option>
+                <th:block th:each="member: ${memberCollection.items}">
+                    <th:block th:if="${userId != member.id}" th:switch="${param.memberId4 != null && param.memberId4[0] == member.id}">
+                        <option th:case="${true}" selected th:value="${member.id}" th:text="${member.firstname + ' ' + member.lastname}"></option>
+                        <option th:case="${false}" th:value="${member.id}" th:text="${member.firstname + ' ' + member.lastname}"></option>
+                    </th:block>
                 </th:block>
-            </th:block>
-        </select>
-    </div>
+            </select>
+        </div>
 
-    <button class="col-span-2 bg-orange-300 hover:bg-orange-400 rounded p-2 font-bold">BOOK</button>
-</form>
+        <button class="col-span-2 bg-orange-300 hover:bg-orange-400 rounded p-2 font-bold">BOOK</button>
+    </form>
+
+
+    <div class="grid grid-cols-1 gap-2">
+        <div class="text-lg font-bold">Meine Buchungen</div>
+        <div th:replace="~{reservations/collection :: f(${reservationCollection})}"></div>
+    </div>
+</div>

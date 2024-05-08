@@ -1,0 +1,13 @@
+<div th:fragment="f(court)" hx-target="this" hx-swap="outerHTML" class="p-2 rounded bg-orange-100 grid grid-cols-1 gap-2">
+    <div>
+        <div class="font-bold">ID</div>
+        <div th:text="${court.name}"></div>
+    </div>
+    <div>
+        <div class="font-bold">Name</div>
+        <div th:text="${court.name}"></div>
+    </div>
+    <div class="flex flex-row-reverse gap-2">
+        <button><i class="fa-solid fa-pen-to-square"></i></button>
+    </div>
+</div>

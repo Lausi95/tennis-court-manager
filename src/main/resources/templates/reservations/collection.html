@@ -1,0 +1,5 @@
+<div th:fragment="f(reservationCollection)" class="grid grid-cols-1 gap-2">
+    <th:block th:each="item: ${reservationCollection.items}">
+        <div th:replace="~{reservations/item :: f(${item})}"></div>
+    </th:block>
+</div>

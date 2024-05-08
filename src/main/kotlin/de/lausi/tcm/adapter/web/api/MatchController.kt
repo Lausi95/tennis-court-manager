@@ -50,12 +50,14 @@ class MatchController(
   private val memberService: MemberService,
   private val matchService: MatchService,
   private val occupancyPlanService: OccupancyPlanService,
+  private val courtService: CourtService,
 ) {
 
   @GetMapping
   fun getMatches(model: Model): String {
     val items = matchRepository.findByDateGreaterThanEqual(LocalDate.now()).map { match ->
-      val courts = match.courtIds.map { courtId -> courtRepository.findById(courtId).map { CourtModel(it.id, it.name) }.orElseGet { CourtModel("", "???") } }
+      val courts = with (courtController) { courtService.getCourts(match.courtIds).map { it.toModel() } }
+
       val team = teamRepository.findById(match.teamId).map { team ->
         val captainName = memberRepository.findById(team.captainMemberId).map { it.formatName() }.orElseGet { "???" }
         TeamModel(team.id, team.name, captainName)

@@ -1,15 +1,14 @@
 package de.lausi.tcm.adapter.web.api
 
 import de.lausi.tcm.domain.model.*
+import de.lausi.tcm.ger
+import de.lausi.tcm.iso
 import org.springframework.stereotype.Controller
 import org.springframework.ui.Model
-import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.PostMapping
-import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.*
 import java.security.Principal
 import java.time.DayOfWeek
 import java.time.LocalDate
-import java.time.format.DateTimeFormatter
 
 data class ReservationModel(
   val id: String,
@@ -18,12 +17,12 @@ data class ReservationModel(
   val fromTime: String,
   val toTime: String,
   val players: List<MemberModel>,
-  val links: Map<String, String> = mapOf(),
+  val links: Map<String, String>,
 )
 
 data class ReservationCollection(
   val items: List<ReservationModel>,
-  val links: Map<String, String> = mapOf(),
+  val links: Map<String, String>,
 )
 
 data class PostReservationParams(
@@ -56,34 +55,42 @@ class ReservationController(
   private val occupancyPlanService: OccupancyPlanService,
   private val occupancyPlanController: OccupancyPlanController,
   private val reservationRespository: ReservationRespository,
-  private val courtRepository: CourtRepository,
   private val memberRepository: MemberRepository,
+  private val courtService: CourtService,
 ) {
 
   @GetMapping
   fun getReservations(model: Model, principal: Principal): String {
     model.addAttribute("userId", principal.name)
 
-    val items = reservationRespository.findByCreatorIdAndDateGreaterThanEqual(principal.getName(), LocalDate.now()).map { reservation ->
-      val court = courtRepository.findById(reservation.courtId).map { CourtModel(it.id, it.name) }.orElseGet { CourtModel("", "???") }
-      val members = reservation.memberIds
-        .map { memberId -> memberRepository.findById(memberId).map { MemberModel(it.id, it.firstname, it.lastname, it.groups.map { it.toString() }) }.orElseGet { MemberModel("", "", "???", emptyList()) } }
+    val items = reservationRespository.findByCreatorIdAndDateGreaterThanEqual(principal.name, LocalDate.now()).sortedWith(compareBy(Reservation::date, Reservation::fromSlot)).map { reservation ->
+      val court = with(courtController) { courtService.getCourt(reservation.courtId).toModel() }
 
-      ReservationModel(reservation.id,
-        reservation.date.format(DateTimeFormatter.ISO_DATE),
+      val members = reservation.memberIds
+        .map { memberId -> memberRepository.findById(memberId).map { MemberModel(it.id, it.firstname, it.lastname, it.formatName(), it.groups.map { it.toString() }) }.orElseGet { MemberModel("", "", "", "???", emptyList()) } }
+
+      ReservationModel(
+        reservation.id,
+        reservation.date.ger(),
         court,
         formatFromTime(reservation.fromSlot),
         formatToTime(reservation.toSlot),
         members,
+        mapOf(
+          "delete" to "/api/reservations/${reservation.id}"
+        )
       )
     }
 
-    val reservationCollection = ReservationCollection(items)
+    val reservationCollection = ReservationCollection(items, mapOf())
     model.addAttribute("reservationCollection", reservationCollection)
 
     courtController.getCourts(model)
     slotController.getSlots(model)
     memberController.getMembers(model)
+
+    model.addAttribute("minDate", LocalDate.now().iso())
+    model.addAttribute("maxDate", LocalDate.now().plusDays(14).iso())
 
     return "views/reservations"
   }
@@ -130,5 +137,11 @@ class ReservationController(
       model.addAttribute("errors", errors)
       return getReservations(model, principal)
     }
+  }
+
+  @ResponseBody
+  @DeleteMapping("/{reservationId}")
+  fun deleteReservation(@PathVariable reservationId: String) {
+    reservationRepository.deleteById(reservationId)
   }
 }
