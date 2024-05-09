@@ -72,4 +72,8 @@ class MemberService(private val memberRepository: MemberRepository) {
 
     return updatedMember
   }
+
+  fun exists(name: String): Boolean {
+    return memberRepository.existsById(name)
+  }
 }

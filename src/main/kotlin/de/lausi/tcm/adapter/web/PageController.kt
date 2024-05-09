@@ -2,6 +2,7 @@ package de.lausi.tcm.adapter.web
 
 import de.lausi.tcm.IsoDate
 import de.lausi.tcm.adapter.web.api.*
+import de.lausi.tcm.domain.model.MemberService
 import org.springframework.stereotype.Controller
 import org.springframework.ui.Model
 import org.springframework.web.bind.annotation.GetMapping
@@ -22,9 +23,14 @@ private class HomeController(
   private val eventController: EventController,
   private val memberController: MemberController,
   private val apiController: ApiController,
+  private val memberService: MemberService,
 ) {
 
   fun Model.preparePage(currentPage: String, view: String, principal: Principal, func: (model: Model) -> Any): String {
+    if (!memberService.exists(principal.name)) {
+      return "unverified"
+    }
+
     apiController.getApi(this, principal)
     addAttribute("currentPage", currentPage)
     addAttribute("view", view)
@@ -36,6 +42,10 @@ private class HomeController(
 
   @GetMapping("/")
   fun getOccupancyPlan(model: Model, principal: Principal, @RequestParam(name = "date") @IsoDate date: LocalDate?): String {
+    if (!memberService.exists(principal.name)) {
+      return "unverified"
+    }
+
     if (date == null) {
       return "redirect:/?date=${LocalDate.now().format(DateTimeFormatter.ISO_DATE)}"
     }
