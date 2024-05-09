@@ -8,6 +8,7 @@ import org.springframework.boot.context.event.ApplicationStartedEvent
 import org.springframework.context.event.EventListener
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Component
+import java.util.concurrent.TimeUnit
 
 @Component
 class MemerSynchronizer(
@@ -18,7 +19,7 @@ class MemerSynchronizer(
   private val log = LoggerFactory.getLogger(javaClass)
 
   @EventListener(ApplicationStartedEvent::class)
-  @Scheduled(fixedDelay = 1000 * 60 * 10) // every 10 min
+  @Scheduled(fixedDelay = 10, timeUnit = TimeUnit.MINUTES)
   fun synchronzeMembers() {
     val importedMembers = keycloakAdapter.getKeycloakUsers()
       .filter { it.emailVerified }
