@@ -8,7 +8,7 @@ services:
     restart: unless-stopped
     labels:
       - traefik.enable=true
-      - traefik.http.routers.tcm.rule=Host(`test.tennislichtenberg.de`)
+      - traefik.http.routers.tcm.rule=Host(`tennislichtenberg.de`)
       - traefik.http.routers.tcm.entrypoints=websecure
       - traefik.http.routers.tcm.tls.certresolver=letsencrypt
 
