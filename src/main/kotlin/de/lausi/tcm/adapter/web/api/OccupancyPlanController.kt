@@ -30,6 +30,7 @@ data class OccupancyPlanModel(
 
   val todayDate: String,
   val planDate: String,
+  val dayOfWeek: DayOfWeekModel,
 
   val links: Map<String, String>
 )
@@ -88,10 +89,13 @@ class OccupancyPlanController(
       links["prevPlan"] = "/?date=$prevCourtDateString"
     }
 
+    val dayOfWeek = DAY_OF_WEEK_MODELS.find { it.id == planDate.dayOfWeek }!!
+
     val occupancyPlanModel = OccupancyPlanModel(
       courtModels,
       todayDateString,
       planDateString,
+      dayOfWeek,
       links,
     )
 

@@ -1,5 +1,7 @@
 <div>
-    <div class="p-3 font-bold gap-4 grid grid-cols-3">
+    <div class="text-center pt-3 italic text-xs" th:text="${occupancyPlan.dayOfWeek.name}"></div>
+
+    <div class="pb-3 font-bold gap-4 grid grid-cols-3">
         <th:block th:switch="${occupancyPlan.links.get('prevPlan') != null}">
             <a th:case="${true}"
                     th:href="${occupancyPlan.links.get('prevPlan')}"
