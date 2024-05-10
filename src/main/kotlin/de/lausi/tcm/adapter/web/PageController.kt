@@ -22,7 +22,6 @@ private class HomeController(
   private val matchController: MatchController,
   private val eventController: EventController,
   private val memberController: MemberController,
-  private val apiController: ApiController,
   private val memberService: MemberService,
 ) {
 
@@ -31,7 +30,12 @@ private class HomeController(
       return "unverified"
     }
 
-    apiController.getApi(this, principal)
+    val user = memberService.getMember(principal.name)
+    val links = mutableListOf("Home", "Buchen")
+    if (user.groups.isNotEmpty()) {
+      links.add("Admin")
+    }
+    addAttribute("links", links)
     addAttribute("currentPage", currentPage)
     addAttribute("view", view)
 
