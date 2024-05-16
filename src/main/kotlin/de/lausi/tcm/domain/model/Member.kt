@@ -1,5 +1,7 @@
 package de.lausi.tcm.domain.model
 
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import org.springframework.data.mongodb.core.mapping.Document
 import org.springframework.data.mongodb.repository.MongoRepository
 import org.springframework.http.HttpStatus
@@ -53,8 +55,11 @@ interface MemberRepository : MongoRepository<Member, String> {
 @Component
 class MemberService(private val memberRepository: MemberRepository) {
 
+  val log: Logger = LoggerFactory.getLogger(javaClass)
+
   fun getMember(id: String): Member {
     return memberRepository.findById(id).orElseThrow {
+      log.warn("Could not find Member with id $id in database")
       ResponseStatusException(HttpStatus.NOT_FOUND, "Member with id $id not found")
     }
   }
@@ -63,8 +68,10 @@ class MemberService(private val memberRepository: MemberRepository) {
     val member = getMember(memberId)
 
     val updatedMember = if (member.groups.contains(group)) {
+      log.info("Adding group $group to member $member")
       member.copy(groups = member.groups.minus(group))
     } else {
+      log.info("Removing group $group to member $member")
       member.copy(groups = member.groups.plus(group))
     }
 
