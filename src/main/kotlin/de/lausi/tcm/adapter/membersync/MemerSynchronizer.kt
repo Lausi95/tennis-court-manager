@@ -4,8 +4,6 @@ import de.lausi.tcm.domain.model.Group
 import de.lausi.tcm.domain.model.Member
 import de.lausi.tcm.domain.model.MemberRepository
 import org.slf4j.LoggerFactory
-import org.springframework.boot.context.event.ApplicationStartedEvent
-import org.springframework.context.event.EventListener
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Component
 import java.util.concurrent.TimeUnit
@@ -18,7 +16,6 @@ class MemerSynchronizer(
 
   private val log = LoggerFactory.getLogger(javaClass)
 
-  @EventListener(ApplicationStartedEvent::class)
   @Scheduled(fixedDelay = 10, timeUnit = TimeUnit.MINUTES)
   fun synchronzeMembers() {
     val importedMembers = keycloakAdapter.getKeycloakUsers()
