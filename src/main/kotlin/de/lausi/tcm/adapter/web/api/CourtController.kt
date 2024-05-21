@@ -17,7 +17,13 @@ data class CourtModel(
   val id: String,
   val name: String,
   val links: Map<String, String>,
-)
+) {
+
+  companion object {
+
+    val NOT_FOUND = CourtModel("???", "???", emptyMap())
+  }
+}
 
 data class CourtCollection(
   val items: List<CourtModel>,

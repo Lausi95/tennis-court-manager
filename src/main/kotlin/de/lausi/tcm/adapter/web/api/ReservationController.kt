@@ -64,10 +64,14 @@ class ReservationController(
     model.addAttribute("userId", principal.name)
 
     val items = reservationRespository.findByCreatorIdAndDateGreaterThanEqual(principal.name, LocalDate.now()).sortedWith(compareBy(Reservation::date, Reservation::fromSlot)).map { reservation ->
-      val court = with(courtController) { courtService.getCourt(reservation.courtId).toModel() }
+      val court = with(courtController) {
+        courtService.getCourt(reservation.courtId)?.toModel() ?: CourtModel.NOT_FOUND
+      }
 
-      val members = reservation.memberIds
-        .map { memberId -> memberRepository.findById(memberId).map { MemberModel(it.id, it.firstname, it.lastname, it.formatName(), it.groups.map { it.toString() }) }.orElseGet { MemberModel("", "", "", "???", emptyList()) } }
+      val members = with(memberController) {
+        reservation.memberIds.map { memberRepository.findById(it).orElse(null) }
+          .map { it?.toModel() ?: MemberModel.NOT_FOUND }
+      }
 
       ReservationModel(
         reservation.id,

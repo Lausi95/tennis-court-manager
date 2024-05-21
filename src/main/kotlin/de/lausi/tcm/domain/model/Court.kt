@@ -3,9 +3,7 @@ package de.lausi.tcm.domain.model
 import org.springframework.data.annotation.Id
 import org.springframework.data.mongodb.core.mapping.Document
 import org.springframework.data.mongodb.repository.MongoRepository
-import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Component
-import org.springframework.web.server.ResponseStatusException
 
 @Document("court")
 data class Court(
@@ -25,9 +23,7 @@ interface CourtRepository : MongoRepository<Court, String> {
 @Component
 class CourtService(private val courtRepository: CourtRepository) {
 
-  fun getCourt(courtId: String): Court = courtRepository.findById(courtId).orElseThrow {
-    ResponseStatusException(HttpStatus.NOT_FOUND, "Court with ID $courtId not found")
-  }
+  fun getCourt(courtId: String): Court? = courtRepository.findById(courtId).orElse(null)
 
   fun getCourts(): Iterable<Court> = courtRepository.findAll()
 

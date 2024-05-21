@@ -18,7 +18,13 @@ data class MemberModel(
   val lastname: String,
   val fullname: String,
   val groups: List<String>,
-  val links: Map<String, String> = mapOf())
+  val links: Map<String, String> = mapOf()) {
+
+  companion object {
+
+    val NOT_FOUND = MemberModel("???", "???", "???", "??? ???", emptyList(), emptyMap())
+  }
+}
 
 data class MemberCollection(
   val items: List<MemberModel>,

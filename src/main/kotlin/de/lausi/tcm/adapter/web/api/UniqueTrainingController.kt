@@ -45,7 +45,7 @@ class UniqueTrainingController(
   @GetMapping
   fun getUniqueTrainings(model: Model): String {
     val items = uniqueTrainingRepository.findByDateGreaterThanEqual(LocalDate.now()).map {
-      val court = with (courtController) { courtService.getCourt(it.courtId).toModel() }
+      val court = with (courtController) { courtService.getCourt(it.courtId)?.toModel() ?: CourtModel.NOT_FOUND }
 
       UniqueTrainingModel(
         it.id,
