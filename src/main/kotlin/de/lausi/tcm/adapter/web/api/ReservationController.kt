@@ -114,8 +114,15 @@ class ReservationController(
 
     // TODO: Move rules to a domain service and make them customizable
     val futureReservations = reservationRepository.findByCreatorIdAndDateGreaterThanEqual(params.memberId1, LocalDate.now())
-    if (reservation.hasCoreTimeSlot() && futureReservations.any { it.hasCoreTimeSlot() }) {
-      errors.add("Du hast bereits eine Buchung inder Kernzeit. Du kannst maximal 1 Buchung in der Kernzeit haben. Die Kernzeit ist das Wochenende und unter der Woche 17:00 - 20:00 Uhr")
+    if (!reservation.isToday() && reservation.hasCoreTimeSlot() && futureReservations.any { it.hasCoreTimeSlot() }) {
+      errors.add(
+        """Du hast bereits eine Buchung in der Kernzeit.
+        Du kannst maximal 1 Buchung in der Kernzeit haben.
+        Die Kernzeit ist das Wochenende und unter der Woche 17:00 - 20:00 Uhr.""".lineSequence().map { it.trim() }.joinToString(" "))
+    }
+
+    if (reservation.hasCoreTimeSlot() && reservation.slotAmount() > 2) {
+      errors.add("Du kannst bei einer Buchung, mit Slots in der Kernzeit, maximal 1 Stunde buchen.")
     }
 
     if (reservation.hasCoreTimeSlot() && reservation.memberIds.size < 2) {
