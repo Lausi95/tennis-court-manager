@@ -93,7 +93,7 @@ class MatchController(
 
   @PostMapping
   fun createMatch(model: Model, principal: Principal, request: CreateMatchRequest): String {
-    memberService.getMember(principal.name).assertRoles(Group.EVENT_MANAGEMENT)
+    memberService.getMember(principal.name).assertRoles(Group.TEAM_CAPTAIN)
 
     val errors = mutableListOf<String>()
 
@@ -140,7 +140,7 @@ class MatchController(
 
   @DeleteMapping("/{matchId}")
   fun deleteMatch(model: Model, principal: Principal, @PathVariable matchId: String): String {
-    memberService.getMember(principal.name).assertRoles(Group.EVENT_MANAGEMENT)
+    memberService.getMember(principal.name).assertRoles(Group.TEAM_CAPTAIN)
 
     matchRepository.deleteById(matchId)
     return getMatches(model)
