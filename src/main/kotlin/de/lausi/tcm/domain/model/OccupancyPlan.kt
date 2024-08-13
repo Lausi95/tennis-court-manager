@@ -28,14 +28,14 @@ data class Block(
   }
 }
 
-interface OccupancyPlanResolver {
+fun interface OccupancyPlanResolver {
 
   fun OccupancyPlan.addBlock(date: LocalDate, courtIds: List<String>)
 }
 
 class OccupancyPlan(courtIds: List<String>, private val minSlot: Int, private val maxSlot: Int) {
 
-  private val blocksByCourt: MutableMap<String, MutableSet<Block>> = mutableMapOf()
+  val blocksByCourt: MutableMap<String, MutableSet<Block>> = mutableMapOf()
 
   init {
     courtIds.forEach { blocksByCourt[it] = mutableSetOf() }

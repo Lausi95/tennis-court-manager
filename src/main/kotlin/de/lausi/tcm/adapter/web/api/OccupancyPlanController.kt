@@ -2,6 +2,8 @@ package de.lausi.tcm.adapter.web.api
 
 import de.lausi.tcm.IsoDate
 import de.lausi.tcm.domain.model.*
+import de.lausi.tcm.iso
+import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Controller
 import org.springframework.ui.Model
 import org.springframework.web.bind.annotation.GetMapping
@@ -41,6 +43,49 @@ class OccupancyPlanController(
   private val courtRepository: CourtRepository,
   private val occupancyPlanService: OccupancyPlanService,
 ) {
+
+  @GetMapping("/report.csv")
+  @ResponseBody
+  fun getOccupancyPlanCsv(@RequestParam @IsoDate from: LocalDate?, @RequestParam @IsoDate to: LocalDate?, @RequestParam(defaultValue = "false") dl: Boolean): ResponseEntity<String> {
+    val fromDate = from ?: LocalDate.now()
+    val toDate = to ?: LocalDate.now()
+
+    var csv = "user,description,slot-start-date,slot-start-time,slot-end-date,slot-end-time,court-number,type\n"
+
+    val courts = courtRepository.findAll()
+    val courtIds = courts.map { it.id }
+
+    var dateIt = fromDate;
+    do {
+      val plan = occupancyPlanService.getOccupancyPlan(dateIt, courtIds)
+      courts.forEach {
+        val blocks = plan.blocksByCourt[it.id]
+        blocks?.forEach { block ->
+          val user = if (block.type == BlockType.FREE_PLAY) block.description.split(",")[0] else ""
+          val description = if (block.type != BlockType.FREE && block.type != BlockType.FREE_PLAY) block.description else ""
+          val slotStartDate = dateIt.iso()
+          val slotStartTime = formatFromTimeIso(block.fromSlot)
+          val slotEndDate = dateIt.iso()
+          val slotEndTime = formatToTimeIso(block.toSlot)
+          val courtNumber = it.name
+          val type = block.type.toString()
+          csv += "\"$user\",\"$description\",$slotStartDate,$slotStartTime,$slotEndDate,$slotEndTime,$courtNumber,$type\n"
+        }
+      }
+      dateIt = dateIt.plusDays(1L)
+    } while (dateIt.isBefore(toDate))
+
+    return if (dl) {
+      ResponseEntity.ok()
+        .header("Content-Type", "text/csv")
+        .header("Content-Disposition", "attachment; filename=\"occupancy-plan.csv\"\n")
+        .body(csv);
+    } else {
+      ResponseEntity.ok()
+        .header("Content-Type", "text/csv")
+        .body(csv);
+    }
+  }
 
   @GetMapping
   fun getOccupancyPlan(model: Model, @RequestParam(name = "date") @IsoDate planDate: LocalDate): String {

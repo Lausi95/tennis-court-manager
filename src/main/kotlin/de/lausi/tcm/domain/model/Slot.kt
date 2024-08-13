@@ -3,6 +3,18 @@ package de.lausi.tcm.domain.model
 const val MIN_SLOT = 14
 const val MAX_SLOT = 43
 
+fun formatFromTimeIso(slot: Int): String {
+  val hours = (slot / 2).toString().padStart(2, '0')
+  val minutes = if (slot % 2 == 0) "00" else "30"
+  return "$hours:$minutes:00"
+}
+
+fun formatToTimeIso(slot: Int): String {
+  val hours = ((slot + 1) / 2).toString().padStart(2, '0')
+  val minutes = if ((slot + 1) % 2 == 0) "00" else "30"
+  return "$hours:$minutes:00"
+}
+
 fun formatFromTime(slot: Int): String {
   val hours = (slot / 2).toString()
   val minutes = if (slot % 2 == 0) "00" else "30"
