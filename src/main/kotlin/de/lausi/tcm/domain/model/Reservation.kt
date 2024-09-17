@@ -31,7 +31,7 @@ data class Reservation(
   )
 
   fun hasCoreTimeSlot(): Boolean {
-    return date.dayOfWeek.isWeekend() || (fromSlot..toSlot).any { isCoreTimeSlot(it) }
+    return (fromSlot..toSlot).any { isCoreTimeSlot(it) }
   }
 
   fun slotAmount(): Int = toSlot - fromSlot + 1
