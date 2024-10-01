@@ -119,7 +119,7 @@ class OccupancyPlanController(
           slotAmount(it.fromSlot, it.toSlot),
           formatDuration(it.fromSlot, it.toSlot),
           it.description,
-          planDate.dayOfWeek.isWeekend() || isCoreTimeSlot(it.fromSlot),
+          !planDate.dayOfWeek.isWeekend() && isCoreTimeSlot(it.fromSlot),
           blockLinks,
         )
       }
