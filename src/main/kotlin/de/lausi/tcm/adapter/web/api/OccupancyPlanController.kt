@@ -61,7 +61,7 @@ class OccupancyPlanController(
     val courts = courtRepository.findAll()
     val courtIds = courts.map { it.id }
 
-    var dateIt = fromDate;
+    var dateIt = fromDate
     do {
       val plan = occupancyPlanService.getOccupancyPlan(dateIt, courtIds)
       courts.forEach {
@@ -85,11 +85,11 @@ class OccupancyPlanController(
       ResponseEntity.ok()
         .header("Content-Type", "text/csv")
         .header("Content-Disposition", "attachment; filename=\"occupancy-plan.csv\"\n")
-        .body(csv);
+        .body(csv)
     } else {
       ResponseEntity.ok()
         .header("Content-Type", "text/csv")
-        .body(csv);
+        .body(csv)
     }
   }
 
