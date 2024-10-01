@@ -44,11 +44,17 @@ class OccupancyPlanController(
   private val occupancyPlanService: OccupancyPlanService,
 ) {
 
+  data class OccupancyPlanCsvParams(
+    @IsoDate val from: LocalDate?,
+    @IsoDate val to: LocalDate?,
+    val dl: Boolean = false,
+  )
+
   @GetMapping("/report.csv")
   @ResponseBody
-  fun getOccupancyPlanCsv(@RequestParam @IsoDate from: LocalDate?, @RequestParam @IsoDate to: LocalDate?, @RequestParam(defaultValue = "false") dl: Boolean): ResponseEntity<String> {
-    val fromDate = from ?: LocalDate.now()
-    val toDate = to ?: LocalDate.now()
+  fun getOccupancyPlanCsv(params: OccupancyPlanCsvParams): ResponseEntity<String> {
+    val fromDate = params.from ?: LocalDate.now()
+    val toDate = params.to ?: LocalDate.now()
 
     var csv = "user,description,slot-start-date,slot-start-time,slot-end-date,slot-end-time,court-number,type\n"
 
@@ -75,7 +81,7 @@ class OccupancyPlanController(
       dateIt = dateIt.plusDays(1L)
     } while (dateIt.isBefore(toDate))
 
-    return if (dl) {
+    return if (params.dl) {
       ResponseEntity.ok()
         .header("Content-Type", "text/csv")
         .header("Content-Disposition", "attachment; filename=\"occupancy-plan.csv\"\n")
