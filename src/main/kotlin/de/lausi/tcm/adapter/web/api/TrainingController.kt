@@ -1,14 +1,15 @@
 package de.lausi.tcm.adapter.web.api
 
+import de.lausi.tcm.adapter.web.memberId
+import de.lausi.tcm.application.CreateTrainingCommand
+import de.lausi.tcm.application.TrainingUseCase
 import de.lausi.tcm.domain.model.*
 import de.lausi.tcm.ger
 import de.lausi.tcm.iso
-import org.springframework.http.HttpStatus
 
 import org.springframework.stereotype.Controller
 import org.springframework.ui.Model
 import org.springframework.web.bind.annotation.*
-import org.springframework.web.server.ResponseStatusException
 import java.security.Principal
 import java.time.DayOfWeek
 import java.time.LocalDate
@@ -55,16 +56,14 @@ data class AddSkippedDateRequest(
 @Controller
 @RequestMapping("/api/trainings")
 class TrainingController(
+  private val trainingUseCase: TrainingUseCase,
   private val courtController: CourtController,
   private val slotController: SlotController,
-  private val courtRepository: CourtRepository,
-  private val trainingRepository: TrainingRepository,
-  private val memberService: MemberService,
 ) {
 
   @GetMapping
   fun getTrainings(model: Model): String {
-    val items = trainingRepository.findAll().sortedWith(compareBy(Training::dayOfWeek, Training::fromSlot)).map { it.toModel() }
+    val items = trainingUseCase.getAllTrainings().map { it.toModel() }
 
     val trainingCollection = TrainingCollection(items, items.size, DAY_OF_WEEK_MODELS, mapOf())
 
@@ -78,7 +77,7 @@ class TrainingController(
 
   fun Training.toModel(): TrainingModel {
     val courtModel = with (courtController) {
-      return@with courtRepository.findById(courtId).orElseThrow().toModel()
+      return@with trainingUseCase.getCourt(courtId).toModel()
     }
 
     return TrainingModel(
@@ -105,68 +104,46 @@ class TrainingController(
 
   @GetMapping("/{trainingId}")
   fun getTraining(model: Model, principal: Principal, @PathVariable trainingId: String): String {
-    val training = trainingRepository.findById(trainingId).orElseThrow { ResponseStatusException(HttpStatus.NOT_FOUND) }
+    val training = trainingUseCase.getTraining(trainingId)
     model.addAttribute("training", training.toModel())
     return "entity/training"
   }
 
   @GetMapping("/{trainingId}/add-skipped-date-form")
   fun getSkippedDateForm(model: Model, @PathVariable trainingId: String): String {
-    model.addAttribute("submit", "/api/trainings/$trainingId/skippedDates")
+    model.addAttribute("submit", "/api/trainings/$trainingId/skipped-dates")
     return "form/training-add-skipped-date"
   }
 
-  @PostMapping("{trainingId}/skippedDates")
-  fun addSkippedDate(model: Model, @PathVariable trainingId: String, request: AddSkippedDateRequest): String {
-    val training = trainingRepository.findById(trainingId).orElseThrow()
-    if (training.skippedDates.contains(request.date)) {
-      throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Already contained")
-    }
-
-    trainingRepository.save(training.copy(skippedDates = training.skippedDates.plus(request.date)))
-
+  @PostMapping("{trainingId}/skipped-dates")
+  fun addSkippedDate(model: Model, @PathVariable trainingId: String, request: AddSkippedDateRequest, principal: Principal): String {
+    val training = trainingUseCase.addSkippedDateToTraining(principal.memberId(), trainingId, request.date)
     model.addAttribute("skippedDate", request.date.toModel(training.id))
     return "entity/training-skipped-date"
   }
 
   @ResponseBody
   @DeleteMapping("{trainingId}/skipped-dates/{date}")
-  fun deleteSkippedDate(@PathVariable trainingId: String, @PathVariable date: LocalDate) {
-    trainingRepository.findById(trainingId).ifPresent {
-      trainingRepository.save(it.copy(skippedDates = it.skippedDates.minus(date)))
-    }
+  fun deleteSkippedDate(@PathVariable trainingId: String, @PathVariable date: LocalDate, principal: Principal) {
+    trainingUseCase.removeSkippedDateFromTraining(principal.memberId(), trainingId, date)
   }
 
   @PostMapping
-  fun createTrainig(model: Model, principal: Principal, params: PostTrainingParams): String {
-    memberService.getMember(principal.name).assertRoles(Group.TRAINER)
-
-    val errors = mutableListOf<String>()
-
-    val training = Training(
+  fun createTraining(model: Model, principal: Principal, params: PostTrainingParams): String {
+    val training = trainingUseCase.createTraining(principal.memberId(), CreateTrainingCommand(
       params.dayOfWeek,
       params.courtId,
       params.fromSlot,
       params.toSlot,
       params.description
-    )
-
-    val trainings = trainingRepository.findByDayOfWeekAndCourtId(training.dayOfWeek, training.courtId)
-    if (trainings.any { it.collidesWith(training) }) {
-      errors.add("Zu dem angegebenen Zeitraum ist bereits Training")
-    }
-
-    if (errors.isEmpty()) {
-      trainingRepository.save(training)
-    }
+    ))
 
     return getTrainings(model)
   }
 
   @DeleteMapping("/{trainingId}")
   fun deleteTraining(model: Model, principal: Principal, @PathVariable trainingId: String): String {
-    memberService.getMember(principal.name).assertRoles(Group.TRAINER)
-    trainingRepository.deleteById(trainingId)
+    trainingUseCase.deleteTraining(principal.memberId(), trainingId)
     return getTrainings(model)
   }
 }

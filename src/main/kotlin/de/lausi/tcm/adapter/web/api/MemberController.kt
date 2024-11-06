@@ -1,9 +1,8 @@
 package de.lausi.tcm.adapter.web.api
 
-import de.lausi.tcm.domain.model.Group
-import de.lausi.tcm.domain.model.Member
-import de.lausi.tcm.domain.model.MemberRepository
-import de.lausi.tcm.domain.model.MemberService
+import de.lausi.tcm.adapter.web.memberId
+import de.lausi.tcm.application.MemberUseCase
+import de.lausi.tcm.domain.model.member.*
 import org.springframework.stereotype.Controller
 import org.springframework.ui.Model
 import org.springframework.web.bind.annotation.GetMapping
@@ -31,36 +30,35 @@ data class MemberCollection(
   val links: Map<String, String> = mapOf())
 
 data class UpdateGroupRequest(
-  val group: Group)
+  val group: MemberGroup)
 
 @Controller
 @RequestMapping("/api/members")
 class MemberController(
-  private val memberRepository: MemberRepository,
-  private val memberService: MemberService,
+  private val memberUseCase: MemberUseCase
 ) {
 
   @GetMapping
   fun getMembers(model: Model): String {
-    val members = memberRepository.findAll().sortedBy { it.firstname }
+    val members = memberUseCase.getAllMembers()
     return model.memberCollection(members)
   }
 
   @GetMapping("/{memberId}")
-  fun getMember(model: Model, @PathVariable memberId: String): String {
-    val member = memberService.getMember(memberId)
+  fun getMember(model: Model, @PathVariable("memberId") memberIdAsString: String): String {
+    val memberId = MemberId(memberIdAsString)
+    val member = memberUseCase.getOneMember(memberId)
     return model.member(member)
   }
 
   @PostMapping("/{memberId}")
-  fun updateMemberGroup(model: Model, @PathVariable memberId: String, request: UpdateGroupRequest, principal: Principal): String {
-    memberService.getMember(principal.name).assertRoles(Group.ADMIN)
-    val member = memberService.toggleGroup(memberId, request.group)
+  fun toggleMemberGroup(model: Model, @PathVariable("memberId") memberIdAsString: String, request: UpdateGroupRequest, principal: Principal): String {
+    val member = memberUseCase.toggleGroup(principal.memberId(), MemberId(memberIdAsString), request.group)
     return model.member(member)
   }
 
   fun Member.toModel(): MemberModel {
-    return MemberModel(id, firstname, lastname, formatName(), groups.map { it.toString() }, mapOf(
+    return MemberModel(id.value, firstname.value, lastname.value, formatName(), groups.map { it.toString() }, mapOf(
       "self" to "/api/members/$id",
       "update" to "/api/members/$id",
     ))

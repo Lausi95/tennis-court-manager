@@ -29,7 +29,7 @@ class SecurityConfiguration {
   }
 
   @Bean
-  fun resouceServerFilterChain(http: HttpSecurity, logoutHandler: KeycloakLogoutHandler): SecurityFilterChain {
+  fun resourceServerFilterChain(http: HttpSecurity, logoutHandler: KeycloakLogoutHandler): SecurityFilterChain {
     // general auth settings
     http.authorizeHttpRequests { it.anyRequest().authenticated() }
     http.cors { it.disable() }

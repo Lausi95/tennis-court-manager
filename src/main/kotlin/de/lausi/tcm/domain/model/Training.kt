@@ -16,7 +16,7 @@ data class Training(
   val fromSlot: Int,
   val toSlot: Int,
   val description: String,
-  val skippedDates: Set<LocalDate>,
+  val skippedDates: MutableSet<LocalDate>,
 ) {
 
   constructor(dayOfWeek: DayOfWeek, courtId: String, fromSlot: Int, toSlot: Int, description: String) : this(
@@ -26,7 +26,7 @@ data class Training(
     fromSlot,
     toSlot,
     description,
-    setOf(),
+    mutableSetOf(),
   )
 
   fun collidesWith(other: Training): Boolean {
@@ -42,6 +42,20 @@ data class Training(
 
     val oneOrMoreSameSlots = (fromSlot..toSlot).any { (other.fromSlot..other.toSlot).contains(it) }
     return oneOrMoreSameSlots
+  }
+
+  fun addSkippedDate(date: LocalDate) {
+    if (skippedDates.contains(date)) {
+      error("Date already in skipped dates.")
+    }
+    skippedDates.add(date)
+  }
+
+  fun removeSkippedDate(date: LocalDate) {
+    if (!skippedDates.contains(date)) {
+      error("Date is not in skipped dates.")
+    }
+    skippedDates.remove(date)
   }
 }
 

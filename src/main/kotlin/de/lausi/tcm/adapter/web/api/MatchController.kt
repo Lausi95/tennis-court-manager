@@ -1,6 +1,10 @@
 package de.lausi.tcm.adapter.web.api
 
+import de.lausi.tcm.adapter.web.memberId
 import de.lausi.tcm.domain.model.*
+import de.lausi.tcm.domain.model.member.MemberGroup
+import de.lausi.tcm.domain.model.member.MemberId
+import de.lausi.tcm.domain.model.member.MemberService
 import org.springframework.stereotype.Controller
 import org.springframework.ui.Model
 import org.springframework.web.bind.annotation.DeleteMapping
@@ -43,11 +47,10 @@ class MatchController(
   private val matchRepository: MatchRepository,
   private val courtRepository: CourtRepository,
   private val teamRepository: TeamRepository,
-  private val memberRepository: MemberRepository,
+  private val memberService: MemberService,
   private val courtController: CourtController,
   private val teamController: TeamController,
   private val slotController: SlotController,
-  private val memberService: MemberService,
   private val matchService: MatchService,
   private val occupancyPlanService: OccupancyPlanService,
   private val courtService: CourtService,
@@ -59,7 +62,8 @@ class MatchController(
       val courts = with (courtController) { courtService.getCourts(match.courtIds).map { it.toModel() } }
 
       val team = teamRepository.findById(match.teamId).map { team ->
-        val captainName = memberRepository.findById(team.captainMemberId).map { it.formatName() }.orElseGet { "???" }
+        val captainMemberId = MemberId(team.captainMemberId)
+        val captainName = memberService.getMember(captainMemberId).formatName()
         TeamModel(team.id, team.name, captainName)
       }.orElseGet {
         TeamModel("", "???", "???")
@@ -93,7 +97,7 @@ class MatchController(
 
   @PostMapping
   fun createMatch(model: Model, principal: Principal, request: CreateMatchRequest): String {
-    memberService.getMember(principal.name).assertRoles(Group.TEAM_CAPTAIN)
+    memberService.assertGroup(principal.memberId(), MemberGroup.TEAM_CAPTAIN)
 
     val errors = mutableListOf<String>()
 
@@ -140,7 +144,7 @@ class MatchController(
 
   @DeleteMapping("/{matchId}")
   fun deleteMatch(model: Model, principal: Principal, @PathVariable matchId: String): String {
-    memberService.getMember(principal.name).assertRoles(Group.TEAM_CAPTAIN)
+    memberService.assertGroup(principal.memberId(), MemberGroup.TEAM_CAPTAIN)
 
     matchRepository.deleteById(matchId)
     return getMatches(model)

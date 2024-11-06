@@ -23,9 +23,11 @@ data class Block(
   }
 
   fun collidesWith(other: Block): Boolean {
-    val otherSlots = (other.fromSlot..other.toSlot)
-    return (fromSlot..toSlot).any { it in otherSlots }
+    val otherRange = other.range()
+    return range().any { it in otherRange }
   }
+
+  private fun range(): IntRange = (this.fromSlot..this.toSlot)
 }
 
 fun interface OccupancyPlanResolver {
@@ -95,7 +97,6 @@ class OccupancyPlanService(private val occupancyPlanResolvers: List<OccupancyPla
   fun getOccupancyPlan(date: LocalDate, courtIds: List<String>): OccupancyPlan {
     val occupancyPlan = OccupancyPlan(courtIds, MIN_SLOT, MAX_SLOT)
     occupancyPlanResolvers.forEach { occupancyPlan.addBlock(date, courtIds, it) }
-
     return occupancyPlan
   }
 }

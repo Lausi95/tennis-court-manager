@@ -1,6 +1,9 @@
 package de.lausi.tcm.adapter.web.api
 
+import de.lausi.tcm.application.ReservationUseCase
 import de.lausi.tcm.domain.model.*
+import de.lausi.tcm.domain.model.member.MemberId
+import de.lausi.tcm.domain.model.member.MemberService
 import de.lausi.tcm.ger
 import de.lausi.tcm.iso
 import org.springframework.stereotype.Controller
@@ -55,8 +58,8 @@ class ReservationController(
   private val occupancyPlanService: OccupancyPlanService,
   private val occupancyPlanController: OccupancyPlanController,
   private val reservationRespository: ReservationRespository,
-  private val memberRepository: MemberRepository,
   private val courtService: CourtService,
+  private val reservationUseCase: ReservationUseCase,
 ) {
 
   @GetMapping
@@ -69,8 +72,7 @@ class ReservationController(
       }
 
       val members = with(memberController) {
-        reservation.memberIds.map { memberRepository.findById(it).orElse(null) }
-          .map { it?.toModel() ?: MemberModel.NOT_FOUND }
+        reservation.memberIds.map { reservationUseCase.getMember(MemberId(it))?.toModel() ?: MemberModel.NOT_FOUND }
       }
 
       ReservationModel(

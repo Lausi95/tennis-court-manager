@@ -2,7 +2,7 @@ package de.lausi.tcm.adapter.web
 
 import de.lausi.tcm.IsoDate
 import de.lausi.tcm.adapter.web.api.*
-import de.lausi.tcm.domain.model.MemberService
+import de.lausi.tcm.domain.model.member.MemberRepository
 import org.springframework.stereotype.Controller
 import org.springframework.ui.Model
 import org.springframework.web.bind.annotation.GetMapping
@@ -18,21 +18,17 @@ private class HomeController(
   private val trainingController: TrainingController,
   private val reservationController: ReservationController,
   private val teamController: TeamController,
-  private val uniqueTrainingController: UniqueTrainingController,
   private val matchController: MatchController,
   private val eventController: EventController,
   private val memberController: MemberController,
-  private val memberService: MemberService,
+  private val memberRepository: MemberRepository,
 ) {
 
   fun Model.preparePage(currentPage: String, view: String, principal: Principal, func: (model: Model) -> Any): String {
-    if (!memberService.exists(principal.name)) {
-      return "unverified"
-    }
+    val member = memberRepository.findById(principal.memberId()) ?: return "unverified"
 
-    val user = memberService.getMember(principal.name)
     val links = mutableListOf("Home", "Buchen")
-    if (user.groups.isNotEmpty()) {
+    if (member.groups.isNotEmpty()) {
       links.add("Admin")
     }
     addAttribute("links", links)
@@ -46,7 +42,7 @@ private class HomeController(
 
   @GetMapping("/")
   fun getOccupancyPlan(model: Model, principal: Principal, @RequestParam(name = "date") @IsoDate date: LocalDate?): String {
-    if (!memberService.exists(principal.name)) {
+    if (memberRepository.exists(principal.memberId())) {
       return "unverified"
     }
 
@@ -60,7 +56,7 @@ private class HomeController(
   }
 
   @GetMapping("/trainings")
-  fun getTrainigs(model: Model, principal: Principal): String {
+  fun getTrainings(model: Model, principal: Principal): String {
     return model.preparePage("Trainings", "views/trainings", principal) {
       trainingController.getTrainings(model)
     }
@@ -70,13 +66,6 @@ private class HomeController(
   fun getTraining(model: Model, principal: Principal, @PathVariable trainingId: String): String {
     return model.preparePage("Training", "views/training", principal) {
       trainingController.getTraining(model, principal, trainingId)
-    }
-  }
-
-  @GetMapping("/unique-trainings")
-  fun getUniqueTrainig(model: Model, principal: Principal): String {
-    return model.preparePage("Einzeltrainings", "views/unique-trainings", principal) {
-      uniqueTrainingController.getUniqueTrainings(model)
     }
   }
 

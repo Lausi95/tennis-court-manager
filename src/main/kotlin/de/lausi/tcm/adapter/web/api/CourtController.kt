@@ -20,7 +20,6 @@ data class CourtModel(
 ) {
 
   companion object {
-
     val NOT_FOUND = CourtModel("???", "???", emptyMap())
   }
 }

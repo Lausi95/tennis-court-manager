@@ -1,7 +1,32 @@
 package de.lausi.tcm.domain.model
 
+import org.springframework.stereotype.Component
+
 const val MIN_SLOT = 14
 const val MAX_SLOT = 43
+
+data class SlotId(val value: Int)
+
+data class Slot(
+        val id: SlotId,
+)
+
+@Component
+class SlotRepository() {
+
+  private val slots: Map<SlotId, Slot>
+
+  init {
+    val slots = mutableMapOf<SlotId, Slot>()
+    (MIN_SLOT..MAX_SLOT).map { SlotId(it) }.forEach { slots[it] = Slot(it) }
+
+    this.slots = slots
+  }
+
+  fun exists(slotId: SlotId): Boolean = slots.containsKey(slotId)
+
+  fun findAll(): List<Slot> = slots.values.sortedBy { it.id.value }.toList()
+}
 
 fun formatFromTimeIso(slot: Int): String {
   val hours = (slot / 2).toString().padStart(2, '0')
@@ -36,5 +61,5 @@ fun formatDuration(fromSlot: Int, toSlot: Int): String {
 fun slotAmount(fromSlot: Int, toSlot: Int) = toSlot - fromSlot + 1
 
 fun isCoreTimeSlot(slot: Int): Boolean {
-  return slot >= 17*2 && slot < 21*2
+  return slot >= 17 * 2 && slot < 21 * 2
 }

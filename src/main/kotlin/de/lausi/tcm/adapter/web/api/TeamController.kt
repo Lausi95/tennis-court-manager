@@ -1,6 +1,12 @@
 package de.lausi.tcm.adapter.web.api
 
+import de.lausi.tcm.adapter.web.memberId
+import de.lausi.tcm.application.TeamUseCase
 import de.lausi.tcm.domain.model.*
+import de.lausi.tcm.domain.model.member.MemberGroup
+import de.lausi.tcm.domain.model.member.MemberId
+import de.lausi.tcm.domain.model.member.MemberRepository
+import de.lausi.tcm.domain.model.member.MemberService
 import org.springframework.stereotype.Controller
 import org.springframework.ui.Model
 import org.springframework.web.bind.annotation.*
@@ -27,27 +33,27 @@ data class CreateTeamRequest(
 @Controller
 @RequestMapping("/api/teams")
 class TeamController(
-  private val teamRepository: TeamRepository,
-  private val memberRepository: MemberRepository,
   private val memberController: MemberController,
-  private val memberService: MemberService,
+  private val teamUseCase: TeamUseCase,
 ) {
 
   @GetMapping
   fun getTeams(model: Model): String {
-    val items = teamRepository.findAll().map { team ->
-      val captainName = memberRepository.findById(team.captainMemberId)
-        .map { member -> member.firstname + " " + member.lastname }
-        .orElse("???")
+    val items = teamUseCase.getAllTeams().map { team ->
+      val captainName = teamUseCase.getMember(MemberId(team.captainMemberId))?.formatName() ?: "???"
 
-      TeamModel(team.id, team.name, captainName, mapOf(
-        "delete" to "/api/teams/${team.id}"
-      ))
+      TeamModel(
+        team.id, team.name, captainName, mapOf(
+          "delete" to "/api/teams/${team.id}"
+        )
+      )
     }
 
-    val teamCollection = TeamCollection(items, mapOf(
-      "create" to "/api/teams",
-    ))
+    val teamCollection = TeamCollection(
+      items, mapOf(
+        "create" to "/api/teams",
+      )
+    )
     model.addAttribute("teamCollection", teamCollection)
 
     memberController.getMembers(model)
@@ -56,33 +62,13 @@ class TeamController(
 
   @PostMapping
   fun createTeam(model: Model, principal: Principal, request: CreateTeamRequest): String {
-    memberService.getMember(principal.name).assertRoles(Group.TEAM_CAPTAIN)
-
-    val errors = mutableListOf<String>()
-
-    if (teamRepository.existsByName(request.name)) {
-      errors.add("Team mit diesen namen existiert bereits.")
-    }
-
-    if (!memberRepository.existsById(request.captainMemberId)) {
-      errors.add("Das mitglied existiert nicht.")
-    }
-
-    if (errors.isNotEmpty()) {
-      model.addAttribute("errors", errors)
-      return getTeams(model)
-    }
-
-    val team = Team(UUID.randomUUID().toString(), request.name, request.captainMemberId)
-    teamRepository.save(team)
-
+    val team = teamUseCase.createTeam(principal.memberId(), request.name, request.captainMemberId)
     return getTeams(model)
   }
 
   @DeleteMapping("/{teamId}")
   fun deleteTeam(model: Model, principal: Principal, @PathVariable teamId: String): String {
-    memberService.getMember(principal.name).assertRoles(Group.TEAM_CAPTAIN)
-    teamRepository.deleteById(teamId)
+    teamUseCase.deleteTeam(principal.memberId(), teamId)
     return getTeams(model)
   }
 }
