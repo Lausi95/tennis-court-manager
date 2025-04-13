@@ -36,5 +36,5 @@ fun formatDuration(fromSlot: Int, toSlot: Int): String {
 fun slotAmount(fromSlot: Int, toSlot: Int) = toSlot - fromSlot + 1
 
 fun isCoreTimeSlot(slot: Int): Boolean {
-  return slot >= 17*2 && slot < 20*2
+  return slot >= 17*2 && slot < 21*2
 }
