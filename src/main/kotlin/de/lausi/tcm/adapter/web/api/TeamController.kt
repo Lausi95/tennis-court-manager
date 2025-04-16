@@ -1,17 +1,20 @@
 package de.lausi.tcm.adapter.web.api
 
+import de.lausi.tcm.Either
 import de.lausi.tcm.adapter.web.memberId
-import de.lausi.tcm.application.TeamUseCase
+import de.lausi.tcm.application.team.CreateTeamCommand
+import de.lausi.tcm.application.team.CreateTeamUseCase
+import de.lausi.tcm.application.team.DeleteTeamCommand
+import de.lausi.tcm.application.team.DeleteTeamUseCase
 import de.lausi.tcm.domain.model.*
-import de.lausi.tcm.domain.model.member.MemberGroup
 import de.lausi.tcm.domain.model.member.MemberId
 import de.lausi.tcm.domain.model.member.MemberRepository
-import de.lausi.tcm.domain.model.member.MemberService
+import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Controller
 import org.springframework.ui.Model
 import org.springframework.web.bind.annotation.*
+import org.springframework.web.server.ResponseStatusException
 import java.security.Principal
-import java.util.UUID
 
 data class TeamModel(
   val id: String,
@@ -34,18 +37,24 @@ data class CreateTeamRequest(
 @RequestMapping("/api/teams")
 class TeamController(
   private val memberController: MemberController,
-  private val teamUseCase: TeamUseCase,
+  private val teamRepository: TeamRepository,
+  private val memberRepository: MemberRepository,
+  private val createTeamUseCase: CreateTeamUseCase,
+  private val deleteTeamUseCase: DeleteTeamUseCase,
 ) {
 
   @GetMapping
   fun getTeams(model: Model): String {
-    val items = teamUseCase.getAllTeams().map { team ->
-      val captainName = teamUseCase.getMember(MemberId(team.captainMemberId))?.formatName() ?: "???"
-
+    val items = teamRepository.findAll().map { team ->
+      val member = memberRepository.findById(team.captainId)
+      val captainName = member?.formatName() ?: "???"
       TeamModel(
-        team.id, team.name, captainName, mapOf(
+        team.id.value,
+        team.name.value,
+        captainName,
+        mapOf(
           "delete" to "/api/teams/${team.id}"
-        )
+        ),
       )
     }
 
@@ -62,13 +71,40 @@ class TeamController(
 
   @PostMapping
   fun createTeam(model: Model, principal: Principal, request: CreateTeamRequest): String {
-    val team = teamUseCase.createTeam(principal.memberId(), request.name, request.captainMemberId)
-    return getTeams(model)
+    val createTeamResult = createTeamUseCase.execute(principal.memberId()) {
+      CreateTeamCommand(
+        TeamName(request.name),
+        MemberId(request.captainMemberId),
+      )
+    }
+
+    if (createTeamResult is Either.Success) {
+      return getTeams(model)
+    }
+
+    if (createTeamResult is Either.Error) {
+      throw ResponseStatusException(HttpStatus.BAD_REQUEST, createTeamResult.value.name)
+    }
+
+    error("unreachable")
   }
 
   @DeleteMapping("/{teamId}")
-  fun deleteTeam(model: Model, principal: Principal, @PathVariable teamId: String): String {
-    teamUseCase.deleteTeam(principal.memberId(), teamId)
-    return getTeams(model)
+  fun deleteTeam(model: Model, principal: Principal, @PathVariable(name = "teamId") teamIdValue: String): String {
+    val deleteTeamResult = deleteTeamUseCase.execute(principal.memberId()) {
+      DeleteTeamCommand(
+        TeamId(teamIdValue),
+      )
+    }
+
+    if (deleteTeamResult is Either.Success) {
+      return getTeams(model)
+    }
+
+    if (deleteTeamResult is Either.Error) {
+      throw ResponseStatusException(HttpStatus.BAD_REQUEST, deleteTeamResult.value.name)
+    }
+
+    error("unreachable")
   }
 }

@@ -3,8 +3,8 @@ package de.lausi.tcm.adapter.web.api
 import de.lausi.tcm.adapter.web.memberId
 import de.lausi.tcm.domain.model.*
 import de.lausi.tcm.domain.model.member.MemberGroup
-import de.lausi.tcm.domain.model.member.MemberId
-import de.lausi.tcm.domain.model.member.MemberService
+import de.lausi.tcm.domain.model.member.MemberRepository
+import de.lausi.tcm.domain.model.member.Permissions
 import org.springframework.stereotype.Controller
 import org.springframework.ui.Model
 import org.springframework.web.bind.annotation.DeleteMapping
@@ -44,10 +44,11 @@ data class CreateMatchRequest(
 @Controller
 @RequestMapping("/api/matches")
 class MatchController(
+  private val permissions: Permissions,
+  private val memberRepository: MemberRepository,
   private val matchRepository: MatchRepository,
   private val courtRepository: CourtRepository,
   private val teamRepository: TeamRepository,
-  private val memberService: MemberService,
   private val courtController: CourtController,
   private val teamController: TeamController,
   private val slotController: SlotController,
@@ -58,16 +59,13 @@ class MatchController(
   @GetMapping
   fun getMatches(model: Model): String {
     val items = matchRepository.findByDateGreaterThanEqual(LocalDate.now()).map { match ->
-      val courtIds = match.courtIds.map { CourtId(it) }
-      val courts = with (courtController) { courtRepository.findAllById(courtIds).map { it.toModel() } }
+      val courts = with (courtController) { courtRepository.findAllById(match.courtIds).map { it.toModel() } }
 
-      val team = teamRepository.findById(match.teamId).map { team ->
-        val captainMemberId = MemberId(team.captainMemberId)
-        val captainName = memberService.getMember(captainMemberId).formatName()
-        TeamModel(team.id, team.name, captainName)
-      }.orElseGet {
-        TeamModel("", "???", "???")
-      }
+      val team = teamRepository.findById(match.teamId)?.let { team ->
+        val captainName = memberRepository.findById(team.captainId)?.formatName() ?: "???"
+        TeamModel(team.id.value, team.name.value, captainName)
+      } ?: TeamModel("???", "???", "???")
+
       MatchModel(
         match.id,
         match.date.format(DateTimeFormatter.ISO_DATE),
@@ -97,10 +95,11 @@ class MatchController(
 
   @PostMapping
   fun createMatch(model: Model, principal: Principal, request: CreateMatchRequest): String {
-    memberService.assertGroup(principal.memberId(), MemberGroup.TEAM_CAPTAIN)
+    permissions.assertGroup(principal.memberId(), MemberGroup.TEAM_CAPTAIN)
 
     val errors = mutableListOf<String>()
     val courtIds = request.courtIds.map { CourtId(it) }
+    val teamId = TeamId(request.teamId)
 
     if (request.courtIds.isEmpty()) {
       errors.add("Es muss mindestens ein Platz ausgewaehlt sein")
@@ -110,16 +109,16 @@ class MatchController(
       errors.add("Einer der Plaetze existiert nicht")
     }
 
-    if (!teamRepository.existsById(request.teamId)) {
+    if (!teamRepository.existsById(teamId)) {
       errors.add("Das ausgewaehlte team existiert nicht")
     }
 
     val match = Match(
       UUID.randomUUID().toString(),
       request.date,
-      request.courtIds,
+      courtIds,
       request.fromSlotId,
-      request.teamId,
+      teamId,
       request.opponentTeamName,
     )
 
@@ -145,7 +144,7 @@ class MatchController(
 
   @DeleteMapping("/{matchId}")
   fun deleteMatch(model: Model, principal: Principal, @PathVariable matchId: String): String {
-    memberService.assertGroup(principal.memberId(), MemberGroup.TEAM_CAPTAIN)
+    permissions.assertGroup(principal.memberId(), MemberGroup.TEAM_CAPTAIN)
 
     matchRepository.deleteById(matchId)
     return getMatches(model)

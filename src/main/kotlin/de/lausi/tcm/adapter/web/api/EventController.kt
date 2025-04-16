@@ -3,7 +3,7 @@ package de.lausi.tcm.adapter.web.api
 import de.lausi.tcm.adapter.web.memberId
 import de.lausi.tcm.domain.model.*
 import de.lausi.tcm.domain.model.member.MemberGroup
-import de.lausi.tcm.domain.model.member.MemberService
+import de.lausi.tcm.domain.model.member.Permissions
 import org.springframework.stereotype.Controller
 import org.springframework.ui.Model
 import org.springframework.web.bind.annotation.DeleteMapping
@@ -46,7 +46,7 @@ class EventController(
   private val courtRepository: CourtRepository,
   private val courtController: CourtController,
   private val slotController: SlotController,
-  private val memberService: MemberService,
+  private val permissions: Permissions,
   private val eventService: EventService,
   private val occupancyPlanService: OccupancyPlanService,
   private val courtService: CourtRepository,
@@ -84,7 +84,7 @@ class EventController(
 
   @PostMapping
   fun createEvent(model: Model, principal: Principal, request: CreateEventRequest): String {
-    memberService.assertGroup(principal.memberId(), MemberGroup.EVENT_MANAGEMENT)
+    permissions.assertGroup(principal.memberId(), MemberGroup.EVENT_MANAGEMENT)
 
     val errors = mutableListOf<String>()
 
@@ -129,7 +129,7 @@ class EventController(
 
   @DeleteMapping("/{eventId}")
   fun deleteEvent(model: Model, principal: Principal, @PathVariable eventId: String): String {
-    memberService.assertGroup(principal.memberId(), MemberGroup.EVENT_MANAGEMENT)
+    permissions.assertGroup(principal.memberId(), MemberGroup.EVENT_MANAGEMENT)
     eventRepository.deleteById(eventId)
     return getEvents(model)
   }

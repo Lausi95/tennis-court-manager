@@ -53,16 +53,12 @@ interface MemberRepository {
 }
 
 @Component
-class MemberService(private val memberRepository: MemberRepository) {
+class Permissions(private val memberRepository: MemberRepository) {
 
   fun assertGroup(memberId: MemberId, memberGroup: MemberGroup) {
     val member = memberRepository.findById(memberId) ?: error("Member with id $memberId not found")
     if (!member.hasGroup(memberGroup)) {
       error("Member with id $memberId has not the group $memberGroup")
     }
-  }
-
-  fun getMember(memberId: MemberId): Member {
-    return memberRepository.findById(memberId) ?: error("Member with id $memberId not found")
   }
 }

@@ -1,7 +1,9 @@
 package de.lausi.tcm.adapter.web.api
 
+import de.lausi.tcm.Either
 import de.lausi.tcm.adapter.web.memberId
-import de.lausi.tcm.application.MemberUseCase
+import de.lausi.tcm.application.member.ToggleMemberGroupCommand
+import de.lausi.tcm.application.member.ToggleMemberGroupUseCase
 import de.lausi.tcm.domain.model.member.*
 import org.springframework.stereotype.Controller
 import org.springframework.ui.Model
@@ -20,7 +22,6 @@ data class MemberModel(
   val links: Map<String, String> = mapOf()) {
 
   companion object {
-
     val NOT_FOUND = MemberModel("???", "???", "???", "??? ???", emptyList(), emptyMap())
   }
 }
@@ -35,33 +36,55 @@ data class UpdateGroupRequest(
 @Controller
 @RequestMapping("/api/members")
 class MemberController(
-  private val memberUseCase: MemberUseCase
+  private val toggleMemberGroupUseCase: ToggleMemberGroupUseCase,
+  private val memberRepository: MemberRepository,
 ) {
 
   @GetMapping
   fun getMembers(model: Model): String {
-    val members = memberUseCase.getAllMembers()
+    val members = memberRepository.findAll()
     return model.memberCollection(members)
   }
 
   @GetMapping("/{memberId}")
-  fun getMember(model: Model, @PathVariable("memberId") memberIdAsString: String): String {
-    val memberId = MemberId(memberIdAsString)
-    val member = memberUseCase.getOneMember(memberId)
+  fun getMember(model: Model, @PathVariable("memberId") memberIdValue: String): String {
+    val memberId = MemberId(memberIdValue)
+    val member = memberRepository.findById(memberId) ?: error("???")
     return model.member(member)
   }
 
   @PostMapping("/{memberId}")
-  fun toggleMemberGroup(model: Model, @PathVariable("memberId") memberIdAsString: String, request: UpdateGroupRequest, principal: Principal): String {
-    val member = memberUseCase.toggleGroup(principal.memberId(), MemberId(memberIdAsString), request.group)
-    return model.member(member)
+  fun toggleMemberGroup(model: Model, @PathVariable("memberId") memberIdValue: String, request: UpdateGroupRequest, principal: Principal): String {
+    val result = toggleMemberGroupUseCase.execute(principal.memberId()) {
+      ToggleMemberGroupCommand(
+        MemberId(memberIdValue),
+        request.group
+      )
+    }
+
+    if (result is Either.Success) {
+      return model.member(result.value.member)
+    }
+
+    if (result is Either.Error) {
+      error("TODO")
+    }
+
+    error("unreachable")
   }
 
   fun Member.toModel(): MemberModel {
-    return MemberModel(id.value, firstname.value, lastname.value, formatName(), groups.map { it.toString() }, mapOf(
-      "self" to "/api/members/$id",
-      "update" to "/api/members/$id",
-    ))
+    return MemberModel(
+      id.value,
+      firstname.value,
+      lastname.value,
+      formatName(),
+      groups.map { it.toString() },
+      mapOf(
+        "self" to "/api/members/$id",
+        "update" to "/api/members/$id",
+      ),
+    )
   }
 
   fun Model.member(member: Member): String {

@@ -10,9 +10,9 @@ import java.time.LocalDate
 data class Match(
   @Id val id: String,
   val date: LocalDate,
-  val courtIds: List<String>,
+  val courtIds: List<CourtId>,
   val fromSlot: Int,
-  val teamId: String,
+  val teamId: TeamId,
   val opponentTeamName: String,
 ) {
 
@@ -41,7 +41,7 @@ class MatchService(
   }
 
   fun Match.toBlock(): Block {
-    val teamName = teamRepository.findById(teamId).map { it.name }.orElse("???")
+    val teamName = teamRepository.findById(teamId)?.name ?: "???"
     return Block(BlockType.MATCH, fromSlot, toSlot(), "$teamName vs. $opponentTeamName")
   }
 }

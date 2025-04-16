@@ -1,9 +1,7 @@
 package de.lausi.tcm.application
 
 import de.lausi.tcm.domain.model.*
-import de.lausi.tcm.domain.model.member.MemberGroup
-import de.lausi.tcm.domain.model.member.MemberId
-import de.lausi.tcm.domain.model.member.MemberService
+import de.lausi.tcm.domain.model.member.*
 import org.springframework.stereotype.Component
 import java.time.DayOfWeek
 import java.time.LocalDate
@@ -20,8 +18,7 @@ data class CreateTrainingCommand(
 @Component
 class TrainingUseCase(
   private val trainingRepository: TrainingRepository,
-  private val courtRepository: CourtRepository,
-  private val memberService: MemberService,
+  private val permissions: Permissions,
 ) {
 
   fun getAllTrainings(): List<Training> {
@@ -35,7 +32,8 @@ class TrainingUseCase(
   }
 
   fun createTraining(userMemberId: MemberId, command: CreateTrainingCommand): Training {
-    memberService.assertGroup(userMemberId, MemberGroup.TRAINER)
+    permissions.assertGroup(userMemberId, MemberGroup.TRAINER)
+
     val newTraining = Training(
       UUID.randomUUID().toString(),
       command.dayOfWeek,
@@ -56,12 +54,14 @@ class TrainingUseCase(
   }
 
   fun deleteTraining(userMemberId: MemberId, trainingId: String) {
-    memberService.assertGroup(userMemberId, MemberGroup.TRAINER)
+    permissions.assertGroup(userMemberId, MemberGroup.TRAINER)
+
     trainingRepository.deleteById(trainingId)
   }
 
   fun addSkippedDateToTraining(userMemberId: MemberId, trainingId: String, date: LocalDate): Training {
-    memberService.assertGroup(userMemberId, MemberGroup.TRAINER)
+    permissions.assertGroup(userMemberId, MemberGroup.TRAINER)
+
     val training = trainingRepository.findById(trainingId).orElse(null) ?: error("Training $trainingId not found")
     training.addSkippedDate(date)
     trainingRepository.save(training)
@@ -69,7 +69,8 @@ class TrainingUseCase(
   }
 
   fun removeSkippedDateFromTraining(userMemberId: MemberId, trainingId: String, date: LocalDate): Training {
-    memberService.assertGroup(userMemberId, MemberGroup.TRAINER)
+    permissions.assertGroup(userMemberId, MemberGroup.TRAINER)
+
     val training = trainingRepository.findById(trainingId).orElse(null) ?: error("Training $trainingId not found")
     training.removeSkippedDate(date)
     trainingRepository.save(training)

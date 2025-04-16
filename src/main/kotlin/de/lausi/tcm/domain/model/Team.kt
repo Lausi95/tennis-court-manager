@@ -1,17 +1,32 @@
 package de.lausi.tcm.domain.model
 
-import org.springframework.data.annotation.Id
-import org.springframework.data.mongodb.core.mapping.Document
-import org.springframework.data.mongodb.repository.MongoRepository
+import de.lausi.tcm.domain.model.member.MemberId
+import java.util.UUID
 
-@Document("team")
+data class TeamId(val value: String) {
+  companion object {
+    fun generate() = TeamId(UUID.randomUUID().toString())
+  }
+}
+data class TeamName(val value: String)
+
 data class Team(
-  @Id val id: String,
-  val name: String,
-  val captainMemberId: String,
+  val id: TeamId,
+  val name: TeamName,
+  val captainId: MemberId,
 )
 
-interface TeamRepository : MongoRepository<Team, String> {
+interface TeamRepository {
 
-  fun existsByName(name: String): Boolean
+  fun existsById(teamId: TeamId): Boolean
+
+  fun existsByName(teamName: TeamName): Boolean
+
+  fun findById(teamId: TeamId): Team?
+
+  fun findAll(): List<Team>
+
+  fun save(team: Team)
+
+  fun delete(teamId: TeamId)
 }
