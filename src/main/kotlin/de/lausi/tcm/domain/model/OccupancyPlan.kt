@@ -32,18 +32,18 @@ data class Block(
 
 fun interface OccupancyPlanResolver {
 
-  fun OccupancyPlan.addBlock(date: LocalDate, courtIds: List<String>)
+  fun OccupancyPlan.addBlock(date: LocalDate, courtIds: List<CourtId>)
 }
 
-class OccupancyPlan(courtIds: List<String>, private val minSlot: Int, private val maxSlot: Int) {
+class OccupancyPlan(courtIds: List<CourtId>, private val minSlot: Int, private val maxSlot: Int) {
 
-  val blocksByCourt: MutableMap<String, MutableSet<Block>> = mutableMapOf()
+  val blocksByCourt: MutableMap<CourtId, MutableSet<Block>> = mutableMapOf()
 
   init {
     courtIds.forEach { blocksByCourt[it] = mutableSetOf() }
   }
 
-  fun addBlock(courtId: String, block: Block){
+  fun addBlock(courtId: CourtId, block: Block){
     blocksByCourt[courtId]?.let { blocks ->
       val collidingBlocks = blocks.filter { it.collidesWith(block) }
       if (collidingBlocks.all { it.type.priority < block.type.priority }) {
@@ -56,7 +56,7 @@ class OccupancyPlan(courtIds: List<String>, private val minSlot: Int, private va
     }
   }
 
-  fun canPlace(courtId: String, block: Block): Boolean {
+  fun canPlace(courtId: CourtId, block: Block): Boolean {
     blocksByCourt[courtId]?.let { blocks ->
       val collidingBlocks = blocks.filter { it.collidesWith(block) }
       if (collidingBlocks.isEmpty() || collidingBlocks.all { it.type.priority < block.type.priority }) {
@@ -66,7 +66,7 @@ class OccupancyPlan(courtIds: List<String>, private val minSlot: Int, private va
     return false
   }
 
-  fun render(courtId: String): List<Block> {
+  fun render(courtId: CourtId): List<Block> {
     val result = mutableListOf<Block>()
     val blocks = blocksByCourt[courtId] ?: error("$courtId not found")
 
@@ -84,7 +84,7 @@ class OccupancyPlan(courtIds: List<String>, private val minSlot: Int, private va
     return result
   }
 
-  fun addBlock(date: LocalDate, courtIds: List<String>, occupancyPlanResolver: OccupancyPlanResolver) {
+  fun addBlock(date: LocalDate, courtIds: List<CourtId>, occupancyPlanResolver: OccupancyPlanResolver) {
     with (occupancyPlanResolver) {
       addBlock(date, courtIds)
     }
@@ -94,7 +94,7 @@ class OccupancyPlan(courtIds: List<String>, private val minSlot: Int, private va
 @Component
 class OccupancyPlanService(private val occupancyPlanResolvers: List<OccupancyPlanResolver>) {
 
-  fun getOccupancyPlan(date: LocalDate, courtIds: List<String>): OccupancyPlan {
+  fun getOccupancyPlan(date: LocalDate, courtIds: List<CourtId>): OccupancyPlan {
     val occupancyPlan = OccupancyPlan(courtIds, MIN_SLOT, MAX_SLOT)
     occupancyPlanResolvers.forEach { occupancyPlan.addBlock(date, courtIds, it) }
     return occupancyPlan

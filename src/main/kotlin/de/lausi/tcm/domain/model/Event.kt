@@ -8,7 +8,7 @@ import java.time.LocalDate
 data class Event(
   @Id val id: String,
   val date: LocalDate,
-  val courtIds: List<String>,
+  val courtIds: List<CourtId>,
   val fromSlot: Int,
   val toSlot: Int,
   val description: String,
@@ -16,7 +16,7 @@ data class Event(
 
 interface EventRepository: MongoRepository<Event, String> {
 
-  fun findByCourtIdsContainsAndDate(courtId: String, date: LocalDate): List<Event>
+  fun findByCourtIdsContainsAndDate(courtId: CourtId, date: LocalDate): List<Event>
 
   fun findByDateGreaterThanEqual(date: LocalDate): List<Event>
 }
@@ -24,7 +24,7 @@ interface EventRepository: MongoRepository<Event, String> {
 @Component
 class EventService(private val eventRepository: EventRepository) : OccupancyPlanResolver {
 
-  override fun OccupancyPlan.addBlock(date: LocalDate, courtIds: List<String>) {
+  override fun OccupancyPlan.addBlock(date: LocalDate, courtIds: List<CourtId>) {
     courtIds.map { courtId ->
       eventRepository.findByCourtIdsContainsAndDate(courtId, date).forEach {
         addBlock(courtId, it.toBlock())

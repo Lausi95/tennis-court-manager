@@ -53,13 +53,13 @@ class MatchController(
   private val slotController: SlotController,
   private val matchService: MatchService,
   private val occupancyPlanService: OccupancyPlanService,
-  private val courtService: CourtService,
 ) {
 
   @GetMapping
   fun getMatches(model: Model): String {
     val items = matchRepository.findByDateGreaterThanEqual(LocalDate.now()).map { match ->
-      val courts = with (courtController) { courtService.getCourts(match.courtIds).map { it.toModel() } }
+      val courtIds = match.courtIds.map { CourtId(it) }
+      val courts = with (courtController) { courtRepository.findAllById(courtIds).map { it.toModel() } }
 
       val team = teamRepository.findById(match.teamId).map { team ->
         val captainMemberId = MemberId(team.captainMemberId)
@@ -100,12 +100,13 @@ class MatchController(
     memberService.assertGroup(principal.memberId(), MemberGroup.TEAM_CAPTAIN)
 
     val errors = mutableListOf<String>()
+    val courtIds = request.courtIds.map { CourtId(it) }
 
     if (request.courtIds.isEmpty()) {
       errors.add("Es muss mindestens ein Platz ausgewaehlt sein")
     }
 
-    if (!request.courtIds.all { courtRepository.existsById(it) }) {
+    if (!courtRepository.allExistById(courtIds)) {
       errors.add("Einer der Plaetze existiert nicht")
     }
 
@@ -124,8 +125,8 @@ class MatchController(
 
     with(matchService) {
       val reservationBlock = match.toBlock()
-      val occupancyPlan = occupancyPlanService.getOccupancyPlan(request.date, request.courtIds)
-      request.courtIds.forEach { courtId ->
+      val occupancyPlan = occupancyPlanService.getOccupancyPlan(request.date, courtIds)
+      courtIds.forEach { courtId ->
         if (!occupancyPlan.canPlace(courtId, reservationBlock)) {
           errors.add("Der Platz ist zu dem Zeitraum schon belegt.")
         }

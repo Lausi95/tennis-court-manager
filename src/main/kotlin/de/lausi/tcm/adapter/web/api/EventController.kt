@@ -49,13 +49,13 @@ class EventController(
   private val memberService: MemberService,
   private val eventService: EventService,
   private val occupancyPlanService: OccupancyPlanService,
-  private val courtService: CourtService,
+  private val courtService: CourtRepository,
 ) {
 
   @GetMapping
   fun getEvents(model: Model): String {
     val items = eventRepository.findByDateGreaterThanEqual(LocalDate.now()).map { event ->
-      val courts = with (courtController) { courtService.getCourts(event.courtIds).map { it.toModel() } }
+      val courts = with (courtController) { courtService.findAllById(event.courtIds).map { it.toModel() } }
 
       EventModel(
         event.id,
@@ -88,7 +88,9 @@ class EventController(
 
     val errors = mutableListOf<String>()
 
-    if (!request.courtIds.all { courtRepository.existsById(it) }) {
+    val courtIds = request.courtIds.map { CourtId(it) }
+
+    if (!courtRepository.allExistById(courtIds)) {
       errors.add("Ein oder mehrere Plaetze existieren nicht")
     }
 
@@ -99,7 +101,7 @@ class EventController(
     val event = Event(
       UUID.randomUUID().toString(),
       request.date,
-      request.courtIds,
+      request.courtIds.map { CourtId(it) },
       request.fromSlotId,
       request.toSlotId,
       request.description
@@ -107,8 +109,8 @@ class EventController(
 
     with(eventService) {
       val reservationBlock = event.toBlock()
-      val occupancyPlan = occupancyPlanService.getOccupancyPlan(request.date, request.courtIds)
-      request.courtIds.forEach { courtId ->
+      val occupancyPlan = occupancyPlanService.getOccupancyPlan(request.date, courtIds)
+      courtIds.forEach { courtId ->
         if (!occupancyPlan.canPlace(courtId, reservationBlock)) {
           errors.add("Der Platz ist zu dem Zeitraum schon belegt.")
         }

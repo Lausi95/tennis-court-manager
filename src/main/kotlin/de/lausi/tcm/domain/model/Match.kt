@@ -23,7 +23,7 @@ interface MatchRepository: MongoRepository<Match, String> {
 
   fun findByDateGreaterThanEqual(date: LocalDate): List<Match>
 
-  fun findByCourtIdsContainsAndDate(courtId: String, date: LocalDate): List<Match>
+  fun findByCourtIdsContainsAndDate(courtId: CourtId, date: LocalDate): List<Match>
 }
 
 @Component
@@ -32,7 +32,7 @@ class MatchService(
   private val teamRepository: TeamRepository,
 ): OccupancyPlanResolver {
 
-  override fun OccupancyPlan.addBlock(date: LocalDate, courtIds: List<String>) {
+  override fun OccupancyPlan.addBlock(date: LocalDate, courtIds: List<CourtId>) {
     courtIds.map { courtId ->
       matchRepository.findByCourtIdsContainsAndDate(courtId, date).forEach {
         addBlock(courtId, it.toBlock())

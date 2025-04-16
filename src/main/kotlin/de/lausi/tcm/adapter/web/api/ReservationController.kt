@@ -58,8 +58,8 @@ class ReservationController(
   private val occupancyPlanService: OccupancyPlanService,
   private val occupancyPlanController: OccupancyPlanController,
   private val reservationRespository: ReservationRespository,
-  private val courtService: CourtService,
   private val reservationUseCase: ReservationUseCase,
+  private val courtRepository: CourtRepository,
 ) {
 
   @GetMapping
@@ -68,7 +68,7 @@ class ReservationController(
 
     val items = reservationRespository.findByCreatorIdAndDateGreaterThanEqual(principal.name, LocalDate.now()).sortedWith(compareBy(Reservation::date, Reservation::fromSlot)).map { reservation ->
       val court = with(courtController) {
-        courtService.getCourt(reservation.courtId)?.toModel() ?: CourtModel.NOT_FOUND
+        courtRepository.findById(reservation.courtId)?.toModel() ?: CourtModel.NOT_FOUND
       }
 
       val members = with(memberController) {
@@ -105,7 +105,7 @@ class ReservationController(
   fun createReservation(model: Model, params: PostReservationParams, principal: Principal): String {
     val errors = mutableListOf<String>()
 
-    val courtId = params.courtId.split(",")[0]
+    val courtId = CourtId(params.courtId.split(",")[0])
     val creatorId = MemberId(params.memberId1)
     val playerIds = listOf(params.memberId1, params.memberId2, params.memberId3, params.memberId4).filter { it.isNotBlank() }.map { MemberId(it) }
 

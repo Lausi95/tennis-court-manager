@@ -6,7 +6,7 @@ import org.springframework.data.mongodb.core.mapping.Document
 import org.springframework.data.mongodb.repository.MongoRepository
 import org.springframework.stereotype.Component
 
-@Document
+@Document("member")
 private data class MongoMember(
   @Id val id: String,
   val firstname: String,

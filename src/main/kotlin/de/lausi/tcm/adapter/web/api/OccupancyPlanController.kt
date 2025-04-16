@@ -129,7 +129,7 @@ class OccupancyPlanController(
           blockLinks,
         )
       }
-      CourtOccupancyPlanModel(court.name, blockModels)
+      CourtOccupancyPlanModel(court.name.value, blockModels)
     }
 
     val links = mutableMapOf(

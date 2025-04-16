@@ -59,6 +59,7 @@ class TrainingController(
   private val trainingUseCase: TrainingUseCase,
   private val courtController: CourtController,
   private val slotController: SlotController,
+  private val courtRepository: CourtRepository,
 ) {
 
   @GetMapping
@@ -77,7 +78,7 @@ class TrainingController(
 
   fun Training.toModel(): TrainingModel {
     val courtModel = with (courtController) {
-      return@with trainingUseCase.getCourt(courtId).toModel()
+      return@with courtRepository.findById(courtId)?.toModel() ?: error("")
     }
 
     return TrainingModel(
@@ -132,7 +133,7 @@ class TrainingController(
   fun createTraining(model: Model, principal: Principal, params: PostTrainingParams): String {
     val training = trainingUseCase.createTraining(principal.memberId(), CreateTrainingCommand(
       params.dayOfWeek,
-      params.courtId,
+      CourtId(params.courtId),
       params.fromSlot,
       params.toSlot,
       params.description

@@ -14,7 +14,7 @@ fun DayOfWeek.isWeekend() = this == DayOfWeek.SATURDAY || this == DayOfWeek.SUND
 @Document("reservation")
 data class Reservation(
   val id: String,
-  val courtId: String,
+  val courtId: CourtId,
   val date: LocalDate,
   val fromSlot: Int,
   val toSlot: Int,
@@ -22,7 +22,7 @@ data class Reservation(
   val playerIds: List<MemberId>,
 ) {
 
-  constructor(courtId: String, date: LocalDate, fromSlot: Int, toSlot: Int, creatorId: MemberId, playerIds: List<MemberId>) : this(
+  constructor(courtId: CourtId, date: LocalDate, fromSlot: Int, toSlot: Int, creatorId: MemberId, playerIds: List<MemberId>) : this(
     UUID.randomUUID().toString(),
     courtId,
     date,
@@ -52,7 +52,7 @@ interface ReservationRespository : MongoRepository<Reservation, String> {
    * @param date Date to find the reservations of
    * @param courtId ID of the court to find the reservations of
    */
-  fun findByDateAndCourtId(date: LocalDate, courtId: String): List<Reservation>
+  fun findByDateAndCourtId(date: LocalDate, courtId: CourtId): List<Reservation>
 
   /**
    * Finds all Reservation where the member with the given member id is the
@@ -71,7 +71,7 @@ class ReservationService(
   private val reservationRepository: ReservationRespository
 ) : OccupancyPlanResolver {
 
-  override fun OccupancyPlan.addBlock(date: LocalDate, courtIds: List<String>) {
+  override fun OccupancyPlan.addBlock(date: LocalDate, courtIds: List<CourtId>) {
     courtIds.forEach { courtId ->
       reservationRepository.findByDateAndCourtId(date, courtId).forEach {
         addBlock(courtId, it.toBlock())

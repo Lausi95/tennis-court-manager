@@ -1,6 +1,8 @@
 package de.lausi.tcm.adapter.web.api
 
 import de.lausi.tcm.domain.model.Court
+import de.lausi.tcm.domain.model.CourtId
+import de.lausi.tcm.domain.model.CourtName
 import de.lausi.tcm.domain.model.CourtRepository
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Controller
@@ -49,10 +51,12 @@ class CourtController(private val courtRepository: CourtRepository) {
   }
 
   @GetMapping("/{courtId}")
-  fun getCourt(model: Model, @PathVariable courtId: String): String {
-    val court = courtRepository.findById(courtId).orElseThrow {
-      ResponseStatusException(HttpStatus.NOT_FOUND, "Court with id $courtId not found.")
-    }
+  fun getCourt(model: Model, @PathVariable(name = "courtId") courtIdValue: String): String {
+    val courtId = CourtId(courtIdValue)
+
+    val court = courtRepository.findById(courtId)
+      ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "Court with id $courtId not found.")
+
     return model.court(court)
   }
 
@@ -65,12 +69,12 @@ class CourtController(private val courtRepository: CourtRepository) {
   fun createCourt(model: Model, principal: Principal, request: CreateCourtRequest): String {
     val errors = mutableListOf<String>()
 
-    val courtId = request.id.trim()
+    val courtId = CourtId(request.id.trim())
     if (courtRepository.existsById(courtId)) {
       errors.add("Ein Platz mit der ID '${request.id}' existiert bereits.")
     }
 
-    val courtName = request.name.trim()
+    val courtName = CourtName(request.name.trim())
     if (courtRepository.existsByName(courtName)) {
       errors.add("Ein Platz mit dem Namen '${request.name}' existiert bereits.")
     }
@@ -85,15 +89,18 @@ class CourtController(private val courtRepository: CourtRepository) {
   }
 
   @GetMapping("/{courtId}/update-form")
-  fun updateCourtForm(model: Model, @PathVariable courtId: String): String {
+  fun updateCourtForm(model: Model, @PathVariable(name = "courtIdValue") courtIdValue: String): String {
+    val courtId = CourtId(courtIdValue)
     return model.updateCourtForm(courtId)
   }
 
   @PutMapping("/{courtId}")
-  fun updateCourt(model: Model, @PathVariable courtId: String, request: UpdateCourtRequest): String {
+  fun updateCourt(model: Model, @PathVariable(name = "courtId") courtIdValue: String, request: UpdateCourtRequest): String {
     val errors = mutableListOf<String>()
 
-    val courtName = request.name.trim()
+    val courtId = CourtId(courtIdValue)
+    val courtName = CourtName(request.name.trim())
+
     if (courtRepository.existsByNameAndIdNot(courtName, courtId)) {
       errors.add("Der name kann nicht auf $courtName geaendert werden. Ein anderer Platz mit diesen Namen existiert bereits.")
     }
@@ -102,15 +109,15 @@ class CourtController(private val courtRepository: CourtRepository) {
       return model.updateCourtForm(courtId, errors)
     }
 
-    val court = courtRepository.findById(courtId).orElseThrow { ResponseStatusException(HttpStatus.NOT_FOUND) }
+    val court = courtRepository.findById(courtId) ?: throw ResponseStatusException(HttpStatus.NOT_FOUND)
     val updatedCourt = court.copy(name = courtName)
     courtRepository.save(updatedCourt)
     return model.courtItem(updatedCourt)
   }
 
   fun Court.toModel(): CourtModel {
-    return CourtModel(id, name, mapOf(
-      "self" to "/api/courts/$id"
+    return CourtModel(id.value, name.value, mapOf(
+      "self" to "/api/courts/${id.value}"
     ))
   }
 
@@ -146,9 +153,9 @@ class CourtController(private val courtRepository: CourtRepository) {
     return "courts/forms/create"
   }
 
-  fun Model.updateCourtForm(courtId: String, errors: List<String>? = null): String {
+  fun Model.updateCourtForm(courtId: CourtId, errors: List<String>? = null): String {
     errors?.let { addAttribute("errors", errors) }
-    addAttribute("submit", "/api/courts/$courtId")
+    addAttribute("submit", "/api/courts/${courtId.value}")
     return "courts/forms/update"
   }
 }

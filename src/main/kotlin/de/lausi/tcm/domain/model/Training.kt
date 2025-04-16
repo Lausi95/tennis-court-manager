@@ -12,14 +12,14 @@ import java.util.UUID
 data class Training(
   @Id val id: String,
   val dayOfWeek: DayOfWeek,
-  val courtId: String,
+  val courtId: CourtId,
   val fromSlot: Int,
   val toSlot: Int,
   val description: String,
   val skippedDates: MutableSet<LocalDate>,
 ) {
 
-  constructor(dayOfWeek: DayOfWeek, courtId: String, fromSlot: Int, toSlot: Int, description: String) : this(
+  constructor(dayOfWeek: DayOfWeek, courtId: CourtId, fromSlot: Int, toSlot: Int, description: String) : this(
     UUID.randomUUID().toString(),
     dayOfWeek,
     courtId,
@@ -61,13 +61,13 @@ data class Training(
 
 interface TrainingRepository : MongoRepository<Training, String> {
 
-  fun findByDayOfWeekAndCourtId(dayOfWeek: DayOfWeek, courtId: String): List<Training>
+  fun findByDayOfWeekAndCourtId(dayOfWeek: DayOfWeek, courtId: CourtId): List<Training>
 }
 
 @Component
 class TrainingService(private val trainingRepository: TrainingRepository): OccupancyPlanResolver {
 
-  override fun OccupancyPlan.addBlock(date: LocalDate, courtIds: List<String>) {
+  override fun OccupancyPlan.addBlock(date: LocalDate, courtIds: List<CourtId>) {
     courtIds.forEach { courtId ->
       trainingRepository.findByDayOfWeekAndCourtId(date.dayOfWeek, courtId).forEach {
         if (!it.skippedDates.contains(date)) {

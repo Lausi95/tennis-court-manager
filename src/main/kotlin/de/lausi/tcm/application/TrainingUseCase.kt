@@ -1,9 +1,6 @@
 package de.lausi.tcm.application
 
-import de.lausi.tcm.domain.model.Court
-import de.lausi.tcm.domain.model.CourtRepository
-import de.lausi.tcm.domain.model.Training
-import de.lausi.tcm.domain.model.TrainingRepository
+import de.lausi.tcm.domain.model.*
 import de.lausi.tcm.domain.model.member.MemberGroup
 import de.lausi.tcm.domain.model.member.MemberId
 import de.lausi.tcm.domain.model.member.MemberService
@@ -14,7 +11,7 @@ import java.util.UUID
 
 data class CreateTrainingCommand(
   val dayOfWeek: DayOfWeek,
-  val courtId: String,
+  val courtId: CourtId,
   val fromSlot: Int,
   val toSlot: Int,
   val description: String,
@@ -35,10 +32,6 @@ class TrainingUseCase(
 
   fun getTraining(trainingId: String): Training {
     return trainingRepository.findById(trainingId).orElse(null) ?: error("Training $trainingId not found")
-  }
-
-  fun getCourt(courtId: String): Court {
-    return courtRepository.findById(courtId).orElse(null) ?: error("Court $courtId not found")
   }
 
   fun createTraining(userMemberId: MemberId, command: CreateTrainingCommand): Training {

@@ -1,31 +1,28 @@
 package de.lausi.tcm.domain.model
 
-import org.springframework.data.annotation.Id
-import org.springframework.data.mongodb.core.mapping.Document
-import org.springframework.data.mongodb.repository.MongoRepository
-import org.springframework.stereotype.Component
+data class CourtId(val value: String)
+data class CourtName(val value: String)
 
-@Document("court")
 data class Court(
-  @Id val id: String,
-  val name: String) {
+  val id: CourtId,
+  val name: CourtName,
+)
 
-  constructor(name: String) : this(name, name)
-}
+interface CourtRepository {
 
-interface CourtRepository : MongoRepository<Court, String> {
+  fun existsById(courtId: CourtId): Boolean
 
-  fun existsByName(name: String): Boolean
+  fun existsByName(courtName: CourtName): Boolean
 
-  fun existsByNameAndIdNot(name: String, id: String): Boolean
-}
+  fun existsByNameAndIdNot(courtName: CourtName, courtId: CourtId): Boolean
 
-@Component
-class CourtService(private val courtRepository: CourtRepository) {
+  fun allExistById(courtIds: List<CourtId>): Boolean
 
-  fun getCourt(courtId: String): Court? = courtRepository.findById(courtId).orElse(null)
+  fun findAll(): List<Court>
 
-  fun getCourts(): Iterable<Court> = courtRepository.findAll()
+  fun findAllById(courtIds: List<CourtId>): List<Court>
 
-  fun getCourts(courtIds: Iterable<String>): Iterable<Court> = courtRepository.findAllById(courtIds)
+  fun findById(courtId: CourtId): Court?
+
+  fun save(court: Court)
 }
