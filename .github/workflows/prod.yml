@@ -50,8 +50,8 @@ jobs:
       - name: Run ansible script
         shell: bash
         run: |
-          service ssh start
-          service ssh status
+          sudo service ssh start
+          sudo service ssh status
           cd ansible
           echo "${{ secrets.ANSIBLE_VAULT_PASSWORD }}" > vault_password.yml
           cat deploy-prod.yml
