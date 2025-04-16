@@ -72,7 +72,7 @@ class ReservationController(
       }
 
       val members = with(memberController) {
-        reservation.memberIds.map { reservationUseCase.getMember(MemberId(it))?.toModel() ?: MemberModel.NOT_FOUND }
+        reservation.playerIds.map { reservationUseCase.getMember(MemberId(it.value))?.toModel() ?: MemberModel.NOT_FOUND }
       }
 
       ReservationModel(
@@ -106,13 +106,10 @@ class ReservationController(
     val errors = mutableListOf<String>()
 
     val courtId = params.courtId.split(",")[0]
-    val reservation = Reservation(
-      courtId,
-      params.date,
-      params.slotId,
-      params.slotId + params.duration,
-      params.memberId1,
-      listOf(params.memberId1, params.memberId2, params.memberId3, params.memberId4).filter { it.isNotBlank() })
+    val creatorId = MemberId(params.memberId1)
+    val playerIds = listOf(params.memberId1, params.memberId2, params.memberId3, params.memberId4).filter { it.isNotBlank() }.map { MemberId(it) }
+
+    val reservation = Reservation(courtId, params.date, params.slotId, params.slotId + params.duration, creatorId, playerIds)
 
     // TODO: Move rules to a domain service and make them customizable
     val futureReservations = reservationRepository.findByCreatorIdAndDateGreaterThanEqual(params.memberId1, LocalDate.now())
@@ -127,8 +124,8 @@ class ReservationController(
       errors.add("Du kannst bei einer Buchung, mit Slots in der Kernzeit, maximal 1 Stunde buchen.")
     }
 
-    if (reservation.hasCoreTimeSlot() && reservation.memberIds.size < 2) {
-      errors.add("Du musst mit mindestens einer anderen Person in der Kernzeit spielen. (Kein Aufschlagtraining in der Kernzeit)")
+    if (reservation.hasCoreTimeSlot() && reservation.playerIds.size < 2) {
+      errors.add("Du musst mit mindestens einer anderen Person in der Kernzeit spielen. (Keine Ballmaschinen-Nutzung oder Aufschlagtraining in der Kernzeit)")
     }
 
     if (LocalDate.now().plusDays(14) <= params.date) {

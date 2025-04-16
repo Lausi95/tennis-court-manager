@@ -43,6 +43,8 @@ interface MemberRepository {
 
   fun findById(memberId: MemberId): Member?
 
+  fun findById(memberIds: List<MemberId>): List<Member>
+
   fun findAll(): List<Member>
 
   fun save(member: Member)

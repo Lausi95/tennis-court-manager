@@ -1,5 +1,7 @@
 package de.lausi.tcm.domain.model
 
+import de.lausi.tcm.domain.model.member.MemberId
+import de.lausi.tcm.domain.model.member.MemberRepository
 import org.springframework.data.mongodb.core.mapping.Document
 import org.springframework.data.mongodb.repository.MongoRepository
 import org.springframework.stereotype.Component
@@ -16,18 +18,18 @@ data class Reservation(
   val date: LocalDate,
   val fromSlot: Int,
   val toSlot: Int,
-  val creatorId: String,
-  val memberIds: List<String>,
+  val creatorId: MemberId,
+  val playerIds: List<MemberId>,
 ) {
 
-  constructor(courtId: String, date: LocalDate, fromSlot: Int, toSlot: Int, creatorId: String, memberIds: List<String>) : this(
+  constructor(courtId: String, date: LocalDate, fromSlot: Int, toSlot: Int, creatorId: MemberId, playerIds: List<MemberId>) : this(
     UUID.randomUUID().toString(),
     courtId,
     date,
     fromSlot,
     toSlot,
     creatorId,
-    memberIds,
+    playerIds,
   )
 
   fun hasCoreTimeSlot(): Boolean {
@@ -78,8 +80,8 @@ class ReservationService(
   }
 
   fun Reservation.toBlock(): Block {
-    val members = memberRepository.findAllById(memberIds)
-    val description = members.joinToString(" & ") { it.formatShortName() }
+    val members = memberRepository.findById(playerIds)
+    val description = members.joinToString(" & ") { it.formatName() }
     return Block(BlockType.FREE_PLAY, fromSlot, toSlot, description)
   }
 }

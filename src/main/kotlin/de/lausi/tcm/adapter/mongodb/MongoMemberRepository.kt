@@ -44,6 +44,11 @@ private class MemberRepositoryImpl(val mongoRepository: MongoMemberRepository) :
     return mongoRepository.findById(memberId.value).orElse(null)?.toMember()
   }
 
+  override fun findById(memberIds: List<MemberId>): List<Member> {
+    val memberIdValues = memberIds.map { it.value }
+    return mongoRepository.findAllById(memberIdValues).map { it.toMember() }
+  }
+
   override fun findAll(): List<Member> {
     return mongoRepository.findAll().map { it.toMember() }
   }
