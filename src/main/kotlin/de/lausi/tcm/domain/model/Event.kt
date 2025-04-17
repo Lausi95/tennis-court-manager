@@ -9,8 +9,8 @@ data class Event(
   @Id val id: String,
   val date: LocalDate,
   val courtIds: List<CourtId>,
-  val fromSlot: Int,
-  val toSlot: Int,
+  val fromSlot: Slot,
+  val toSlot: Slot,
   val description: String,
 )
 

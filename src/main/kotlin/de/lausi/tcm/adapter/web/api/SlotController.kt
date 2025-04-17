@@ -26,33 +26,33 @@ class SlotController {
 
   @GetMapping
   fun getSlots(model: Model): String {
-    val slots = (MIN_SLOT..MAX_SLOT)
-    return model.slotCollection(slots.toList())
+    return model.slotCollection(SlotRepository.findAll())
   }
 
   @GetMapping("/{slotId}")
-  fun getSlot(model: Model, @PathVariable slotId: Int): String {
-    return model.slot(slotId)
+  fun getSlot(model: Model, @PathVariable(name = "slotId") slotIndex: Int): String {
+    val slot = SlotRepository.findByIndex(slotIndex) ?: error("Slot does not exist")
+    return model.slot(slot)
   }
 
-  fun Int.toModel(): SlotModel {
+  fun Slot.toModel(): SlotModel {
     return SlotModel(
-      this,
-      formatFromTime(this),
-      formatToTime(this),
-      isCoreTimeSlot(this),
+      this.index,
+      this.formatFromTime(),
+      this.formatToTime(),
+      false,
       mapOf(
         "self" to "/api/slots/$this"
-      )
+      ),
     )
   }
 
-  fun Model.slot(slot: Int): String {
+  fun Model.slot(slot: Slot): String {
     addAttribute("slot", slot.toModel())
     return "entity/slot"
   }
 
-  fun Model.slotCollection(slots: List<Int>): String {
+  fun Model.slotCollection(slots: List<Slot>): String {
     val items = slots.map { it.toModel() }
     addAttribute("slotCollection", SlotCollection(items, mapOf(
       "self" to "/api/slots"

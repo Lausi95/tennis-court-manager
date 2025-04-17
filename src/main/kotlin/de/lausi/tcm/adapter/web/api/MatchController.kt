@@ -70,8 +70,8 @@ class MatchController(
         match.id,
         match.date.format(DateTimeFormatter.ISO_DATE),
         courts,
-        formatFromTime(match.fromSlot),
-        formatToTime(match.toSlot()),
+        match.fromSlot.formatFromTime(),
+        match.toSlot().formatToTime(),
         team,
         match.opponentTeamName,
         mapOf(
@@ -117,7 +117,7 @@ class MatchController(
       UUID.randomUUID().toString(),
       request.date,
       courtIds,
-      request.fromSlotId,
+      Slot(request.fromSlotId),
       teamId,
       request.opponentTeamName,
     )

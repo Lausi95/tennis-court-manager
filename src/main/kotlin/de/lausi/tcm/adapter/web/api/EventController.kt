@@ -61,8 +61,8 @@ class EventController(
         event.id,
         event.date.format(DateTimeFormatter.ISO_LOCAL_DATE),
         courts,
-        formatFromTime(event.fromSlot),
-        formatToTime(event.toSlot),
+        event.fromSlot.formatFromTime(),
+        event.toSlot.formatToTime(),
         event.description,
         mapOf(
           "self" to "/api/events/${event.id}",
@@ -102,8 +102,8 @@ class EventController(
       UUID.randomUUID().toString(),
       request.date,
       request.courtIds.map { CourtId(it) },
-      request.fromSlotId,
-      request.toSlotId,
+      Slot(request.fromSlotId),
+      Slot(request.toSlotId),
       request.description
     )
 

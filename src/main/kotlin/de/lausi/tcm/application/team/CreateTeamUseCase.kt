@@ -3,7 +3,6 @@ package de.lausi.tcm.application.team
 import de.lausi.tcm.Either
 import de.lausi.tcm.application.UseCase
 import de.lausi.tcm.domain.model.Team
-import de.lausi.tcm.domain.model.TeamId
 import de.lausi.tcm.domain.model.TeamName
 import de.lausi.tcm.domain.model.TeamRepository
 import de.lausi.tcm.domain.model.member.*
@@ -41,7 +40,7 @@ class CreateTeamUseCase(
       return Either.Error(CreateTeamError.CAPTAIN_DOES_NOT_EXIST)
     }
 
-    val team = Team(TeamId.generate(), command.teamName, command.captainId)
+    val team = Team(command.teamName, command.captainId)
 
     teamRepository.save(team)
 

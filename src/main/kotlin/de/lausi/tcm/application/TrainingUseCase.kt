@@ -5,7 +5,6 @@ import de.lausi.tcm.domain.model.member.*
 import org.springframework.stereotype.Component
 import java.time.DayOfWeek
 import java.time.LocalDate
-import java.util.UUID
 
 data class CreateTrainingCommand(
   val dayOfWeek: DayOfWeek,
@@ -34,12 +33,14 @@ class TrainingUseCase(
   fun createTraining(userMemberId: MemberId, command: CreateTrainingCommand): Training {
     permissions.assertGroup(userMemberId, MemberGroup.TRAINER)
 
+    val fromSlot = SlotRepository.findByIndex(command.fromSlot) ?: error("From Slot Does not exist")
+    val toSlot = SlotRepository.findByIndex(command.toSlot) ?: error("To Slot Does not exist")
+
     val newTraining = Training(
-      UUID.randomUUID().toString(),
       command.dayOfWeek,
       command.courtId,
-      command.fromSlot,
-      command.toSlot,
+      fromSlot,
+      toSlot,
       command.description,
       mutableSetOf()
     )

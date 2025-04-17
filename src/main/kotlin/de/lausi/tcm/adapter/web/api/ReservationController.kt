@@ -78,8 +78,8 @@ class ReservationController(
         reservation.id,
         reservation.date.ger(),
         court,
-        formatFromTime(reservation.fromSlot),
-        formatToTime(reservation.toSlot),
+        reservation.fromSlot.formatFromTime(),
+        reservation.toSlot.formatToTime(),
         members,
         mapOf(
           "delete" to "/api/reservations/${reservation.id}"
@@ -108,23 +108,15 @@ class ReservationController(
     val creatorId = MemberId(params.memberId1)
     val playerIds = listOf(params.memberId1, params.memberId2, params.memberId3, params.memberId4).filter { it.isNotBlank() }.map { MemberId(it) }
 
-    val reservation = Reservation(courtId, params.date, params.slotId, params.slotId + params.duration, creatorId, playerIds)
+    val reservation = Reservation(courtId, params.date, Slot(params.slotId), Slot(params.slotId + params.duration), creatorId, playerIds)
 
     // TODO: Move rules to a domain service and make them customizable
     val futureReservations = reservationRepository.findByCreatorIdAndDateGreaterThanEqual(params.memberId1, LocalDate.now())
-    if (!reservation.isToday() && reservation.hasCoreTimeSlot() && futureReservations.any { it.hasCoreTimeSlot() }) {
+    if (!reservation.isToday()) {
       errors.add(
         """Du hast bereits eine Buchung in der Kernzeit.
         Du kannst maximal 1 Buchung in der Kernzeit haben.
         Die Kernzeit ist das Wochenende und unter der Woche 17:00 - 20:00 Uhr.""".lineSequence().map { it.trim() }.joinToString(" "))
-    }
-
-    if (reservation.hasCoreTimeSlot() && reservation.slotAmount() > 2) {
-      errors.add("Du kannst bei einer Buchung, mit Slots in der Kernzeit, maximal 1 Stunde buchen.")
-    }
-
-    if (reservation.hasCoreTimeSlot() && reservation.playerIds.size < 2) {
-      errors.add("Du musst mit mindestens einer anderen Person in der Kernzeit spielen. (Keine Ballmaschinen-Nutzung oder Aufschlagtraining in der Kernzeit)")
     }
 
     if (LocalDate.now().plusDays(14) <= params.date) {

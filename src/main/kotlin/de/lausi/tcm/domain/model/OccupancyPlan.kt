@@ -13,21 +13,21 @@ enum class BlockType(val priority: Int) {
 
 data class Block(
   val type: BlockType,
-  val fromSlot: Int,
-  val toSlot: Int,
+  val fromSlot: Slot,
+  val toSlot: Slot,
   val description: String,
 ) {
 
-  fun contains(slot: Int): Boolean {
-    return slot in fromSlot..toSlot
+  fun contains(slot: Slot): Boolean {
+    return slot.isInBoundariesOfSlots(fromSlot, toSlot)
   }
 
   fun collidesWith(other: Block): Boolean {
-    val otherRange = other.range()
-    return range().any { it in otherRange }
+    val otherRange = other.indices()
+    return indices().any { it in otherRange }
   }
 
-  private fun range(): IntRange = (this.fromSlot..this.toSlot)
+  private fun indices(): IntRange = (this.fromSlot.index..this.toSlot.index)
 }
 
 fun interface OccupancyPlanResolver {
@@ -35,7 +35,7 @@ fun interface OccupancyPlanResolver {
   fun OccupancyPlan.addBlock(date: LocalDate, courtIds: List<CourtId>)
 }
 
-class OccupancyPlan(courtIds: List<CourtId>, private val minSlot: Int, private val maxSlot: Int) {
+class OccupancyPlan(courtIds: List<CourtId>) {
 
   val blocksByCourt: MutableMap<CourtId, MutableSet<Block>> = mutableMapOf()
 
@@ -70,11 +70,11 @@ class OccupancyPlan(courtIds: List<CourtId>, private val minSlot: Int, private v
     val result = mutableListOf<Block>()
     val blocks = blocksByCourt[courtId] ?: error("$courtId not found")
 
-    for (slot in minSlot..maxSlot) {
+    SlotRepository.findAll().forEach { slot ->
       val block = blocks.find { it.contains(slot) }
       if (block == null) {
         result.add(Block(BlockType.FREE, slot, slot, "frei"))
-        continue
+        return@forEach
       }
       if (block.fromSlot == slot) {
         result.add(block)
@@ -95,7 +95,7 @@ class OccupancyPlan(courtIds: List<CourtId>, private val minSlot: Int, private v
 class OccupancyPlanService(private val occupancyPlanResolvers: List<OccupancyPlanResolver>) {
 
   fun getOccupancyPlan(date: LocalDate, courtIds: List<CourtId>): OccupancyPlan {
-    val occupancyPlan = OccupancyPlan(courtIds, MIN_SLOT, MAX_SLOT)
+    val occupancyPlan = OccupancyPlan(courtIds)
     occupancyPlanResolvers.forEach { occupancyPlan.addBlock(date, courtIds, it) }
     return occupancyPlan
   }

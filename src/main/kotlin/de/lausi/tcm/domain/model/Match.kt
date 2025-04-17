@@ -11,12 +11,12 @@ data class Match(
   @Id val id: String,
   val date: LocalDate,
   val courtIds: List<CourtId>,
-  val fromSlot: Int,
+  val fromSlot: Slot,
   val teamId: TeamId,
   val opponentTeamName: String,
 ) {
 
-  fun toSlot() = fromSlot + 9
+  fun toSlot() = Slot(fromSlot.index + 9)
 }
 
 interface MatchRepository: MongoRepository<Match, String> {

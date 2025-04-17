@@ -10,24 +10,14 @@ import java.util.UUID
 
 @Document("training")
 data class Training(
-  @Id val id: String,
   val dayOfWeek: DayOfWeek,
   val courtId: CourtId,
-  val fromSlot: Int,
-  val toSlot: Int,
+  val fromSlot: Slot,
+  val toSlot: Slot,
   val description: String,
   val skippedDates: MutableSet<LocalDate>,
+  @Id val id: String = UUID.randomUUID().toString(),
 ) {
-
-  constructor(dayOfWeek: DayOfWeek, courtId: CourtId, fromSlot: Int, toSlot: Int, description: String) : this(
-    UUID.randomUUID().toString(),
-    dayOfWeek,
-    courtId,
-    fromSlot,
-    toSlot,
-    description,
-    mutableSetOf(),
-  )
 
   fun collidesWith(other: Training): Boolean {
     val sameCourt = courtId == other.courtId
@@ -40,8 +30,7 @@ data class Training(
       return false
     }
 
-    val oneOrMoreSameSlots = (fromSlot..toSlot).any { (other.fromSlot..other.toSlot).contains(it) }
-    return oneOrMoreSameSlots
+    return fromSlot.isInBoundariesOfSlots(other.fromSlot, other.fromSlot) || toSlot.isInBoundariesOfSlots(other.fromSlot, other.toSlot)
   }
 
   fun addSkippedDate(date: LocalDate) {

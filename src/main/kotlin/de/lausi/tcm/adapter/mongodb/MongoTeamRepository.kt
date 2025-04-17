@@ -18,9 +18,9 @@ private data class MongoTeam(
 ) {
 
   fun toModel(): Team = Team(
-    TeamId(id),
     TeamName(name),
     MemberId(captainId),
+    TeamId(id),
   )
 }
 
@@ -48,12 +48,12 @@ private class TeamRepositoryImpl(private val mongoRepository: MongoTeamRepositor
     return mongoRepository.findAll().map { it.toModel() }
   }
 
-  override fun save(team: Team) {
-    mongoRepository.save(MongoTeam(
+  override fun save(team: Team): Team {
+    return mongoRepository.save(MongoTeam(
       team.id.value,
       team.name.value,
       team.captainId.value,
-    ))
+    )).toModel()
   }
 
   override fun delete(teamId: TeamId) {

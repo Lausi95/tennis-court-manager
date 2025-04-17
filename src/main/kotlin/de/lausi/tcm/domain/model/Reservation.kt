@@ -5,38 +5,21 @@ import de.lausi.tcm.domain.model.member.MemberRepository
 import org.springframework.data.mongodb.core.mapping.Document
 import org.springframework.data.mongodb.repository.MongoRepository
 import org.springframework.stereotype.Component
-import java.time.DayOfWeek
 import java.time.LocalDate
 import java.util.UUID
 
-fun DayOfWeek.isWeekend() = this == DayOfWeek.SATURDAY || this == DayOfWeek.SUNDAY
-
 @Document("reservation")
 data class Reservation(
-  val id: String,
   val courtId: CourtId,
   val date: LocalDate,
-  val fromSlot: Int,
-  val toSlot: Int,
+  val fromSlot: Slot,
+  val toSlot: Slot,
   val creatorId: MemberId,
   val playerIds: List<MemberId>,
+  val id: String = UUID.randomUUID().toString(),
 ) {
 
-  constructor(courtId: CourtId, date: LocalDate, fromSlot: Int, toSlot: Int, creatorId: MemberId, playerIds: List<MemberId>) : this(
-    UUID.randomUUID().toString(),
-    courtId,
-    date,
-    fromSlot,
-    toSlot,
-    creatorId,
-    playerIds,
-  )
-
-  fun hasCoreTimeSlot(): Boolean {
-    return (fromSlot..toSlot).any { isCoreTimeSlot(it) }
-  }
-
-  fun slotAmount(): Int = toSlot - fromSlot + 1
+  fun slotAmount(): Int = Slot.distance(fromSlot, toSlot)
 
   fun isToday(): Boolean = date.isBefore(LocalDate.now().plusDays(2))
 }

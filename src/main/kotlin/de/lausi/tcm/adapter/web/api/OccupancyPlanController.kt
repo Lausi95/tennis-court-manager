@@ -70,9 +70,9 @@ class OccupancyPlanController(
           val user = if (block.type == BlockType.FREE_PLAY) block.description.split(",")[0] else ""
           val description = if (block.type != BlockType.FREE && block.type != BlockType.FREE_PLAY) block.description else ""
           val slotStartDate = dateIt.iso()
-          val slotStartTime = formatFromTimeIso(block.fromSlot)
+          val slotStartTime = block.fromSlot.formatFromTimeIso()
           val slotEndDate = dateIt.iso()
-          val slotEndTime = formatToTimeIso(block.toSlot)
+          val slotEndTime = block.toSlot.formatToTimeIso()
           val courtNumber = it.name
           val type = block.type.toString()
           csv += "\"$user\",\"$description\",$slotStartDate,$slotStartTime,$slotEndDate,$slotEndTime,$courtNumber,$type\n"
@@ -120,12 +120,12 @@ class OccupancyPlanController(
 
         BlockModel(
           it.type,
-          formatFromTime(it.fromSlot),
-          formatToTime(it.toSlot),
-          slotAmount(it.fromSlot, it.toSlot),
-          formatDuration(it.fromSlot, it.toSlot),
+          it.fromSlot.formatFromTime(),
+          it.toSlot.formatToTime(),
+          Slot.distance(it.fromSlot, it.toSlot),
+          Slot.formatDuration(it.fromSlot, it.toSlot),
           it.description,
-          !planDate.dayOfWeek.isWeekend() && isCoreTimeSlot(it.fromSlot),
+          false, // TODO reinvent core time logic
           blockLinks,
         )
       }

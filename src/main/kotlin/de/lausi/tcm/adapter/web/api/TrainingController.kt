@@ -85,8 +85,8 @@ class TrainingController(
       id,
       courtModel,
       DAY_OF_WEEK_MODELS.find { it.id == dayOfWeek }!!,
-      formatFromTime(fromSlot),
-      formatToTime(toSlot),
+      fromSlot.formatFromTime(),
+      toSlot.formatToTime(),
       description,
       skippedDates.map { it.toModel(id) }.toSet(),
       mapOf(
@@ -131,7 +131,7 @@ class TrainingController(
 
   @PostMapping
   fun createTraining(model: Model, principal: Principal, params: PostTrainingParams): String {
-    val training = trainingUseCase.createTraining(principal.memberId(), CreateTrainingCommand(
+    trainingUseCase.createTraining(principal.memberId(), CreateTrainingCommand(
       params.dayOfWeek,
       CourtId(params.courtId),
       params.fromSlot,
