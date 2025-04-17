@@ -1,11 +1,13 @@
 package de.lausi.tcm.domain.model
 
-data class CourtId(val value: String)
+import java.util.*
+
+data class CourtId(val value: String = UUID.randomUUID().toString())
 data class CourtName(val value: String)
 
 data class Court(
-  val id: CourtId,
   val name: CourtName,
+  val id: CourtId = CourtId(),
 )
 
 interface CourtRepository {

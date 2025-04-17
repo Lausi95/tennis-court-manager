@@ -14,7 +14,10 @@ private data class MongoCourt(
   @Id val id: String,
   val name: String,
 ) {
-  fun toCourt(): Court = Court(CourtId(id), CourtName(name))
+  fun toCourt(): Court = Court(
+    CourtName(name),
+    CourtId(id),
+  )
 }
 
 private interface MongoCourtRepository : MongoRepository<MongoCourt, String> {

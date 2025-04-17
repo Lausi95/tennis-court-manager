@@ -83,8 +83,9 @@ class CourtController(private val courtRepository: CourtRepository) {
       return model.createCourtForm(errors)
     }
 
-    val court = Court(courtId, courtName)
+    val court = Court(courtName)
     courtRepository.save(court)
+
     return model.courtItem(court)
   }
 
