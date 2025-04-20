@@ -52,11 +52,10 @@ class ReservationController(
   private val courtController: CourtController,
   private val slotController: SlotController,
   private val memberController: MemberController,
-  private val reservationRepository: ReservationRespository,
+  private val reservationRepository: ReservationRepository,
   private val reservationService: ReservationService,
   private val occupancyPlanService: OccupancyPlanService,
   private val occupancyPlanController: OccupancyPlanController,
-  private val reservationRespository: ReservationRespository,
   private val courtRepository: CourtRepository,
   private val memberRepository: MemberRepository,
 ) {
@@ -65,7 +64,7 @@ class ReservationController(
   fun getReservations(model: Model, principal: Principal): String {
     model.addAttribute("userId", principal.name)
 
-    val items = reservationRespository.findByCreatorIdAndDateGreaterThanEqual(principal.name, LocalDate.now()).sortedWith(compareBy(Reservation::date, Reservation::fromSlot)).map { reservation ->
+    val items = reservationRepository.findByCreatorIdAndDateGreaterThanEqual(principal.name, LocalDate.now()).sortedWith(compareBy(Reservation::date, Reservation::fromSlot)).map { reservation ->
       val court = with(courtController) {
         courtRepository.findById(reservation.courtId)?.toModel() ?: CourtModel.NOT_FOUND
       }
@@ -75,7 +74,7 @@ class ReservationController(
       }
 
       ReservationModel(
-        reservation.id,
+        reservation.id.value,
         reservation.date.ger(),
         court,
         reservation.fromSlot.formatFromTime(),
@@ -142,7 +141,8 @@ class ReservationController(
 
   @ResponseBody
   @DeleteMapping("/{reservationId}")
-  fun deleteReservation(@PathVariable reservationId: String) {
-    reservationRepository.deleteById(reservationId)
+  fun deleteReservation(@PathVariable(name = "reservationId") reservationIdValue: String) {
+    val reservationId = ReservationId(reservationIdValue)
+    reservationRepository.delete(reservationId)
   }
 }

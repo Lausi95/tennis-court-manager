@@ -8,7 +8,8 @@ import org.springframework.stereotype.Component
 import java.time.LocalDate
 import java.util.UUID
 
-@Document("reservation")
+data class ReservationId(val value: String = UUID.randomUUID().toString())
+
 data class Reservation(
   val courtId: CourtId,
   val date: LocalDate,
@@ -16,7 +17,7 @@ data class Reservation(
   val toSlot: Slot,
   val creatorId: MemberId,
   val playerIds: List<MemberId>,
-  val id: String = UUID.randomUUID().toString(),
+  val id: ReservationId = ReservationId(),
 ) {
 
   fun slotAmount(): Int = Slot.distance(fromSlot, toSlot)
@@ -27,7 +28,7 @@ data class Reservation(
 /**
  * Interface for a Repository that stores [Reservation] entities.
  */
-interface ReservationRespository : MongoRepository<Reservation, String> {
+interface ReservationRepository  {
 
   /**
    * Finds all reservations at the given date on the given court.
@@ -46,12 +47,16 @@ interface ReservationRespository : MongoRepository<Reservation, String> {
    * All reservations should be that date or later.
    */
   fun findByCreatorIdAndDateGreaterThanEqual(memberId: String, minDate: LocalDate): List<Reservation>
+
+  fun save(reservation: Reservation): Reservation
+
+  fun delete(reservationId: ReservationId)
 }
 
 @Component
 class ReservationService(
   private val memberRepository: MemberRepository,
-  private val reservationRepository: ReservationRespository
+  private val reservationRepository: ReservationRepository
 ) : OccupancyPlanResolver {
 
   override fun OccupancyPlan.addBlock(date: LocalDate, courtIds: List<CourtId>) {
