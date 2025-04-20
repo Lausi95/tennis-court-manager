@@ -1,8 +1,5 @@
 package de.lausi.tcm.domain.model
 
-import org.springframework.data.annotation.Id
-import org.springframework.data.mongodb.core.mapping.Document
-import org.springframework.data.mongodb.repository.MongoRepository
 import org.springframework.stereotype.Component
 import java.time.LocalDate
 import java.util.*
