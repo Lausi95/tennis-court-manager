@@ -1,24 +1,30 @@
 package de.lausi.tcm.domain.model
 
-import org.springframework.data.annotation.Id
-import org.springframework.data.mongodb.repository.MongoRepository
 import org.springframework.stereotype.Component
 import java.time.LocalDate
+import java.util.*
+
+data class EventId(val value: String = UUID.randomUUID().toString())
+data class EventDescription(val value: String)
 
 data class Event(
-  @Id val id: String,
   val date: LocalDate,
   val courtIds: List<CourtId>,
   val fromSlot: Slot,
   val toSlot: Slot,
-  val description: String,
+  val description: EventDescription,
+  val id: EventId = EventId(),
 )
 
-interface EventRepository: MongoRepository<Event, String> {
+interface EventRepository {
 
   fun findByCourtIdsContainsAndDate(courtId: CourtId, date: LocalDate): List<Event>
 
   fun findByDateGreaterThanEqual(date: LocalDate): List<Event>
+
+  fun save(event: Event): Event
+
+  fun delete(id: EventId)
 }
 
 @Component
@@ -33,6 +39,6 @@ class EventService(private val eventRepository: EventRepository) : OccupancyPlan
   }
 
   fun Event.toBlock(): Block {
-    return Block(BlockType.EVENT, fromSlot, toSlot, description)
+    return Block(BlockType.EVENT, fromSlot, toSlot, description.value)
   }
 }

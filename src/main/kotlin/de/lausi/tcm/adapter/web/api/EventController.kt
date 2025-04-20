@@ -58,12 +58,12 @@ class EventController(
       val courts = with (courtController) { courtService.findAllById(event.courtIds).map { it.toModel() } }
 
       EventModel(
-        event.id,
+        event.id.value,
         event.date.format(DateTimeFormatter.ISO_LOCAL_DATE),
         courts,
         event.fromSlot.formatFromTime(),
         event.toSlot.formatToTime(),
-        event.description,
+        event.description.value,
         mapOf(
           "self" to "/api/events/${event.id}",
           "delete" to "/api/events/${event.id}"
@@ -99,12 +99,11 @@ class EventController(
     }
 
     val event = Event(
-      UUID.randomUUID().toString(),
       request.date,
       request.courtIds.map { CourtId(it) },
       Slot(request.fromSlotId),
       Slot(request.toSlotId),
-      request.description
+      EventDescription(request.description),
     )
 
     with(eventService) {
@@ -128,9 +127,12 @@ class EventController(
   }
 
   @DeleteMapping("/{eventId}")
-  fun deleteEvent(model: Model, principal: Principal, @PathVariable eventId: String): String {
+  fun deleteEvent(model: Model, principal: Principal, @PathVariable(name = "eventId") eventIdValue: String): String {
     permissions.assertGroup(principal.memberId(), MemberGroup.EVENT_MANAGEMENT)
-    eventRepository.deleteById(eventId)
+
+    val eventId = EventId(eventIdValue)
+    eventRepository.delete(eventId)
+
     return getEvents(model)
   }
 }
