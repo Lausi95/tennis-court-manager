@@ -5,31 +5,38 @@ import org.springframework.data.mongodb.core.mapping.Document
 import org.springframework.data.mongodb.repository.MongoRepository
 import org.springframework.stereotype.Component
 import java.time.LocalDate
+import java.util.*
 
-@Document("match")
+data class MatchId(val value: String = UUID.randomUUID().toString())
+data class MatchOpponentName(val value: String)
+
 data class Match(
-  @Id val id: String,
   val date: LocalDate,
   val courtIds: List<CourtId>,
   val fromSlot: Slot,
   val teamId: TeamId,
-  val opponentTeamName: String,
+  val opponentTeamName: MatchOpponentName,
+  val id: MatchId = MatchId(),
 ) {
 
   fun toSlot() = Slot(fromSlot.index + 9)
 }
 
-interface MatchRepository: MongoRepository<Match, String> {
+interface MatchRepository {
 
   fun findByDateGreaterThanEqual(date: LocalDate): List<Match>
 
   fun findByCourtIdsContainsAndDate(courtId: CourtId, date: LocalDate): List<Match>
+
+  fun save(match: Match): Match
+
+  fun delete(matchId: MatchId)
 }
 
 @Component
 class MatchService(
-  private val matchRepository: MatchRepository,
   private val teamRepository: TeamRepository,
+  private val matchRepository: MatchRepository,
 ): OccupancyPlanResolver {
 
   override fun OccupancyPlan.addBlock(date: LocalDate, courtIds: List<CourtId>) {

@@ -15,7 +15,6 @@ import org.springframework.web.bind.annotation.RequestMapping
 import java.security.Principal
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
-import java.util.UUID
 
 data class MatchModel(
   val id: String,
@@ -67,13 +66,13 @@ class MatchController(
       } ?: TeamModel("???", "???", "???")
 
       MatchModel(
-        match.id,
+        match.id.value,
         match.date.format(DateTimeFormatter.ISO_DATE),
         courts,
         match.fromSlot.formatFromTime(),
         match.toSlot().formatToTime(),
         team,
-        match.opponentTeamName,
+        match.opponentTeamName.value,
         mapOf(
           "self" to "/api/matches/${match.id}",
           "delete" to "/api/matches/${match.id}",
@@ -114,12 +113,11 @@ class MatchController(
     }
 
     val match = Match(
-      UUID.randomUUID().toString(),
       request.date,
       courtIds,
       Slot(request.fromSlotId),
       teamId,
-      request.opponentTeamName,
+      MatchOpponentName(request.opponentTeamName),
     )
 
     with(matchService) {
@@ -143,10 +141,12 @@ class MatchController(
   }
 
   @DeleteMapping("/{matchId}")
-  fun deleteMatch(model: Model, principal: Principal, @PathVariable matchId: String): String {
+  fun deleteMatch(model: Model, principal: Principal, @PathVariable(name = "matchId") matchIdValue: String): String {
     permissions.assertGroup(principal.memberId(), MemberGroup.TEAM_CAPTAIN)
 
-    matchRepository.deleteById(matchId)
+    val matchId = MatchId(matchIdValue)
+    matchRepository.delete(matchId)
+
     return getMatches(model)
   }
 }
