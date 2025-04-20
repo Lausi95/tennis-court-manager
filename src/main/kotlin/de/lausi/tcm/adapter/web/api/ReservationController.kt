@@ -1,8 +1,8 @@
 package de.lausi.tcm.adapter.web.api
 
 import de.lausi.tcm.domain.model.*
-import de.lausi.tcm.domain.model.member.MemberId
-import de.lausi.tcm.domain.model.member.MemberRepository
+import de.lausi.tcm.domain.model.MemberId
+import de.lausi.tcm.domain.model.MemberRepository
 import de.lausi.tcm.ger
 import de.lausi.tcm.iso
 import org.springframework.stereotype.Controller

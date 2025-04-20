@@ -1,6 +1,6 @@
 package de.lausi.tcm
 
-import de.lausi.tcm.domain.model.member.*
+import de.lausi.tcm.domain.model.*
 import io.github.serpro69.kfaker.Faker
 import kotlin.random.Random
 

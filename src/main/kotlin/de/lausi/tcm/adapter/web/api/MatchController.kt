@@ -2,9 +2,9 @@ package de.lausi.tcm.adapter.web.api
 
 import de.lausi.tcm.adapter.web.memberId
 import de.lausi.tcm.domain.model.*
-import de.lausi.tcm.domain.model.member.MemberGroup
-import de.lausi.tcm.domain.model.member.MemberRepository
-import de.lausi.tcm.domain.model.member.Permissions
+import de.lausi.tcm.domain.model.MemberGroup
+import de.lausi.tcm.domain.model.MemberRepository
+import de.lausi.tcm.domain.model.Permissions
 import org.springframework.stereotype.Controller
 import org.springframework.ui.Model
 import org.springframework.web.bind.annotation.DeleteMapping

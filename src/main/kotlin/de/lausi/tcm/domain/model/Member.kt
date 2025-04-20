@@ -1,4 +1,4 @@
-package de.lausi.tcm.domain.model.member
+package de.lausi.tcm.domain.model
 
 import org.springframework.stereotype.Component
 

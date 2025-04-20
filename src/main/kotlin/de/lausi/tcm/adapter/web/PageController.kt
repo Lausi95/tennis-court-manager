@@ -2,7 +2,7 @@ package de.lausi.tcm.adapter.web
 
 import de.lausi.tcm.IsoDate
 import de.lausi.tcm.adapter.web.api.*
-import de.lausi.tcm.domain.model.member.MemberRepository
+import de.lausi.tcm.domain.model.MemberRepository
 import org.springframework.stereotype.Controller
 import org.springframework.ui.Model
 import org.springframework.web.bind.annotation.GetMapping

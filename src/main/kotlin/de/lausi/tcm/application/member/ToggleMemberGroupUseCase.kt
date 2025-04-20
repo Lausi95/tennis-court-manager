@@ -2,7 +2,7 @@ package de.lausi.tcm.application.member
 
 import de.lausi.tcm.Either
 import de.lausi.tcm.application.UseCase
-import de.lausi.tcm.domain.model.member.*
+import de.lausi.tcm.domain.model.*
 import org.springframework.stereotype.Component
 
 data class ToggleMemberGroupCommand(

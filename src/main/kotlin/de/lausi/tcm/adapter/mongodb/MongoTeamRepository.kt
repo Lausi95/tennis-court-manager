@@ -4,7 +4,7 @@ import de.lausi.tcm.domain.model.Team
 import de.lausi.tcm.domain.model.TeamId
 import de.lausi.tcm.domain.model.TeamName
 import de.lausi.tcm.domain.model.TeamRepository
-import de.lausi.tcm.domain.model.member.MemberId
+import de.lausi.tcm.domain.model.MemberId
 import org.springframework.data.annotation.Id
 import org.springframework.data.mongodb.core.mapping.Document
 import org.springframework.data.mongodb.repository.MongoRepository

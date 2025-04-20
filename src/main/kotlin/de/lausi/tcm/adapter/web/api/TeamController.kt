@@ -7,8 +7,8 @@ import de.lausi.tcm.application.team.CreateTeamUseCase
 import de.lausi.tcm.application.team.DeleteTeamCommand
 import de.lausi.tcm.application.team.DeleteTeamUseCase
 import de.lausi.tcm.domain.model.*
-import de.lausi.tcm.domain.model.member.MemberId
-import de.lausi.tcm.domain.model.member.MemberRepository
+import de.lausi.tcm.domain.model.MemberId
+import de.lausi.tcm.domain.model.MemberRepository
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Controller
 import org.springframework.ui.Model

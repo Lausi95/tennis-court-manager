@@ -1,8 +1,8 @@
 package de.lausi.tcm.application
 
+import de.lausi.tcm.domain.model.*
 import de.lausi.tcm.domain.model.iam.IamUser
 import de.lausi.tcm.domain.model.iam.IamUserRepository
-import de.lausi.tcm.domain.model.member.*
 import org.springframework.stereotype.Component
 
 @Component

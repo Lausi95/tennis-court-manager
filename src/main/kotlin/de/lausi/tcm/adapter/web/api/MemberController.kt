@@ -4,7 +4,10 @@ import de.lausi.tcm.Either
 import de.lausi.tcm.adapter.web.memberId
 import de.lausi.tcm.application.member.ToggleMemberGroupCommand
 import de.lausi.tcm.application.member.ToggleMemberGroupUseCase
-import de.lausi.tcm.domain.model.member.*
+import de.lausi.tcm.domain.model.Member
+import de.lausi.tcm.domain.model.MemberGroup
+import de.lausi.tcm.domain.model.MemberId
+import de.lausi.tcm.domain.model.MemberRepository
 import org.springframework.stereotype.Controller
 import org.springframework.ui.Model
 import org.springframework.web.bind.annotation.GetMapping
@@ -31,7 +34,8 @@ data class MemberCollection(
   val links: Map<String, String> = mapOf())
 
 data class UpdateGroupRequest(
-  val group: MemberGroup)
+  val group: MemberGroup
+)
 
 @Controller
 @RequestMapping("/api/members")

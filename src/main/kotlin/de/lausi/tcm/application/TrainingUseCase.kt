@@ -1,7 +1,6 @@
 package de.lausi.tcm.application
 
 import de.lausi.tcm.domain.model.*
-import de.lausi.tcm.domain.model.member.*
 import org.springframework.stereotype.Component
 import java.time.DayOfWeek
 import java.time.LocalDate

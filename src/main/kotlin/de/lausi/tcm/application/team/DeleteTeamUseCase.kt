@@ -4,9 +4,9 @@ import de.lausi.tcm.Either
 import de.lausi.tcm.application.UseCase
 import de.lausi.tcm.domain.model.TeamId
 import de.lausi.tcm.domain.model.TeamRepository
-import de.lausi.tcm.domain.model.member.MemberGroup
-import de.lausi.tcm.domain.model.member.MemberId
-import de.lausi.tcm.domain.model.member.Permissions
+import de.lausi.tcm.domain.model.MemberGroup
+import de.lausi.tcm.domain.model.MemberId
+import de.lausi.tcm.domain.model.Permissions
 import org.springframework.stereotype.Component
 
 data class DeleteTeamCommand(

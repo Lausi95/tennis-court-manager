@@ -1,7 +1,7 @@
 package de.lausi.tcm.adapter.mongodb
 
 import de.lausi.tcm.domain.model.*
-import de.lausi.tcm.domain.model.member.MemberId
+import de.lausi.tcm.domain.model.MemberId
 import org.springframework.data.annotation.Id
 import org.springframework.data.mongodb.core.mapping.Document
 import org.springframework.data.mongodb.repository.MongoRepository

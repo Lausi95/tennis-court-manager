@@ -1,6 +1,5 @@
 package de.lausi.tcm.domain.model
 
-import de.lausi.tcm.domain.model.member.MemberId
 import java.util.UUID
 
 data class TeamId(val value: String = UUID.randomUUID().toString())

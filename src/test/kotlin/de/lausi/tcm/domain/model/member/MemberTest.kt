@@ -1,5 +1,6 @@
 package de.lausi.tcm.domain.model.member
 
+import de.lausi.tcm.domain.model.MemberGroup
 import de.lausi.tcm.randomMember
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.params.ParameterizedTest

@@ -1,7 +1,7 @@
 package de.lausi.tcm.application
 
 import de.lausi.tcm.Either
-import de.lausi.tcm.domain.model.member.MemberId
+import de.lausi.tcm.domain.model.MemberId
 
 interface UseCase<C, R, E> {
 
