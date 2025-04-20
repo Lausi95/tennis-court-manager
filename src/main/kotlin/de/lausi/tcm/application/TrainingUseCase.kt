@@ -11,7 +11,7 @@ data class CreateTrainingCommand(
   val courtId: CourtId,
   val fromSlot: Int,
   val toSlot: Int,
-  val description: String,
+  val description: TrainingDescription,
 )
 
 @Component
@@ -26,8 +26,8 @@ class TrainingUseCase(
       .sortedBy { it.dayOfWeek }
   }
 
-  fun getTraining(trainingId: String): Training {
-    return trainingRepository.findById(trainingId).orElse(null) ?: error("Training $trainingId not found")
+  fun getTraining(trainingId: TrainingId): Training {
+    return trainingRepository.findById(trainingId) ?: error("Training $trainingId not found")
   }
 
   fun createTraining(userMemberId: MemberId, command: CreateTrainingCommand): Training {
@@ -54,25 +54,27 @@ class TrainingUseCase(
     return newTraining
   }
 
-  fun deleteTraining(userMemberId: MemberId, trainingId: String) {
+  fun deleteTraining(userMemberId: MemberId, trainingId: TrainingId) {
     permissions.assertGroup(userMemberId, MemberGroup.TRAINER)
 
-    trainingRepository.deleteById(trainingId)
+    trainingRepository.delete(trainingId)
   }
 
-  fun addSkippedDateToTraining(userMemberId: MemberId, trainingId: String, date: LocalDate): Training {
+  fun addSkippedDateToTraining(userMemberId: MemberId, trainingId: TrainingId, date: LocalDate): Training {
     permissions.assertGroup(userMemberId, MemberGroup.TRAINER)
 
-    val training = trainingRepository.findById(trainingId).orElse(null) ?: error("Training $trainingId not found")
+    val training = trainingRepository.findById(trainingId) ?: error("Training $trainingId not found")
+
     training.addSkippedDate(date)
     trainingRepository.save(training)
     return training
   }
 
-  fun removeSkippedDateFromTraining(userMemberId: MemberId, trainingId: String, date: LocalDate): Training {
+  fun removeSkippedDateFromTraining(userMemberId: MemberId, trainingId: TrainingId, date: LocalDate): Training {
     permissions.assertGroup(userMemberId, MemberGroup.TRAINER)
 
-    val training = trainingRepository.findById(trainingId).orElse(null) ?: error("Training $trainingId not found")
+    val training = trainingRepository.findById(trainingId) ?: error("Training $trainingId not found")
+
     training.removeSkippedDate(date)
     trainingRepository.save(training)
     return training

@@ -8,15 +8,18 @@ import java.time.DayOfWeek
 import java.time.LocalDate
 import java.util.UUID
 
+data class TrainingId(val value: String = UUID.randomUUID().toString())
+data class TrainingDescription(val value: String)
+
 @Document("training")
 data class Training(
   val dayOfWeek: DayOfWeek,
   val courtId: CourtId,
   val fromSlot: Slot,
   val toSlot: Slot,
-  val description: String,
+  val description: TrainingDescription,
   val skippedDates: MutableSet<LocalDate>,
-  @Id val id: String = UUID.randomUUID().toString(),
+  @Id val id: TrainingId = TrainingId(),
 ) {
 
   fun collidesWith(other: Training): Boolean {
@@ -48,9 +51,17 @@ data class Training(
   }
 }
 
-interface TrainingRepository : MongoRepository<Training, String> {
+interface TrainingRepository {
+
+  fun findAll(): List<Training>
 
   fun findByDayOfWeekAndCourtId(dayOfWeek: DayOfWeek, courtId: CourtId): List<Training>
+
+  fun findById(trainingId: TrainingId): Training?
+
+  fun save(training: Training): Training
+
+  fun delete(trainingId: TrainingId)
 }
 
 @Component
@@ -67,6 +78,11 @@ class TrainingService(private val trainingRepository: TrainingRepository): Occup
   }
 
   fun Training.toBlock(): Block {
-    return Block(BlockType.TRAINING, fromSlot, toSlot, description)
+    return Block(
+      BlockType.TRAINING,
+      fromSlot,
+      toSlot,
+      description.value,
+    )
   }
 }

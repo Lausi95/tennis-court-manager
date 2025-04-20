@@ -82,12 +82,12 @@ class TrainingController(
     }
 
     return TrainingModel(
-      id,
+      id.value,
       courtModel,
       DAY_OF_WEEK_MODELS.find { it.id == dayOfWeek }!!,
       fromSlot.formatFromTime(),
       toSlot.formatToTime(),
-      description,
+      description.value,
       skippedDates.map { it.toModel(id) }.toSet(),
       mapOf(
         "self" to "/trainings/${id}",
@@ -97,14 +97,19 @@ class TrainingController(
     )
   }
 
-  fun LocalDate.toModel(trainingId: String): SkippedDateModel {
+  fun LocalDate.toModel(trainingId: TrainingId): SkippedDateModel {
     return SkippedDateModel(ger(), mapOf(
-      "delete" to "/api/trainings/$trainingId/skipped-dates/${iso()}"
+      "delete" to "/api/trainings/${trainingId.value}/skipped-dates/${iso()}"
     ))
   }
 
   @GetMapping("/{trainingId}")
-  fun getTraining(model: Model, principal: Principal, @PathVariable trainingId: String): String {
+  fun getTraining(
+    model: Model,
+    principal: Principal,
+    @PathVariable(name = "trainingId") trainingIdValue: String
+  ): String {
+    val trainingId = TrainingId(trainingIdValue)
     val training = trainingUseCase.getTraining(trainingId)
     model.addAttribute("training", training.toModel())
     return "entity/training"
@@ -117,7 +122,13 @@ class TrainingController(
   }
 
   @PostMapping("{trainingId}/skipped-dates")
-  fun addSkippedDate(model: Model, @PathVariable trainingId: String, request: AddSkippedDateRequest, principal: Principal): String {
+  fun addSkippedDate(
+    model: Model,
+    @PathVariable(name = "trainingId") trainingIdValue: String,
+    request: AddSkippedDateRequest,
+    principal: Principal,
+  ): String {
+    val trainingId = TrainingId(trainingIdValue)
     val training = trainingUseCase.addSkippedDateToTraining(principal.memberId(), trainingId, request.date)
     model.addAttribute("skippedDate", request.date.toModel(training.id))
     return "entity/training-skipped-date"
@@ -125,7 +136,13 @@ class TrainingController(
 
   @ResponseBody
   @DeleteMapping("{trainingId}/skipped-dates/{date}")
-  fun deleteSkippedDate(@PathVariable trainingId: String, @PathVariable date: LocalDate, principal: Principal) {
+  fun deleteSkippedDate(
+    @PathVariable(name = "trainingId") trainingIdValue: String,
+    @PathVariable date:
+    LocalDate,
+    principal: Principal,
+  ) {
+    val trainingId = TrainingId(trainingIdValue)
     trainingUseCase.removeSkippedDateFromTraining(principal.memberId(), trainingId, date)
   }
 
@@ -136,14 +153,19 @@ class TrainingController(
       CourtId(params.courtId),
       params.fromSlot,
       params.toSlot,
-      params.description
+      TrainingDescription(params.description),
     ))
 
     return getTrainings(model)
   }
 
   @DeleteMapping("/{trainingId}")
-  fun deleteTraining(model: Model, principal: Principal, @PathVariable trainingId: String): String {
+  fun deleteTraining(
+    model: Model,
+    principal: Principal,
+    @PathVariable(name = "trainingId") trainingIdValue: String,
+  ): String {
+    val trainingId = TrainingId(trainingIdValue)
     trainingUseCase.deleteTraining(principal.memberId(), trainingId)
     return getTrainings(model)
   }
