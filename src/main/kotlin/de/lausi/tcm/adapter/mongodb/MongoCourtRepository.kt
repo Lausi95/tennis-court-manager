@@ -59,10 +59,10 @@ private class CourtRepositoryImpl(val mongoRepository: MongoCourtRepository) : C
     return mongoRepository.findAllById(courtIdValues).map { it.toCourt() }
   }
 
-  override fun save(court: Court) {
-    mongoRepository.save(MongoCourt(
+  override fun save(court: Court): Court {
+    return mongoRepository.save(MongoCourt(
       court.id.value,
       court.name.value,
-    ))
+    )).toCourt()
   }
 }

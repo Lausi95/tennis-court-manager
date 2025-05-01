@@ -6,7 +6,7 @@ data class CourtId(val value: String = UUID.randomUUID().toString())
 data class CourtName(val value: String)
 
 data class Court(
-  val name: CourtName,
+  var name: CourtName,
   val id: CourtId = CourtId(),
 )
 
@@ -26,5 +26,5 @@ interface CourtRepository {
 
   fun findById(courtId: CourtId): Court?
 
-  fun save(court: Court)
+  fun save(court: Court): Court
 }

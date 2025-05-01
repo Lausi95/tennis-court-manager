@@ -71,19 +71,20 @@ class TeamController(
 
   @PostMapping
   fun createTeam(model: Model, principal: Principal, request: CreateTeamRequest): String {
-    val createTeamResult = createTeamUseCase.execute(principal.memberId()) {
+    val result = createTeamUseCase.execute(principal.memberId()) {
       CreateTeamCommand(
         TeamName(request.name),
         MemberId(request.captainMemberId),
       )
     }
 
-    if (createTeamResult is Either.Success) {
+    if (result is Either.Success) {
       return getTeams(model)
     }
 
-    if (createTeamResult is Either.Error) {
-      throw ResponseStatusException(HttpStatus.BAD_REQUEST, createTeamResult.value.name)
+    if (result is Either.Error) {
+      val msg = result.value.joinToString(", ") { toString() }
+      throw ResponseStatusException(HttpStatus.BAD_REQUEST, msg)
     }
 
     error("unreachable")
@@ -91,18 +92,19 @@ class TeamController(
 
   @DeleteMapping("/{teamId}")
   fun deleteTeam(model: Model, principal: Principal, @PathVariable(name = "teamId") teamIdValue: String): String {
-    val deleteTeamResult = deleteTeamUseCase.execute(principal.memberId()) {
+    val result = deleteTeamUseCase.execute(principal.memberId()) {
       DeleteTeamCommand(
         TeamId(teamIdValue),
       )
     }
 
-    if (deleteTeamResult is Either.Success) {
+    if (result is Either.Success) {
       return getTeams(model)
     }
 
-    if (deleteTeamResult is Either.Error) {
-      throw ResponseStatusException(HttpStatus.BAD_REQUEST, deleteTeamResult.value.name)
+    if (result is Either.Error) {
+      val msg = result.value.joinToString(", ") { toString() }
+      throw ResponseStatusException(HttpStatus.BAD_REQUEST, msg)
     }
 
     error("unreachable")
