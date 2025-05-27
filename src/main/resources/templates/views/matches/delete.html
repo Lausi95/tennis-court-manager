@@ -1,0 +1,10 @@
+<th:block th:replace="~{components/title :: title('Match Loeschen')}"></th:block>
+<th:block th:replace="~{components/error :: error}"/>
+
+<form th:hx-post="${match.links['delete']}" hx-target="#view" class="grid grid-cols-1 gap-2">
+    <div>
+        Willst du das Match wirklich loeschen?
+    </div>
+
+    <th:block th:replace="~{components/inputs :: submit('Loeschen', '/matches/collection')}"/>
+</form>

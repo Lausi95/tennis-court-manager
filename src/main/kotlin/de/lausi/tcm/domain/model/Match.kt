@@ -28,13 +28,17 @@ interface MatchRepository {
   fun save(match: Match): Match
 
   fun delete(matchId: MatchId)
+
+  fun findAll(): List<Match>
+
+  fun findById(matchId: MatchId): Match?
 }
 
 @Component
-class MatchService(
+class MatchOccupancyPlanResolver(
   private val teamRepository: TeamRepository,
   private val matchRepository: MatchRepository,
-): OccupancyPlanResolver {
+) : OccupancyPlanResolver {
 
   override fun OccupancyPlan.addBlock(date: LocalDate, courtIds: List<CourtId>) {
     courtIds.map { courtId ->

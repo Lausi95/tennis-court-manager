@@ -1,36 +1,18 @@
 package de.lausi.tcm.adapter.web.api
 
-import de.lausi.tcm.adapter.web.memberId
+import de.lausi.tcm.adapter.web.PageAssembler
+import de.lausi.tcm.adapter.web.userId
+import de.lausi.tcm.application.NOTHING
+import de.lausi.tcm.application.match.*
 import de.lausi.tcm.domain.model.*
-import de.lausi.tcm.domain.model.MemberGroup
-import de.lausi.tcm.domain.model.MemberRepository
-import de.lausi.tcm.domain.model.Permissions
 import org.springframework.stereotype.Controller
 import org.springframework.ui.Model
-import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestMapping
 import java.security.Principal
 import java.time.LocalDate
-import java.time.format.DateTimeFormatter
-
-data class MatchModel(
-  val id: String,
-  val date: String,
-  val courts: List<CourtModel>,
-  val fromTime: String,
-  val toTime: String,
-  val team: TeamModel,
-  val oppenentTeamName: String,
-  val links: Map<String, String> = mapOf()
-)
-
-data class MatchCollection(
-  val items: List<MatchModel>,
-  val links: Map<String, String> = mapOf(),
-)
 
 data class CreateMatchRequest(
   val date: LocalDate,
@@ -41,112 +23,83 @@ data class CreateMatchRequest(
 )
 
 @Controller
-@RequestMapping("/api/matches")
+@RequestMapping("/matches")
 class MatchController(
-  private val permissions: Permissions,
-  private val memberRepository: MemberRepository,
-  private val matchRepository: MatchRepository,
-  private val courtRepository: CourtRepository,
-  private val teamRepository: TeamRepository,
-  private val courtController: CourtController,
-  private val teamController: TeamController,
-  private val slotController: SlotController,
-  private val matchService: MatchService,
-  private val occupancyPlanService: OccupancyPlanService,
+  private val pageAssembler: PageAssembler,
+  private val getMatchesUseCase: GetMatchesUseCase,
+  private val createMatchUseCase: CreateMatchUseCase,
+  private val deleteMatchUseCase: DeleteMatchUseCase,
 ) {
 
   @GetMapping
-  fun getMatches(model: Model): String {
-    val items = matchRepository.findByDateGreaterThanEqual(LocalDate.now()).map { match ->
-      val courts = with (courtController) { courtRepository.findAllById(match.courtIds).map { it.toModel() } }
-
-      val team = teamRepository.findById(match.teamId)?.let { team ->
-        val captainName = memberRepository.findById(team.captainId)?.formatName() ?: "???"
-        TeamModel(team.id.value, team.name.value, captainName)
-      } ?: TeamModel("???", "???", "???")
-
-      MatchModel(
-        match.id.value,
-        match.date.format(DateTimeFormatter.ISO_DATE),
-        courts,
-        match.fromSlot.formatFromTime(),
-        match.toSlot().formatToTime(),
-        team,
-        match.opponentTeamName.value,
-        mapOf(
-          "self" to "/api/matches/${match.id}",
-          "delete" to "/api/matches/${match.id}",
-        )
-      )
+  fun getView(principal: Principal, model: Model): String {
+    return with(pageAssembler) {
+      model.preparePage("Events", principal) {
+        getMatchCollection(principal, model)
+      }
     }
-
-    model.addAttribute("matchCollection", MatchCollection(items, mapOf(
-      "self" to "/api/matches",
-      "create" to "/api/matches"
-    )))
-
-    courtController.getCourts(model)
-    teamController.getTeams(model)
-    slotController.getSlots(model)
-
-    return "views/matches"
   }
 
-  @PostMapping
-  fun createMatch(model: Model, principal: Principal, request: CreateMatchRequest): String {
-    permissions.assertGroup(principal.memberId(), MemberGroup.TEAM_CAPTAIN)
-
-    val errors = mutableListOf<String>()
-    val courtIds = request.courtIds.map { CourtId(it) }
-    val teamId = TeamId(request.teamId)
-
-    if (request.courtIds.isEmpty()) {
-      errors.add("Es muss mindestens ein Platz ausgewaehlt sein")
+  @GetMapping("/collection")
+  fun getMatchCollection(principal: Principal, model: Model): String {
+    return runContext(getMatchesUseCase.execute(principal.userId(), NOTHING), model) {
+      model.matchCollection(it.matches, it.courts, it.teams, it.captains)
+      "views/matches/collection"
     }
+  }
 
-    if (!courtRepository.allExistById(courtIds)) {
-      errors.add("Einer der Plaetze existiert nicht")
+  @GetMapping("/create")
+  fun getCreateMatch(principal: Principal, model: Model): String {
+    return runContext(createMatchUseCase.context(principal.userId(), NOTHING), model) {
+      model.courtCollection(it.courts)
+      model.teamCollection(it.teams, it.captains)
+      model.slotCollection(SlotRepository.findAll())
+      "views/matches/create"
     }
+  }
 
-    if (!teamRepository.existsById(teamId)) {
-      errors.add("Das ausgewaehlte team existiert nicht")
-    }
 
-    val match = Match(
+  @PostMapping("/create")
+  fun createMatch(principal: Principal, model: Model, request: CreateMatchRequest): String {
+    val command = CreateMatchCommand(
+      TeamId(request.teamId),
       request.date,
-      courtIds,
+      request.courtIds.map { CourtId(it) },
       Slot(request.fromSlotId),
-      teamId,
       MatchOpponentName(request.opponentTeamName),
     )
 
-    with(matchService) {
-      val reservationBlock = match.toBlock()
-      val occupancyPlan = occupancyPlanService.getOccupancyPlan(request.date, courtIds)
-      courtIds.forEach { courtId ->
-        if (!occupancyPlan.canPlace(courtId, reservationBlock)) {
-          errors.add("Der Platz ist zu dem Zeitraum schon belegt.")
-        }
-      }
+    return runUseCase(
+      createMatchUseCase.execute(principal.userId(), command),
+      model,
+      { getCreateMatch(principal, model) }) {
+      getMatchCollection(principal, model)
     }
-
-    if (errors.isNotEmpty()) {
-      model.addAttribute("errors", errors)
-      return getMatches(model)
-    }
-
-    matchRepository.save(match)
-
-    return getMatches(model)
   }
 
-  @DeleteMapping("/{matchId}")
-  fun deleteMatch(model: Model, principal: Principal, @PathVariable(name = "matchId") matchIdValue: String): String {
-    permissions.assertGroup(principal.memberId(), MemberGroup.TEAM_CAPTAIN)
+  @GetMapping("/{matchId}/delete")
+  fun getDeleteMatch(principal: Principal, model: Model, @PathVariable matchId: String): String {
+    val params = DeleteMatchContextParams(
+      MatchId(matchId),
+    )
 
-    val matchId = MatchId(matchIdValue)
-    matchRepository.delete(matchId)
+    return runContext(deleteMatchUseCase.context(principal.userId(), params), model) {
+      model.matchEntity(it.match, it.courts, it.team, it.captain)
+      "views/matches/delete"
+    }
+  }
 
-    return getMatches(model)
+  @PostMapping("/{matchId}/delete")
+  fun deleteMatch(model: Model, principal: Principal, @PathVariable matchId: String): String {
+    val command = DeleteMatchCommand(
+      MatchId(matchId),
+    )
+
+    return runUseCase(
+      deleteMatchUseCase.execute(principal.userId(), command),
+      model,
+      { getDeleteMatch(principal, model, matchId) }) {
+      getMatchCollection(principal, model)
+    }
   }
 }

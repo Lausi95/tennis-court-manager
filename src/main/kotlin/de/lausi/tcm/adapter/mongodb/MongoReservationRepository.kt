@@ -1,10 +1,10 @@
 package de.lausi.tcm.adapter.mongodb
 
 import de.lausi.tcm.domain.model.*
-import de.lausi.tcm.domain.model.MemberId
 import org.springframework.data.annotation.Id
 import org.springframework.data.mongodb.core.mapping.Document
 import org.springframework.data.mongodb.repository.MongoRepository
+import org.springframework.stereotype.Component
 import java.time.LocalDate
 
 @Document("reservation")
@@ -31,12 +31,24 @@ data class MongoReservation(
 
 private interface MongoReservationRespository : MongoRepository<MongoReservation, String> {
 
+  fun findByCreatorId(creatorId: String): List<MongoReservation>
+
   fun findByDateAndCourtId(date: LocalDate, courtId: String): List<MongoReservation>
 
   fun findByCreatorIdAndDateGreaterThanEqual(memberId: String, minDate: LocalDate): List<MongoReservation>
 }
 
-private class ReservationRepositoryImpl(private val mongoRepository: MongoReservationRespository): ReservationRepository {
+@Component
+private class ReservationRepositoryImpl(private val mongoRepository: MongoReservationRespository) :
+  ReservationRepository {
+
+  override fun findAll(): List<Reservation> {
+    return mongoRepository.findAll().map { it.toReservation() }
+  }
+
+  override fun findByCretorId(memberId: MemberId): List<Reservation> {
+    return mongoRepository.findByCreatorId(memberId.value).map { it.toReservation() }
+  }
 
   override fun findByDateAndCourtId(date: LocalDate, courtId: CourtId): List<Reservation> {
     return mongoRepository.findByDateAndCourtId(date, courtId.value).map { it.toReservation() }
@@ -60,5 +72,9 @@ private class ReservationRepositoryImpl(private val mongoRepository: MongoReserv
 
   override fun delete(reservationId: ReservationId) {
     mongoRepository.deleteById(reservationId.value)
+  }
+
+  override fun findById(reservationId: ReservationId): Reservation? {
+    return mongoRepository.findById(reservationId.value).orElse(null)?.toReservation()
   }
 }

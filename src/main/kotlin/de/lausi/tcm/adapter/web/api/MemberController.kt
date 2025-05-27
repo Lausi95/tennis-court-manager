@@ -1,13 +1,14 @@
 package de.lausi.tcm.adapter.web.api
 
-import de.lausi.tcm.Either
-import de.lausi.tcm.adapter.web.memberId
-import de.lausi.tcm.application.member.ToggleMemberGroupCommand
-import de.lausi.tcm.application.member.ToggleMemberGroupUseCase
-import de.lausi.tcm.domain.model.Member
+import de.lausi.tcm.adapter.web.PageAssembler
+import de.lausi.tcm.adapter.web.userId
+import de.lausi.tcm.application.NOTHING
+import de.lausi.tcm.application.member.GetMembersUseCase
+import de.lausi.tcm.application.member.UpdateMemberCommand
+import de.lausi.tcm.application.member.UpdateMemberContextParams
+import de.lausi.tcm.application.member.UpdateMemberUseCase
 import de.lausi.tcm.domain.model.MemberGroup
 import de.lausi.tcm.domain.model.MemberId
-import de.lausi.tcm.domain.model.MemberRepository
 import org.springframework.stereotype.Controller
 import org.springframework.ui.Model
 import org.springframework.web.bind.annotation.GetMapping
@@ -16,91 +17,72 @@ import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestMapping
 import java.security.Principal
 
-data class MemberModel(
-  val id: String,
-  val firstname: String,
-  val lastname: String,
-  val fullname: String,
-  val groups: List<String>,
-  val links: Map<String, String> = mapOf()) {
-
-  companion object {
-    val NOT_FOUND = MemberModel("???", "???", "???", "??? ???", emptyList(), emptyMap())
-  }
-}
-
-data class MemberCollection(
-  val items: List<MemberModel>,
-  val links: Map<String, String> = mapOf())
-
-data class UpdateGroupRequest(
-  val group: MemberGroup
+data class UpdateMemberRequest(
+  val admin: String?,
+  val eventManager: String?,
+  val teamCaptain: String?,
+  val trainer: String?,
 )
 
 @Controller
-@RequestMapping("/api/members")
+@RequestMapping("/members")
 class MemberController(
-  private val toggleMemberGroupUseCase: ToggleMemberGroupUseCase,
-  private val memberRepository: MemberRepository,
+  private val pageAssembler: PageAssembler,
+  private val getMembersUseCase: GetMembersUseCase,
+  private val updateMemberUseCase: UpdateMemberUseCase,
 ) {
 
   @GetMapping
-  fun getMembers(model: Model): String {
-    val members = memberRepository.findAll()
-    return model.memberCollection(members)
+  fun getView(principal: Principal, model: Model): String {
+    return with(pageAssembler) {
+      model.preparePage("Mitglieder", principal) {
+        getMemberCollection(principal, model)
+      }
+    }
   }
 
-  @GetMapping("/{memberId}")
-  fun getMember(model: Model, @PathVariable("memberId") memberIdValue: String): String {
-    val memberId = MemberId(memberIdValue)
-    val member = memberRepository.findById(memberId) ?: error("???")
-    return model.member(member)
+  @GetMapping("/collection")
+  fun getMemberCollection(principal: Principal, model: Model): String {
+    return runContext(getMembersUseCase.execute(principal.userId(), NOTHING), model) {
+      model.memberCollection(it.members)
+      "views/members/collection"
+    }
   }
 
-  @PostMapping("/{memberId}")
-  fun toggleMemberGroup(model: Model, @PathVariable("memberId") memberIdValue: String, request: UpdateGroupRequest, principal: Principal): String {
-    val result = toggleMemberGroupUseCase.execute(principal.memberId()) {
-      ToggleMemberGroupCommand(
-        MemberId(memberIdValue),
-        request.group
-      )
-    }
+  @GetMapping("/{memberId}/edit")
+  fun getEditMember(principal: Principal, model: Model, @PathVariable memberId: String): String {
+    val params = UpdateMemberContextParams(
+      MemberId(memberId),
+    )
 
-    if (result is Either.Success) {
-      return model.member(result.value.member)
+    return runContext(updateMemberUseCase.context(principal.userId(), params), model) {
+      model.memberEntity(it.memeber)
+      "views/members/edit"
     }
-
-    if (result is Either.Error) {
-      error("TODO")
-    }
-
-    error("unreachable")
   }
 
-  fun Member.toModel(): MemberModel {
-    return MemberModel(
-      id.value,
-      firstname.value,
-      lastname.value,
-      formatName(),
-      groups.map { it.toString() },
+  @PostMapping("/{memberId}/edit")
+  fun editMember(
+    model: Model,
+    @PathVariable memberId: String,
+    request: UpdateMemberRequest,
+    principal: Principal
+  ): String {
+    val command = UpdateMemberCommand(
+      MemberId(memberId),
       mapOf(
-        "self" to "/api/members/$id",
-        "update" to "/api/members/$id",
+        MemberGroup.ADMIN to (request.admin == "on"),
+        MemberGroup.TEAM_CAPTAIN to (request.teamCaptain == "on"),
+        MemberGroup.TRAINER to (request.trainer == "on"),
+        MemberGroup.EVENT_MANAGEMENT to (request.eventManager == "on"),
       ),
     )
-  }
 
-  fun Model.member(member: Member): String {
-    addAttribute("member", member.toModel())
-    return "entity/member"
-  }
-
-  fun Model.memberCollection(members: List<Member>): String {
-    val items = members.map { it.toModel() }
-    addAttribute("memberCollection", MemberCollection(items, mapOf(
-      "self" to "/api/members"
-    )))
-    return "collection/member"
+    return runUseCase(
+      updateMemberUseCase.execute(principal.userId(), command),
+      model,
+      { getEditMember(principal, model, memberId) }) {
+      getMemberCollection(principal, model)
+    }
   }
 }

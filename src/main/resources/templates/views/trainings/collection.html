@@ -1,0 +1,27 @@
+<th:block th:replace="~{components/title :: title('Trainings')}"></th:block>
+
+<div>
+    <th:block th:replace="~{components/button :: nav-button('/trainings/create', 'Training erstellen')}"/>
+</div>
+
+<div th:each="dayOfWeek : ${dayOfWeekCollection}">
+    <div class="font-bold text-lg" th:text="${dayOfWeek.name}"></div>
+    <div class="grid grid-cols-3 gap-2 grid-flow-col rounded bg-orange-100 p-2">
+        <div class="flex flex-col gap-2" th:each="court : ${courtCollection.items}">
+            <div class="text-center italic" th:text="${court.name}"></div>
+            <th:block th:each="training: ${trainingCollection.items}">
+                <div class="bg-blue-900 rounded p-2 text-white text-xs"
+                     th:if="${training.dayOfWeek.id == dayOfWeek.id && training.court.id == court.id}">
+                    <div class="font-bold">
+                        <span th:text="${training.fromTime}"></span> - <span th:text="${training.toTime}"></span>
+                    </div>
+                    <div>
+                        <span th:text="${training.description}"></span>
+                    </div>
+
+                    <th:block th:replace="~{components/button :: item-operations(${training})}"/>
+                </div>
+            </th:block>
+        </div>
+    </div>
+</div>

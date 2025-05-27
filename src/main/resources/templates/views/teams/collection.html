@@ -1,0 +1,11 @@
+<th:block th:replace="~{components/title :: title('Teams')}"></th:block>
+
+<div>
+    <th:block th:replace="~{components/button :: nav-button('/teams/create', 'Team erstellen')}"/>
+</div>
+
+<div th:each="team : ${teamCollection.items}" class="text-xs bg-blue-900 text-white rounded p-2">
+    <div th:text="${team.name}" class="font-bold"></div>
+    <div th:text="${team.captainName}"></div>
+    <th:block th:replace="~{components/button :: item-operations(${team})}"/>
+</div>

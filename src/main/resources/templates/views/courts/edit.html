@@ -1,0 +1,10 @@
+<th:block th:replace="~{components/title :: title('Platz bearbeiten')}"></th:block>
+<th:block th:replace="~{components/error :: error}"/>
+
+<form th:hx-post="${court.links['edit']}" hx-target="#view" class="grid grid-cols-2 gap-2">
+    <div class="col-span-2">
+        <th:block th:replace="~{components/inputs :: text-input('name', 'Name', ${court.name})}"/>
+    </div>
+
+    <th:block th:replace="~{components/inputs :: submit('Speichern', '/courts/collection')}"/>
+</form>

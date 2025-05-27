@@ -1,0 +1,90 @@
+<!-- TEXT-INPUT -->
+<div th:fragment="text-input(name, label, value)" class="bg-gray-200 rounded p-2">
+    <label th:for="${name}" class="block text-xs font-bold pb-2" th:text="${label}"></label>
+    <input th:id="${name}" th:name="${name}" class="block w-full rounded p-1 bg-white" th:value="${value}"/>
+</div>
+
+<!-- TEXT-INPUT (disabled) -->
+<div th:fragment="text-input-disabled(name, label, value)" class="bg-gray-200 rounded p-2">
+    <label th:for="${name}" class="block text-xs font-bold pb-2" th:text="${label}"></label>
+    <input th:id="${name}" th:name="${name}" class="block w-full rounded p-1 bg-white" th:value="${value}" disabled/>
+</div>
+
+<!-- SUBMIT -->
+<div th:fragment="submit(label, backlink)" class="flex gap-2 justify-end col-span-2">
+    <button class="bg-gray-300 hover:bg-gray-400 rounded p-2 px-4 font-bold cursor-pointer"
+            hx-target="#view"
+            th:hx-get="${backlink}">Abbrechen
+    </button>
+    <button type="submit"
+            class="bg-orange-300 hover:bg-orange-400 rounded p-2 px-4 font-bold cursor-pointer"
+            th:text="${label}"></button>
+</div>
+
+<!-- FROM TIME -->
+<div th:fragment="fromSlot(name)" class="bg-gray-200 rounded p-2">
+    <label class="block text-xs font-bold pb-2" th:for="${name}">Start Zeit</label>
+    <select th:id="${name}" th:name="${name}" class="block w-full rounded p-1 bg-white">
+        <option value="">---</option>
+        <option th:each="slot : ${slotCollection.items}" th:value="${slot.id}" th:text="${slot.time}"></option>
+    </select>
+</div>
+
+<!-- TO TIME -->
+<div th:fragment="toSlot(name)" class="bg-gray-200 rounded p-2">
+    <label class="block text-xs font-bold pb-2" th:for="${name}">End Zeit</label>
+    <select th:id="${name}" th:name="${name}" class="block w-full rounded p-1 bg-white">
+        <option value="">---</option>
+        <option th:each="slot : ${slotCollection.items}" th:value="${slot.id}" th:text="${slot.endTime}"></option>
+    </select>
+</div>
+
+<!-- COURT -->
+<div th:fragment="court(name)" class="bg-gray-200 rounded p-2">
+    <label class="block text-xs font-bold pb-2" th:for="${name}">Platz</label>
+    <select th:id="${name}" th:name="${name}" class="block w-full rounded p-1 bg-white">
+        <option value="">---</option>
+        <option th:each="item : ${courtCollection.items}" th:value="${item.id}" th:text="${item.name}"></option>
+    </select>
+</div>
+
+<!-- COURTS (Multiselect) -->
+<div th:fragment="courts(name)" class="bg-gray-200 rounded p-2">
+    <label class="block text-xs font-bold pb-2">PLAETZE</label>
+    <div th:each="court : ${courtCollection.items}">
+        <input th:id="${'court-' + court.id}" th:value="${court.id}" type="checkbox" th:name="${name}"/>
+        <label th:for="${'court-' + court.id}" th:text="${court.name}"></label>
+    </div>
+</div>
+
+<!-- Date -->
+<div th:fragment="date(name)" class="bg-gray-200 rounded p-2 col-span-2">
+    <label class="block text-xs font-bold pb-2" th:for="${name}">DATUM</label>
+    <input th:name="${name}" th:id="${name}" type="date" th:value="${name}" class="block w-full rounded p-1">
+</div>
+
+<!-- DAY-OF-WEEK -->
+<div th:fragment="dayOfWeek(name)" class="bg-gray-200 rounded p-2">
+    <label class="block text-xs font-bold pb-2" th:for="${name}">Wochentag</label>
+    <select th:id="${name}" th:name="${name}" class="block w-full rounded p-1 bg-white">
+        <option value="">---</option>
+        <option th:each="item : ${dayOfWeekCollection}" th:value="${item.id}" th:text="${item.name}"></option>
+    </select>
+</div>
+
+<!-- TEAM -->
+<div th:fragment="team(name)" class="bg-gray-200 rounded p-2 col-span-2">
+    <label th:for="${name}" class="block text-xs font-bold pb-2">TEAM</label>
+    <select th:id="${name}" th:name="${name}" class="block w-full rounded p-1">
+        <option th:each="team : ${teamCollection.items}" th:value="${team.id}" th:text="${team.name}"></option>
+    </select>
+</div>
+
+<!-- Member -->
+<div th:fragment="member(name)" class="bg-gray-200 rounded p-2 col-span-2">
+    <label th:for="${name}" class="block text-xs font-bold pb-2">Captain</label>
+    <select th:id="${name}" th:name="${name}" class="block w-full rounded p-1">
+        <option th:each="member : ${memberCollection.items}" th:value="${member.id}"
+                th:text="${member.firstname + ' ' + member.lastname}"></option>
+    </select>
+</div>

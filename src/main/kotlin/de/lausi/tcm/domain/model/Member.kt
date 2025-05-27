@@ -3,6 +3,7 @@ package de.lausi.tcm.domain.model
 import org.springframework.stereotype.Component
 
 data class MemberId(val value: String)
+
 data class MemberFirstname(val value: String) : Comparable<MemberFirstname> {
   override fun compareTo(other: MemberFirstname): Int {
     return this.value.compareTo(other.value)
@@ -10,6 +11,7 @@ data class MemberFirstname(val value: String) : Comparable<MemberFirstname> {
 }
 
 data class MemberLastname(val value: String)
+
 enum class MemberGroup {
   ADMIN,
   EVENT_MANAGEMENT,
@@ -55,10 +57,9 @@ interface MemberRepository {
 @Component
 class Permissions(private val memberRepository: MemberRepository) {
 
-  fun assertGroup(memberId: MemberId, memberGroup: MemberGroup) {
-    val member = memberRepository.findById(memberId) ?: error("Member with id $memberId not found")
-    if (!member.hasGroup(memberGroup)) {
-      error("Member with id $memberId has not the group $memberGroup")
-    }
+  fun assertGroup(userId: MemberId, memberGroup: MemberGroup): Boolean {
+    return memberRepository.findById(userId)?.let {
+      it.hasGroup(MemberGroup.ADMIN) || it.hasGroup(memberGroup)
+    } ?: false
   }
 }

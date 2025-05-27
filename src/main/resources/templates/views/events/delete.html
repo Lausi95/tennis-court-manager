@@ -1,0 +1,10 @@
+<th:block th:replace="~{components/title :: title('Event Loeschen')}"></th:block>
+<th:block th:replace="~{components/error :: error}"/>
+
+<form th:hx-post="${event.links['delete']}" hx-target="#view" class="grid grid-cols-1 gap-2">
+    <div>
+        Willst du das Event <span class="font-bold" th:text="${event.description}"></span> wirklich loeschen?
+    </div>
+
+    <th:block th:replace="~{components/inputs :: submit('Loeschen', '/events/collection')}"/>
+</form>

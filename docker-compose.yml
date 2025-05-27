@@ -1,0 +1,6 @@
+services:
+  mongodb:
+    image: mongo
+    env_file: [ mongo.env ]
+    restart: unless-stopped
+    ports: [ "27017:27017" ]

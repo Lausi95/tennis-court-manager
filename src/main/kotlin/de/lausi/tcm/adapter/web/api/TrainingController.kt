@@ -1,172 +1,89 @@
 package de.lausi.tcm.adapter.web.api
 
-import de.lausi.tcm.adapter.web.memberId
-import de.lausi.tcm.application.CreateTrainingCommand
-import de.lausi.tcm.application.TrainingUseCase
-import de.lausi.tcm.domain.model.*
-import de.lausi.tcm.ger
-import de.lausi.tcm.iso
-
+import de.lausi.tcm.adapter.web.PageAssembler
+import de.lausi.tcm.adapter.web.userId
+import de.lausi.tcm.application.NOTHING
+import de.lausi.tcm.application.training.CreateTraingUseCase
+import de.lausi.tcm.application.training.CreateTrainingCommand
+import de.lausi.tcm.application.training.GetTrainingsUseCase
+import de.lausi.tcm.domain.model.CourtId
+import de.lausi.tcm.domain.model.Slot
+import de.lausi.tcm.domain.model.SlotRepository
+import de.lausi.tcm.domain.model.TrainingDescription
 import org.springframework.stereotype.Controller
 import org.springframework.ui.Model
-import org.springframework.web.bind.annotation.*
+import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.PostMapping
+import org.springframework.web.bind.annotation.RequestMapping
 import java.security.Principal
 import java.time.DayOfWeek
-import java.time.LocalDate
 
-data class DayOfWeekModel(val id: DayOfWeek, val name: String)
-
-val DAY_OF_WEEK_MODELS = listOf(
-  DayOfWeekModel(DayOfWeek.MONDAY, "Montag"),
-  DayOfWeekModel(DayOfWeek.TUESDAY, "Dienstag"),
-  DayOfWeekModel(DayOfWeek.WEDNESDAY, "Mittwoch"),
-  DayOfWeekModel(DayOfWeek.THURSDAY, "Donnerstag"),
-  DayOfWeekModel(DayOfWeek.FRIDAY, "Freitag"),
-  DayOfWeekModel(DayOfWeek.SATURDAY, "Samstag"),
-  DayOfWeekModel(DayOfWeek.SUNDAY, "Sonntag"),
-)
-
-data class TrainingModel(
-  val id: String,
-  val court: CourtModel,
-  val dayOfWeek: DayOfWeekModel,
-  val fromTime: String,
-  val toTime: String,
+data class CreateTrainingRequest(
+  val dayOfWeek: DayOfWeek,
+  val courtId: String,
+  val fromSlot: Int,
+  val toSlot: Int,
   val description: String,
-  val skippedDays: Set<SkippedDateModel>,
-  val links: Map<String, String>
-)
-
-data class TrainingCollection(
-  val items: List<TrainingModel>,
-  val count: Int,
-  val daysOfWeek: List<DayOfWeekModel>,
-  val links: Map<String, String>
-)
-
-data class SkippedDateModel(
-  val date: String,
-  val links: Map<String, String>,
-)
-
-data class AddSkippedDateRequest(
-  val date: LocalDate,
 )
 
 @Controller
-@RequestMapping("/api/trainings")
+@RequestMapping("/trainings")
 class TrainingController(
-  private val trainingUseCase: TrainingUseCase,
-  private val courtController: CourtController,
-  private val slotController: SlotController,
-  private val courtRepository: CourtRepository,
+  private val pageAssembler: PageAssembler,
+  private val getTrainingsUseCase: GetTrainingsUseCase,
+  private val createTraingUseCase: CreateTraingUseCase,
 ) {
 
   @GetMapping
-  fun getTrainings(model: Model): String {
-    val items = trainingUseCase.getAllTrainings().map { it.toModel() }
-
-    val trainingCollection = TrainingCollection(items, items.size, DAY_OF_WEEK_MODELS, mapOf())
-
-    model.addAttribute("trainingCollection", trainingCollection)
-
-    courtController.getCourts(model)
-    slotController.getSlots(model)
-
-    return "views/trainings"
-  }
-
-  fun Training.toModel(): TrainingModel {
-    val courtModel = with (courtController) {
-      return@with courtRepository.findById(courtId)?.toModel() ?: error("")
+  fun getView(principal: Principal, model: Model): String {
+    return with(pageAssembler) {
+      model.preparePage("Trainings", principal) {
+        getTrainingCollection(principal, model)
+      }
     }
+  }
 
-    return TrainingModel(
-      id.value,
-      courtModel,
-      DAY_OF_WEEK_MODELS.find { it.id == dayOfWeek }!!,
-      fromSlot.formatFromTime(),
-      toSlot.formatToTime(),
-      description.value,
-      skippedDates.map { it.toModel(id) }.toSet(),
-      mapOf(
-        "self" to "/trainings/${id}",
-        "delete" to "/api/trainings/${id}",
-        "skippedDateFrom" to "/api/trainings/$id/add-skipped-date-form"
-      ),
+  @GetMapping("/collection")
+  fun getTrainingCollection(principal: Principal, model: Model): String {
+    return runContext(getTrainingsUseCase.execute(principal.userId(), NOTHING), model) {
+      model.trainingCollection(it.trainings, it.courtsByTraining)
+      model.courtCollection(it.courts)
+      model.dayOfWeekCollection()
+      "views/trainings/collection"
+    }
+  }
+
+  @GetMapping("/create")
+  fun getCreateTraining(principal: Principal, model: Model): String {
+    return runContext(createTraingUseCase.context(principal.userId(), NOTHING), model) {
+      model.courtCollection(it.courts)
+      model.dayOfWeekCollection()
+      model.slotCollection(SlotRepository.findAll())
+      "views/trainings/create"
+    }
+  }
+
+  @PostMapping("/create")
+  fun createTraining(principal: Principal, model: Model, request: CreateTrainingRequest): String {
+    val command = CreateTrainingCommand(
+      CourtId(request.courtId),
+      TrainingDescription(request.description),
+      request.dayOfWeek,
+      Slot(request.fromSlot),
+      Slot(request.toSlot),
     )
+
+    return runUseCase(
+      createTraingUseCase.execute(principal.userId(), command),
+      model,
+      { getCreateTraining(principal, model) }) {
+      getTrainingCollection(principal, model)
+    }
   }
 
-  fun LocalDate.toModel(trainingId: TrainingId): SkippedDateModel {
-    return SkippedDateModel(ger(), mapOf(
-      "delete" to "/api/trainings/${trainingId.value}/skipped-dates/${iso()}"
-    ))
-  }
+  // TODO: Delte Use Case
 
-  @GetMapping("/{trainingId}")
-  fun getTraining(
-    model: Model,
-    principal: Principal,
-    @PathVariable(name = "trainingId") trainingIdValue: String
-  ): String {
-    val trainingId = TrainingId(trainingIdValue)
-    val training = trainingUseCase.getTraining(trainingId)
-    model.addAttribute("training", training.toModel())
-    return "entity/training"
-  }
+  // TODO: Edit Use Case
 
-  @GetMapping("/{trainingId}/add-skipped-date-form")
-  fun getSkippedDateForm(model: Model, @PathVariable trainingId: String): String {
-    model.addAttribute("submit", "/api/trainings/$trainingId/skipped-dates")
-    return "form/training-add-skipped-date"
-  }
-
-  @PostMapping("{trainingId}/skipped-dates")
-  fun addSkippedDate(
-    model: Model,
-    @PathVariable(name = "trainingId") trainingIdValue: String,
-    request: AddSkippedDateRequest,
-    principal: Principal,
-  ): String {
-    val trainingId = TrainingId(trainingIdValue)
-    val training = trainingUseCase.addSkippedDateToTraining(principal.memberId(), trainingId, request.date)
-    model.addAttribute("skippedDate", request.date.toModel(training.id))
-    return "entity/training-skipped-date"
-  }
-
-  @ResponseBody
-  @DeleteMapping("{trainingId}/skipped-dates/{date}")
-  fun deleteSkippedDate(
-    @PathVariable(name = "trainingId") trainingIdValue: String,
-    @PathVariable date:
-    LocalDate,
-    principal: Principal,
-  ) {
-    val trainingId = TrainingId(trainingIdValue)
-    trainingUseCase.removeSkippedDateFromTraining(principal.memberId(), trainingId, date)
-  }
-
-  @PostMapping
-  fun createTraining(model: Model, principal: Principal, params: PostTrainingParams): String {
-    trainingUseCase.createTraining(principal.memberId(), CreateTrainingCommand(
-      params.dayOfWeek,
-      CourtId(params.courtId),
-      params.fromSlot,
-      params.toSlot,
-      TrainingDescription(params.description),
-    ))
-
-    return getTrainings(model)
-  }
-
-  @DeleteMapping("/{trainingId}")
-  fun deleteTraining(
-    model: Model,
-    principal: Principal,
-    @PathVariable(name = "trainingId") trainingIdValue: String,
-  ): String {
-    val trainingId = TrainingId(trainingIdValue)
-    trainingUseCase.deleteTraining(principal.memberId(), trainingId)
-    return getTrainings(model)
-  }
+  // TODO: Exception Dates Use Case
 }

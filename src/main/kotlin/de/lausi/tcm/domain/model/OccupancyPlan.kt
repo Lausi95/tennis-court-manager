@@ -43,7 +43,7 @@ class OccupancyPlan(courtIds: List<CourtId>) {
     courtIds.forEach { blocksByCourt[it] = mutableSetOf() }
   }
 
-  fun addBlock(courtId: CourtId, block: Block){
+  fun addBlock(courtId: CourtId, block: Block) {
     blocksByCourt[courtId]?.let { blocks ->
       val collidingBlocks = blocks.filter { it.collidesWith(block) }
       if (collidingBlocks.all { it.type.priority < block.type.priority }) {
@@ -85,7 +85,7 @@ class OccupancyPlan(courtIds: List<CourtId>) {
   }
 
   fun addBlock(date: LocalDate, courtIds: List<CourtId>, occupancyPlanResolver: OccupancyPlanResolver) {
-    with (occupancyPlanResolver) {
+    with(occupancyPlanResolver) {
       addBlock(date, courtIds)
     }
   }

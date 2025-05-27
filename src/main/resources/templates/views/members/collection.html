@@ -1,0 +1,9 @@
+<th:block th:replace="~{components/title :: title('Mitglieder')}"></th:block>
+
+<div class="grid grid-cols-1 gap-2">
+    <div th:each="member: ${memberCollection.items}" class="text-xs bg-blue-900 text-white rounded p-2">
+        <div class="font-bold" th:text="${member.fullname}"></div>
+
+        <th:block th:replace="~{components/button :: item-operations(${member})}"/>
+    </div>
+</div>

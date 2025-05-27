@@ -1,9 +1,13 @@
 package de.lausi.tcm.domain.model
 
-import java.util.UUID
+import java.util.*
 
 data class TeamId(val value: String = UUID.randomUUID().toString())
-data class TeamName(val value: String)
+data class TeamName(val value: String) : Comparable<TeamName> {
+  override fun compareTo(other: TeamName): Int {
+    return this.value.compareTo(other.value)
+  }
+}
 
 data class Team(
   val name: TeamName,

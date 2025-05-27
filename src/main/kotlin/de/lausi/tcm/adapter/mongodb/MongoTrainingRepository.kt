@@ -4,6 +4,7 @@ import de.lausi.tcm.domain.model.*
 import org.springframework.data.annotation.Id
 import org.springframework.data.mongodb.core.mapping.Document
 import org.springframework.data.mongodb.repository.MongoRepository
+import org.springframework.stereotype.Component
 import java.time.DayOfWeek
 import java.time.LocalDate
 
@@ -34,7 +35,8 @@ private interface MongoTrainingRepository : MongoRepository<MongoTraining, Strin
   fun findByDayOfWeekAndCourtId(dayOfWeek: DayOfWeek, courtId: String): List<MongoTraining>
 }
 
-private class TrainingRepositoryImpl(private val mongoRepository: MongoTrainingRepository): TrainingRepository {
+@Component
+private class TrainingRepositoryImpl(private val mongoRepository: MongoTrainingRepository) : TrainingRepository {
 
   override fun findAll(): List<Training> {
     return mongoRepository.findAll().map { it.toTraining() }
@@ -49,15 +51,17 @@ private class TrainingRepositoryImpl(private val mongoRepository: MongoTrainingR
   }
 
   override fun save(training: Training): Training {
-    return mongoRepository.save(MongoTraining(
-      training.id.value,
-      training.dayOfWeek,
-      training.courtId.value,
-      training.fromSlot.index,
-      training.toSlot.index,
-      training.description.value,
-      training.skippedDates,
-    )).toTraining()
+    return mongoRepository.save(
+      MongoTraining(
+        training.id.value,
+        training.dayOfWeek,
+        training.courtId.value,
+        training.fromSlot.index,
+        training.toSlot.index,
+        training.description.value,
+        training.skippedDates,
+      )
+    ).toTraining()
   }
 
   override fun delete(trainingId: TrainingId) {

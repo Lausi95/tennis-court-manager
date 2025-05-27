@@ -1,0 +1,13 @@
+<th:block th:replace="~{components/title :: title('Plaetze')}"></th:block>
+
+<div>
+    <th:block th:replace="~{components/button :: nav-button('/courts/create', 'Court Erstellen')}"/>
+</div>
+
+<div class="grid grid-cols-1 gap-2">
+    <div th:each="court: ${courtCollection.items}" class="text-xs bg-blue-900 text-white rounded p-2">
+        <div class="font-bold" th:text="${court.name}"></div>
+
+        <th:block th:replace="~{components/button :: item-operations(${court})}"/>
+    </div>
+</div>

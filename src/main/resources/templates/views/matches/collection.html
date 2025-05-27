@@ -1,0 +1,17 @@
+<th:block th:replace="~{components/title :: title('Matches')}"></th:block>
+
+<div>
+    <th:block th:replace="~{components/button :: nav-button('/matches/create', 'Match erstellen')}"/>
+</div>
+
+<div th:each="match : ${matchCollection.items}" class="text-xs bg-blue-900 text-white rounded p-2">
+    <div class="font-bold" th:text="${match.team.name + ' vs. ' + match.oppenentTeamName}"></div>
+    <div th:text="${match.date}"></div>
+    <div>
+        <span th:text="${match.fromTime}"></span> - <span th:text="${match.toTime}"></span>
+    </div>
+    <div class="pt-2 font-bold italic">Plaetze</div>
+    <div th:each="court : ${match.courts.items}" th:text="${court.name}"></div>
+
+    <th:block th:replace="~{components/button :: item-operations(${match})}"/>
+</div>

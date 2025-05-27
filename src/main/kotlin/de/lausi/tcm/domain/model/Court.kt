@@ -27,4 +27,6 @@ interface CourtRepository {
   fun findById(courtId: CourtId): Court?
 
   fun save(court: Court): Court
+
+  fun delete(id: CourtId)
 }

@@ -43,6 +43,14 @@ private class EventRepositoryImpl(
   private val mongoRepository: MongoEventRepository,
 ) : EventRepository {
 
+  override fun existsById(id: EventId): Boolean {
+    return mongoRepository.existsById(id.value)
+  }
+
+  override fun findAll(): List<Event> {
+    return mongoRepository.findAll().map { it.toEvent() }
+  }
+
   override fun findByCourtIdsContainsAndDate(courtId: CourtId, date: LocalDate): List<Event> {
     return mongoRepository.findByCourtIdsContainsAndDate(courtId.value, date).map { it.toEvent() }
   }
@@ -51,15 +59,21 @@ private class EventRepositoryImpl(
     return mongoRepository.findByDateGreaterThanEqual(date).map { it.toEvent() }
   }
 
+  override fun findById(eventId: EventId): Event? {
+    return mongoRepository.findById(eventId.value).orElse(null)?.toEvent()
+  }
+
   override fun save(event: Event): Event {
-    return mongoRepository.save(MongoEvent(
-      event.id.value,
-      event.date,
-      event.courtIds.map { it.value },
-      event.fromSlot.index,
-      event.toSlot.index,
-      event.description.value,
-    )).toEvent()
+    return mongoRepository.save(
+      MongoEvent(
+        event.id.value,
+        event.date,
+        event.courtIds.map { it.value },
+        event.fromSlot.index,
+        event.toSlot.index,
+        event.description.value,
+      )
+    ).toEvent()
   }
 
   override fun delete(id: EventId) {

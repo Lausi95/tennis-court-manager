@@ -1,0 +1,12 @@
+<th:block th:replace="~{components/title :: title('Team erstellen')}"/>
+<th:block th:replace="~{components/error :: error}"/>
+
+<form hx-post="/teams/create" hx-target="#view" class="grid grid-cols-2 gap-2">
+    <div class="col-span-2">
+        <th:block th:replace="~{components/inputs :: text-input('name', 'Name des Teams', '')}"/>
+    </div>
+    <div class="col-span-2">
+        <th:block th:replace="~{components/inputs :: member('captainMemberId')}"/>
+    </div>
+    <th:block th:replace="~{components/inputs :: submit('Erstellen', '/teams/collection')}"/>
+</form>

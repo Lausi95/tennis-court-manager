@@ -1,31 +1,18 @@
 package de.lausi.tcm.adapter.web.api
 
-import de.lausi.tcm.domain.model.*
+import de.lausi.tcm.adapter.web.userId
+import de.lausi.tcm.application.reservation.*
+import de.lausi.tcm.domain.model.CourtId
 import de.lausi.tcm.domain.model.MemberId
-import de.lausi.tcm.domain.model.MemberRepository
-import de.lausi.tcm.ger
-import de.lausi.tcm.iso
+import de.lausi.tcm.domain.model.ReservationId
 import org.springframework.stereotype.Controller
 import org.springframework.ui.Model
-import org.springframework.web.bind.annotation.*
+import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.PathVariable
+import org.springframework.web.bind.annotation.PostMapping
+import org.springframework.web.bind.annotation.RequestMapping
 import java.security.Principal
-import java.time.DayOfWeek
 import java.time.LocalDate
-
-data class ReservationModel(
-  val id: String,
-  val date: String,
-  val court: CourtModel,
-  val fromTime: String,
-  val toTime: String,
-  val players: List<MemberModel>,
-  val links: Map<String, String>,
-)
-
-data class ReservationCollection(
-  val items: List<ReservationModel>,
-  val links: Map<String, String>,
-)
 
 data class PostReservationParams(
   val date: LocalDate,
@@ -38,111 +25,91 @@ data class PostReservationParams(
   val memberId4: String,
 )
 
-data class PostTrainingParams(
-  val dayOfWeek: DayOfWeek,
-  val courtId: String,
-  val fromSlot: Int,
-  val toSlot: Int,
-  val description: String,
-)
-
 @Controller
 @RequestMapping("/api/reservations")
 class ReservationController(
-  private val courtController: CourtController,
-  private val slotController: SlotController,
-  private val memberController: MemberController,
-  private val reservationRepository: ReservationRepository,
-  private val reservationService: ReservationService,
-  private val occupancyPlanService: OccupancyPlanService,
-  private val occupancyPlanController: OccupancyPlanController,
-  private val courtRepository: CourtRepository,
-  private val memberRepository: MemberRepository,
+  private val getReservationsUseCase: GetReservationsUseCase,
+  private val createReservationUseCase: CreateReservationUseCase,
+  private val cancelReservationUseCase: CancelReservationUseCase
 ) {
 
   @GetMapping
-  fun getReservations(model: Model, principal: Principal): String {
-    model.addAttribute("userId", principal.name)
+  fun getReservationCollection(principal: Principal, model: Model): String {
+    val command = GetReservationsCommand(
+      principal.userId(),
+      LocalDate.now()
+    )
 
-    val items = reservationRepository.findByCreatorIdAndDateGreaterThanEqual(principal.name, LocalDate.now()).sortedWith(compareBy(Reservation::date, Reservation::fromSlot)).map { reservation ->
-      val court = with(courtController) {
-        courtRepository.findById(reservation.courtId)?.toModel() ?: CourtModel.NOT_FOUND
-      }
-
-      val members = with(memberController) {
-        reservation.playerIds.map { memberRepository.findById(MemberId(it.value))?.toModel() ?: MemberModel.NOT_FOUND }
-      }
-
-      ReservationModel(
-        reservation.id.value,
-        reservation.date.ger(),
-        court,
-        reservation.fromSlot.formatFromTime(),
-        reservation.toSlot.formatToTime(),
-        members,
-        mapOf(
-          "delete" to "/api/reservations/${reservation.id}"
-        )
+    return runContext(getReservationsUseCase.execute(principal.userId(), command), model) {
+      model.reservationCollection(
+        it.reservations,
+        it.courts,
+        it.creators,
+        it.players,
       )
-    }
-
-    val reservationCollection = ReservationCollection(items, mapOf())
-    model.addAttribute("reservationCollection", reservationCollection)
-
-    courtController.getCourts(model)
-    slotController.getSlots(model)
-    memberController.getMembers(model)
-
-    model.addAttribute("minDate", LocalDate.now().iso())
-    model.addAttribute("maxDate", LocalDate.now().plusDays(14).iso())
-
-    return "views/reservations"
-  }
-
-  @PostMapping
-  fun createReservation(model: Model, params: PostReservationParams, principal: Principal): String {
-    val errors = mutableListOf<String>()
-
-    val courtId = CourtId(params.courtId.split(",")[0])
-    val creatorId = MemberId(params.memberId1)
-    val playerIds = listOf(params.memberId1, params.memberId2, params.memberId3, params.memberId4).filter { it.isNotBlank() }.map { MemberId(it) }
-
-    val reservation = Reservation(courtId, params.date, Slot(params.slotId), Slot(params.slotId + params.duration), creatorId, playerIds)
-
-    // TODO: Move rules to a domain service and make them customizable
-    val futureReservations = reservationRepository.findByCreatorIdAndDateGreaterThanEqual(params.memberId1, LocalDate.now())
-    if (!reservation.isToday()) {
-      errors.add(
-        """Du hast bereits eine Buchung in der Kernzeit.
-        Du kannst maximal 1 Buchung in der Kernzeit haben.
-        Die Kernzeit ist das Wochenende und unter der Woche 17:00 - 20:00 Uhr.""".lineSequence().map { it.trim() }.joinToString(" "))
-    }
-
-    if (LocalDate.now().plusDays(14) <= params.date) {
-      errors.add("Du kannst maximal 14 Tage in die Zukunft buchen")
-    }
-
-    with(reservationService) {
-      val reservationBlock = reservation.toBlock()
-      val occupancyPlan = occupancyPlanService.getOccupancyPlan(params.date, listOf(courtId))
-      if (!occupancyPlan.canPlace(courtId, reservationBlock)) {
-        errors.add("Der Platz ist zu dem Zeitraum schon belegt.")
-      }
-    }
-
-    if (errors.isEmpty()) {
-      reservationRepository.save(reservation)
-      return occupancyPlanController.getOccupancyPlan(model, params.date)
-    } else {
-      model.addAttribute("errors", errors)
-      return getReservations(model, principal)
+      "views/reservation/collection"
     }
   }
 
-  @ResponseBody
-  @DeleteMapping("/{reservationId}")
-  fun deleteReservation(@PathVariable(name = "reservationId") reservationIdValue: String) {
-    val reservationId = ReservationId(reservationIdValue)
-    reservationRepository.delete(reservationId)
+  @GetMapping("/create")
+  fun getCreateReservation(principal: Principal, model: Model): String {
+    val params = CreateReservationContextParams(
+      principal.userId(),
+    )
+
+    return runContext(createReservationUseCase.context(principal.userId(), params), model) {
+      model.memberEntity(it.self)
+      model.memberCollection(it.members)
+      "views/reservation/create"
+    }
+  }
+
+  @PostMapping("/create")
+  fun createReservation(principal: Principal, model: Model, params: PostReservationParams): String {
+    val memberIds = listOf(params.memberId1, params.memberId2, params.memberId3, params.memberId4)
+      .filter { it.isNotEmpty() }
+      .map { MemberId(it) }
+
+    val command = CreateReservationCommand(
+      params.date,
+      params.slotId,
+      params.slotId + params.duration,
+      CourtId(params.courtId),
+      principal.userId(),
+      memberIds,
+    )
+
+    return runUseCase(
+      createReservationUseCase.execute(principal.userId(), command),
+      model,
+      { getCreateReservation(principal, model) }) {
+      getReservationCollection(principal, model)
+    }
+  }
+
+  @GetMapping("/{reservationId}/cancel")
+  fun getCancelReservation(principal: Principal, model: Model, @PathVariable reservationId: String): String {
+    val params = CancelReservationContextParams(
+      ReservationId(reservationId),
+    )
+
+    return runContext(cancelReservationUseCase.context(principal.userId(), params), model) {
+      model.reservationEntity(it.reservation, it.court, it.creator, it.players)
+      "views/reservation/cancel"
+    }
+  }
+
+  @PostMapping("/{reservationId}/cancel")
+  fun cancelReservation(principal: Principal, model: Model, @PathVariable reservationId: String): String {
+    val command = CancelReservationCommand(
+      ReservationId(reservationId),
+    )
+
+    return runUseCase(
+      cancelReservationUseCase.execute(principal.userId(), command),
+      model,
+      { getCancelReservation(principal, model, reservationId) }) {
+      getReservationCollection(principal, model)
+    }
   }
 }

@@ -1,0 +1,17 @@
+<th:block th:replace="~{components/title :: title('Match erstellen')}"/>
+<th:block th:replace="~{components/error :: error}"/>
+
+<form hx-post="/matches/create" hx-target="#view" class="grid grid-cols-2 gap-2">
+    <div class="col-span-2">
+        <th:block th:replace="~{components/inputs :: date('date')}"/>
+    </div>
+    <div class="col-span-2">
+        <th:block th:replace="~{components/inputs :: courts('courtIds')}"/>
+    </div>
+    <th:block th:replace="~{components/inputs :: fromSlot('fromSlotId')}"/>
+    <th:block th:replace="~{components/inputs :: team('teamId')}"/>
+    <div class="col-span-2">
+        <th:block th:replace="~{components/inputs :: text-input('opponentTeamName', 'Gegner', '')}"/>
+    </div>
+    <th:block th:replace="~{components/inputs :: submit('Erstellen', '/matches/collection')}"/>
+</form>

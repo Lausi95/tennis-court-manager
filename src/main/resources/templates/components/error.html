@@ -1,0 +1,3 @@
+<div th:fragment="error" th:if="${errors != null}">
+    <div th:each="error : ${errors}" th:text="${error}" class="bg-red-300 p-2 rounded"></div>
+</div>

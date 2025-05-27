@@ -1,0 +1,17 @@
+<th:block th:replace="~{components/title :: title('Training erstellen')}"/>
+<th:block th:replace="~{components/error :: error}"/>
+
+<form hx-post="/trainings/create" hx-target="#view" class="grid grid-cols-2 gap-2">
+    <div class="col-span-2">
+        <th:block th:replace="~{components/inputs :: dayOfWeek('dayOfWeek')}"/>
+    </div>
+    <div class="col-span-2">
+        <th:block th:replace="~{components/inputs :: court('courtId')}"/>
+    </div>
+    <th:block th:replace="~{components/inputs :: fromSlot('fromSlot')}"/>
+    <th:block th:replace="~{components/inputs :: toSlot('toSlot')}"/>
+    <div class="col-span-2">
+        <th:block th:replace="~{components/inputs :: text-input('description', 'Beschreibung', '')}"/>
+    </div>
+    <th:block th:replace="~{components/inputs :: submit('Erstellen', '/trainings/collection')}"/>
+</form>

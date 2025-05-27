@@ -46,27 +46,13 @@
             <input name="description" class="block w-full rounded p-1" th:value="${param.description}"/>
         </div>
 
-        <button class="col-span-2 bg-orange-300 hover:bg-orange-400 rounded p-2 font-bold" type="submit">Erstellen</button>
+        <button class="col-span-2 bg-orange-300 hover:bg-orange-400 rounded p-2 font-bold" type="submit">Erstellen
+        </button>
     </form>
 
     <div class="grid grid-cols-1 gap-2 pt-2">
         <div class="font-bold text-lg">
             Events
-        </div>
-        <div th:each="event : ${eventCollection.items}" class="text-xs bg-blue-900 text-white rounded p-2">
-            <div class="font-bold" th:text="${event.description}"></div>
-
-            <div th:text="${event.date}"></div>
-            <div>
-                <span th:text="${event.fromTime}"></span> - <span th:text="${event.toTime}"></span>
-            </div>
-
-            <div class="pt-2 font-bold italic">Plaetze</div>
-            <div th:each="court : ${event.courts}" th:text="${court.name}"></div>
-
-            <div class="flex flex-row-reverse gap-2 text-cs">
-                <button th:if="${event.links.containsKey('delete')}" th:hx-delete="${event.links.get('delete')}" hx-target="#view"><i class="fa-solid fa-trash"></i></button>
-            </div>
         </div>
     </div>
 </div>

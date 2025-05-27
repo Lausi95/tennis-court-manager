@@ -24,7 +24,8 @@
             <i class="fa-solid fa-house"></i>
             <a class="font-bold" href="/">Home</a>
         </div>
-        <div th:unless="${currentPage == 'Home'}" class="border-b p-4 border-gray-300 flex gap-3 items-center text-gray-500">
+        <div th:unless="${currentPage == 'Home'}"
+             class="border-b p-4 border-gray-300 flex gap-3 items-center text-gray-500">
             <i class="fa-solid fa-house"></i>
             <a href="/">Home</a>
         </div>
@@ -34,7 +35,8 @@
             <i class="fa-regular fa-calendar-plus"></i>
             <a class="font-bold" href="/reservations">Buchen</a>
         </div>
-        <div th:unless="${currentPage == 'Buchen'}" class="border-b p-4 border-gray-300 flex gap-3 items-center text-gray-500">
+        <div th:unless="${currentPage == 'Buchen'}"
+             class="border-b p-4 border-gray-300 flex gap-3 items-center text-gray-500">
             <i class="fa-regular fa-calendar-plus"></i>
             <a href="/reservations">Buchen</a>
         </div>
@@ -45,7 +47,8 @@
                 <i class="fa-solid fa-screwdriver-wrench"></i>
                 <a class="font-bold" href="/admin">Admin</a>
             </div>
-            <div th:unless="${currentPage == 'Admin'}" class="border-b p-4 border-gray-300 flex gap-3 items-center text-gray-500">
+            <div th:unless="${currentPage == 'Admin'}"
+                 class="border-b p-4 border-gray-300 flex gap-3 items-center text-gray-500">
                 <i class="fa-solid fa-screwdriver-wrench"></i>
                 <a href="/admin">Admin</a>
             </div>
@@ -53,11 +56,12 @@
 
         <div class="flex-grow border-b border-gray-300"></div>
         <div></div>
-        <a href="/logout" class="border-b border-gray-300 p-4 text-gray-500"><i class="fa-solid fa-right-from-bracket"></i></a>
+        <a href="/logout" class="border-b border-gray-300 p-4 text-gray-500"><i
+                class="fa-solid fa-right-from-bracket"></i></a>
     </div>
 </nav>
 
-<div id="view" th:insert="~{${view}}"></div>
+<div id="view" class="p-2 grid gap-2 grid-cols-1" th:insert="~{${view}}"></div>
 
 </body>
 </html>

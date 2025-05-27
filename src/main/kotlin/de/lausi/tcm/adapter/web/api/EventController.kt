@@ -1,34 +1,18 @@
 package de.lausi.tcm.adapter.web.api
 
-import de.lausi.tcm.adapter.web.memberId
+import de.lausi.tcm.adapter.web.PageAssembler
+import de.lausi.tcm.adapter.web.userId
+import de.lausi.tcm.application.NOTHING
+import de.lausi.tcm.application.event.*
 import de.lausi.tcm.domain.model.*
-import de.lausi.tcm.domain.model.MemberGroup
-import de.lausi.tcm.domain.model.Permissions
 import org.springframework.stereotype.Controller
 import org.springframework.ui.Model
-import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestMapping
 import java.security.Principal
 import java.time.LocalDate
-import java.time.format.DateTimeFormatter
-
-data class EventModel(
-  val id: String,
-  val date: String,
-  val courts: List<CourtModel>,
-  val fromTime: String,
-  val toTime: String,
-  val description: String,
-  val links: Map<String, String> = mapOf(),
-)
-
-data class EventCollection(
-  val items: List<EventModel>,
-  val links: Map<String, String> = mapOf(),
-)
 
 data class CreateEventRequest(
   val date: LocalDate,
@@ -39,99 +23,83 @@ data class CreateEventRequest(
 )
 
 @Controller
-@RequestMapping("/api/events")
+@RequestMapping("/events")
 class EventController(
-  private val eventRepository: EventRepository,
-  private val courtRepository: CourtRepository,
-  private val courtController: CourtController,
-  private val slotController: SlotController,
-  private val permissions: Permissions,
-  private val eventService: EventService,
-  private val occupancyPlanService: OccupancyPlanService,
-  private val courtService: CourtRepository,
+  private val pageAssembler: PageAssembler,
+  private val getEventsUseCase: GetEventsUseCase,
+  private val createEventUseCase: CreateEventUseCase,
+  private val deleteEventUseCase: DeleteEventUseCase,
 ) {
 
   @GetMapping
-  fun getEvents(model: Model): String {
-    val items = eventRepository.findByDateGreaterThanEqual(LocalDate.now()).map { event ->
-      val courts = with (courtController) { courtService.findAllById(event.courtIds).map { it.toModel() } }
-
-      EventModel(
-        event.id.value,
-        event.date.format(DateTimeFormatter.ISO_LOCAL_DATE),
-        courts,
-        event.fromSlot.formatFromTime(),
-        event.toSlot.formatToTime(),
-        event.description.value,
-        mapOf(
-          "self" to "/api/events/${event.id}",
-          "delete" to "/api/events/${event.id}"
-        )
-      )
+  fun getView(principal: Principal, model: Model): String {
+    return with(pageAssembler) {
+      model.preparePage("Events", principal) {
+        getEventCollection(principal, model)
+      }
     }
-
-    model.addAttribute("eventCollection", EventCollection(items, mapOf(
-      "self" to "/api/events",
-      "create" to "/api/events",
-    )))
-
-    courtController.getCourts(model)
-    slotController.getSlots(model)
-
-    return "views/events"
   }
 
-  @PostMapping
-  fun createEvent(model: Model, principal: Principal, request: CreateEventRequest): String {
-    permissions.assertGroup(principal.memberId(), MemberGroup.EVENT_MANAGEMENT)
+  @GetMapping("/collection")
+  fun getEventCollection(principal: Principal, model: Model): String {
+    val command = GetEventsCommand(null)
 
-    val errors = mutableListOf<String>()
-
-    val courtIds = request.courtIds.map { CourtId(it) }
-
-    if (!courtRepository.allExistById(courtIds)) {
-      errors.add("Ein oder mehrere Plaetze existieren nicht")
+    return runContext(getEventsUseCase.execute(principal.userId(), command), model) {
+      model.eventCollection(it.events, it.courts)
+      "views/events/collection"
     }
+  }
 
-    if (request.courtIds.isEmpty()) {
-      errors.add("Es muss mindestens ein Platz ausgewaehlt werden")
+  @GetMapping("/create")
+  fun getCreateEvent(principal: Principal, model: Model): String {
+    return runContext(createEventUseCase.context(principal.userId(), NOTHING), model) {
+      model.slotCollection(SlotRepository.findAll())
+      model.courtCollection(it.courts)
+      "views/events/create"
     }
+  }
 
-    val event = Event(
+  @PostMapping("/create")
+  fun createEvent(principal: Principal, model: Model, request: CreateEventRequest): String {
+    val command = CreateEventCommand(
       request.date,
       request.courtIds.map { CourtId(it) },
       Slot(request.fromSlotId),
       Slot(request.toSlotId),
-      EventDescription(request.description),
+      EventDescription(request.description)
     )
 
-    with(eventService) {
-      val reservationBlock = event.toBlock()
-      val occupancyPlan = occupancyPlanService.getOccupancyPlan(request.date, courtIds)
-      courtIds.forEach { courtId ->
-        if (!occupancyPlan.canPlace(courtId, reservationBlock)) {
-          errors.add("Der Platz ist zu dem Zeitraum schon belegt.")
-        }
-      }
+    return runUseCase(
+      createEventUseCase.execute(principal.userId(), command),
+      model,
+      { getCreateEvent(principal, model) }) {
+      getEventCollection(principal, model)
     }
-
-    if (errors.isNotEmpty()) {
-      model.addAttribute("errors", errors)
-      return getEvents(model)
-    }
-
-    eventRepository.save(event)
-
-    return getEvents(model)
   }
 
-  @DeleteMapping("/{eventId}")
-  fun deleteEvent(model: Model, principal: Principal, @PathVariable(name = "eventId") eventIdValue: String): String {
-    permissions.assertGroup(principal.memberId(), MemberGroup.EVENT_MANAGEMENT)
+  @GetMapping("/{eventId}/delete")
+  fun getDeleteEvent(principal: Principal, model: Model, @PathVariable eventId: String): String {
+    val params = DeleteEventContextParams(
+      EventId(eventId),
+    )
 
-    val eventId = EventId(eventIdValue)
-    eventRepository.delete(eventId)
+    return runContext(deleteEventUseCase.context(principal.userId(), params), model) {
+      model.eventEntity(it.event, it.courts)
+      "views/events/delete"
+    }
+  }
 
-    return getEvents(model)
+  @PostMapping("/{eventId}/delete")
+  fun deleteEvent(principal: Principal, model: Model, @PathVariable eventId: String): String {
+    val command = DeleteEventCommand(
+      EventId(eventId),
+    )
+
+    return runUseCase(
+      deleteEventUseCase.execute(principal.userId(), command),
+      model,
+      { getDeleteEvent(principal, model, eventId) }) {
+      getEventCollection(principal, model)
+    }
   }
 }

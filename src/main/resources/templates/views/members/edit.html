@@ -1,0 +1,34 @@
+<th:block th:replace="~{components/title :: title('Mitglied bearbeiten')}"></th:block>
+<th:block th:replace="~{components/error :: error}"/>
+
+<form th:hx-post="${member.links['edit']}" hx-target="#view" class="grid grid-cols-2 gap-2">
+    <div class="col-span-2">
+        <th:block th:replace="~{components/inputs :: text-input-disabled('name', 'Name', ${member.fullname})}"/>
+    </div>
+
+    <div class="col-span-2 bg-gray-200 rounded p-2">
+        <div class="block text-xs font-bold pb-2">Gruppen</div>
+
+        <div class="flex gap-2">
+            <input type="checkbox" id="admin" name="admin" th:checked="${member.isAdmin}"/><label
+                for="admin">Admin</label>
+        </div>
+
+        <div class="flex gap-2">
+            <input type="checkbox" id="teamCaptain" name="teamCaptain" th:checked="${member.isTeamCaptain}"/><label
+                for="teamCaptain">Team Captain</label>
+        </div>
+
+        <div class="flex gap-2">
+            <input type="checkbox" id="eventManager" name="eventManager" th:checked="${member.isEventManager}"/><label
+                for="eventManager">Event Manager</label>
+        </div>
+
+        <div class="flex gap-2">
+            <input type="checkbox" id="trainer" name="trainer" th:checked="${member.isTrainer}"/><label
+                for="trainer">Trainer</label>
+        </div>
+    </div>
+
+    <th:block th:replace="~{components/inputs :: submit('Speichern', '/members/collection')}"/>
+</form>

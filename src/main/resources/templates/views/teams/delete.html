@@ -1,0 +1,10 @@
+<th:block th:replace="~{components/title :: title('Team Loeschen')}"></th:block>
+<th:block th:replace="~{components/error :: error}"/>
+
+<form th:hx-post="${team.links['delete']}" hx-target="#view" class="grid grid-cols-1 gap-2">
+    <div>
+        Willst du das Team wirklich loeschen?
+    </div>
+
+    <th:block th:replace="~{components/inputs :: submit('Loeschen', '/teams/collection')}"/>
+</form>

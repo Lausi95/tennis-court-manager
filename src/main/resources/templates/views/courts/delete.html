@@ -1,0 +1,10 @@
+<th:block th:replace="~{components/title :: title('Platz Loeschen')}"></th:block>
+<th:block th:replace="~{components/error :: error}"/>
+
+<form th:hx-post="${court.links['delete']}" hx-target="#view" class="grid grid-cols-1 gap-2">
+    <div>
+        Willst du den Platz <span class="font-bold" th:text="${court.name}"></span> wirklich loeschen?
+    </div>
+
+    <th:block th:replace="~{components/inputs :: submit('Loeschen', '/courts/collection')}"/>
+</form>

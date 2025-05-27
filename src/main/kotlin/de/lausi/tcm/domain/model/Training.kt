@@ -1,17 +1,13 @@
 package de.lausi.tcm.domain.model
 
-import org.springframework.data.annotation.Id
-import org.springframework.data.mongodb.core.mapping.Document
-import org.springframework.data.mongodb.repository.MongoRepository
 import org.springframework.stereotype.Component
 import java.time.DayOfWeek
 import java.time.LocalDate
-import java.util.UUID
+import java.util.*
 
 data class TrainingId(val value: String = UUID.randomUUID().toString())
 data class TrainingDescription(val value: String)
 
-@Document("training")
 data class Training(
   val dayOfWeek: DayOfWeek,
   val courtId: CourtId,
@@ -19,7 +15,7 @@ data class Training(
   val toSlot: Slot,
   val description: TrainingDescription,
   val skippedDates: MutableSet<LocalDate>,
-  @Id val id: TrainingId = TrainingId(),
+  val id: TrainingId = TrainingId(),
 ) {
 
   fun collidesWith(other: Training): Boolean {
@@ -33,7 +29,10 @@ data class Training(
       return false
     }
 
-    return fromSlot.isInBoundariesOfSlots(other.fromSlot, other.fromSlot) || toSlot.isInBoundariesOfSlots(other.fromSlot, other.toSlot)
+    return fromSlot.isInBoundariesOfSlots(
+      other.fromSlot,
+      other.fromSlot
+    ) || toSlot.isInBoundariesOfSlots(other.fromSlot, other.toSlot)
   }
 
   fun addSkippedDate(date: LocalDate) {
@@ -65,7 +64,7 @@ interface TrainingRepository {
 }
 
 @Component
-class TrainingService(private val trainingRepository: TrainingRepository): OccupancyPlanResolver {
+class TeamOccupancyPlanResolver(private val trainingRepository: TrainingRepository) : OccupancyPlanResolver {
 
   override fun OccupancyPlan.addBlock(date: LocalDate, courtIds: List<CourtId>) {
     courtIds.forEach { courtId ->

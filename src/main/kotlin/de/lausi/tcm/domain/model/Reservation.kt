@@ -2,7 +2,7 @@ package de.lausi.tcm.domain.model
 
 import org.springframework.stereotype.Component
 import java.time.LocalDate
-import java.util.UUID
+import java.util.*
 
 data class ReservationId(val value: String = UUID.randomUUID().toString())
 
@@ -24,7 +24,11 @@ data class Reservation(
 /**
  * Interface for a Repository that stores [Reservation] entities.
  */
-interface ReservationRepository  {
+interface ReservationRepository {
+
+  fun findAll(): List<Reservation>
+
+  fun findByCretorId(memberId: MemberId): List<Reservation>
 
   /**
    * Finds all reservations at the given date on the given court.
@@ -47,10 +51,12 @@ interface ReservationRepository  {
   fun save(reservation: Reservation): Reservation
 
   fun delete(reservationId: ReservationId)
+
+  fun findById(reservationId: ReservationId): Reservation?
 }
 
 @Component
-class ReservationService(
+class ReservationOccupancyPlanResolver(
   private val memberRepository: MemberRepository,
   private val reservationRepository: ReservationRepository
 ) : OccupancyPlanResolver {

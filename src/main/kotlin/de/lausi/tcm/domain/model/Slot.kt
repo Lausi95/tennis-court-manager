@@ -3,7 +3,7 @@ package de.lausi.tcm.domain.model
 const val MIN_SLOT = 14
 const val MAX_SLOT = 43
 
-data class Slot  (
+data class Slot(
   val index: Int
 ) : Comparable<Slot> {
 
@@ -49,6 +49,12 @@ data class Slot  (
     fun distance(fromSlot: Slot, toSlot: Slot): Int {
       return toSlot.index - fromSlot.index + 1
     }
+  }
+
+  fun match(): Slot = Slot(index + 10)
+
+  fun plus(duration: Int): Slot {
+    return Slot(index + duration - 1)
   }
 }
 

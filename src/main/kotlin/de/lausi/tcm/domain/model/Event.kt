@@ -18,9 +18,15 @@ data class Event(
 
 interface EventRepository {
 
+  fun existsById(id: EventId): Boolean
+
+  fun findAll(): List<Event>
+
   fun findByCourtIdsContainsAndDate(courtId: CourtId, date: LocalDate): List<Event>
 
   fun findByDateGreaterThanEqual(date: LocalDate): List<Event>
+
+  fun findById(eventId: EventId): Event?
 
   fun save(event: Event): Event
 
@@ -28,7 +34,7 @@ interface EventRepository {
 }
 
 @Component
-class EventService(private val eventRepository: EventRepository) : OccupancyPlanResolver {
+class EventOccupancyPlanResolver(private val eventRepository: EventRepository) : OccupancyPlanResolver {
 
   override fun OccupancyPlan.addBlock(date: LocalDate, courtIds: List<CourtId>) {
     courtIds.map { courtId ->

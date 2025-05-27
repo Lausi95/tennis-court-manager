@@ -60,9 +60,15 @@ private class CourtRepositoryImpl(val mongoRepository: MongoCourtRepository) : C
   }
 
   override fun save(court: Court): Court {
-    return mongoRepository.save(MongoCourt(
-      court.id.value,
-      court.name.value,
-    )).toCourt()
+    return mongoRepository.save(
+      MongoCourt(
+        court.id.value,
+        court.name.value,
+      )
+    ).toCourt()
+  }
+
+  override fun delete(id: CourtId) {
+    mongoRepository.deleteById(id.value)
   }
 }
