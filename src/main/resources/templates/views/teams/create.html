@@ -6,7 +6,7 @@
         <th:block th:replace="~{components/inputs :: text-input('name', 'Name des Teams', '')}"/>
     </div>
     <div class="col-span-2">
-        <th:block th:replace="~{components/inputs :: member('captainMemberId')}"/>
+        <th:block th:replace="~{components/inputs :: member('captainMemberId', 'Kapitaen')}"/>
     </div>
     <th:block th:replace="~{components/inputs :: submit('Erstellen', '/teams/collection')}"/>
 </form>

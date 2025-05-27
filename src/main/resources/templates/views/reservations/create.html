@@ -1,0 +1,23 @@
+<th:block th:replace="~{components/title :: title('Neue Reservierung')}"/>
+<th:block th:replace="~{components/error :: error}"/>
+
+<form hx-post="/reservations/create" hx-target="#view" class="grid grid-cols-2 gap-2">
+    <div class="col-span-2">
+        <th:block th:replace="~{components/inputs :: date('date')}"/>
+    </div>
+
+    <div class="col-span-2">
+        <th:block th:replace="~{components/inputs :: court('courtId')}"/>
+    </div>
+
+    <th:block th:replace="~{components/inputs :: fromSlot('slotId')}"/>
+
+    <th:block th:replace="~{components/inputs :: duration('duration', 'Dauer')}"/>
+
+    <th:block th:replace="~{components/inputs :: playerSelf('memberId1', 'Spieler*in 1')}"/>
+    <th:block th:replace="~{components/inputs :: player('memberId2', 'Spieler*in 2')}"/>
+    <th:block th:replace="~{components/inputs :: player('memberId3', 'Spieler*in 3')}"/>
+    <th:block th:replace="~{components/inputs :: player('memberId4', 'Spieler*in 4')}"/>
+
+    <th:block th:replace="~{components/inputs :: submit('Erstellen', '/reservations/collection')}"/>
+</form>

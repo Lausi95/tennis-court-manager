@@ -54,7 +54,7 @@ class CreateReservationUseCase(
     val self = memberRepository.findById(params.selfId)
       ?: return Either.Error(listOf(CreateReservationError.CURRENT_USER_DOES_NOT_EXIST))
 
-    val members = memberRepository.findAll().filter { it.id != params.selfId }
+    val members = memberRepository.findAll()
 
     return Either.Success(
       CreateReservationContext(

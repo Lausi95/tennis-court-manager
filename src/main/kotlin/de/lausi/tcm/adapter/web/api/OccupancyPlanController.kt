@@ -124,7 +124,8 @@ class OccupancyPlanController(
       val blockModels = occupancyPlan.render(court.id).map {
         val blockLinks = mutableMapOf<String, String>()
         if (it.type == BlockType.FREE) {
-          blockLinks["book"] = "/reservations?date=${planDateString}&slotId=${it.fromSlot}&courtId=${court.id}"
+          blockLinks["book"] =
+            "/reservations?use=create&date=${planDateString}&slotId=${it.fromSlot.index}&courtId=${court.id.value}"
         }
 
         BlockModel(

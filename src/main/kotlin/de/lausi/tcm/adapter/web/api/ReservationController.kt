@@ -2,20 +2,16 @@ package de.lausi.tcm.adapter.web.api
 
 import de.lausi.tcm.adapter.web.PageAssembler
 import de.lausi.tcm.adapter.web.userId
+import de.lausi.tcm.adapter.web.userInfo
 import de.lausi.tcm.application.reservation.*
-import de.lausi.tcm.domain.model.CourtId
-import de.lausi.tcm.domain.model.MemberId
-import de.lausi.tcm.domain.model.ReservationId
+import de.lausi.tcm.domain.model.*
 import org.springframework.stereotype.Controller
 import org.springframework.ui.Model
-import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.PathVariable
-import org.springframework.web.bind.annotation.PostMapping
-import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.*
 import java.security.Principal
 import java.time.LocalDate
 
-data class PostReservationParams(
+data class CreateReservationRequest(
   val date: LocalDate,
   val courtId: String,
   val slotId: Int,
@@ -32,14 +28,19 @@ class ReservationController(
   private val pageAssembler: PageAssembler,
   private val getReservationsUseCase: GetReservationsUseCase,
   private val createReservationUseCase: CreateReservationUseCase,
-  private val cancelReservationUseCase: CancelReservationUseCase
+  private val cancelReservationUseCase: CancelReservationUseCase,
+  private val courtRepository: CourtRepository
 ) {
 
   @GetMapping
-  fun getView(principal: Principal, model: Model): String {
+  fun getView(principal: Principal, model: Model, @RequestParam(required = false) use: String?): String {
     return with(pageAssembler) {
       model.preparePage("Reservierungen", principal) {
-        getReservationCollection(principal, model)
+        return@preparePage if (use == "create") {
+          getCreateReservation(principal, model)
+        } else {
+          getReservationCollection(principal, model)
+        }
       }
     }
   }
@@ -71,21 +72,24 @@ class ReservationController(
     return runContext(createReservationUseCase.context(principal.userId(), params), model) {
       model.memberEntity(it.self)
       model.memberCollection(it.members)
+      model.courtCollection(courtRepository.findAll())
+      model.slotCollection(SlotRepository.findAll())
+      model.userInfo(principal)
       "views/reservations/create"
     }
   }
 
   @PostMapping("/create")
-  fun createReservation(principal: Principal, model: Model, params: PostReservationParams): String {
-    val memberIds = listOf(params.memberId1, params.memberId2, params.memberId3, params.memberId4)
+  fun createReservation(principal: Principal, model: Model, request: CreateReservationRequest): String {
+    val memberIds = listOf(request.memberId1, request.memberId2, request.memberId3, request.memberId4)
       .filter { it.isNotEmpty() }
       .map { MemberId(it) }
 
     val command = CreateReservationCommand(
-      params.date,
-      params.slotId,
-      params.slotId + params.duration,
-      CourtId(params.courtId),
+      request.date,
+      request.slotId,
+      request.slotId + request.duration,
+      CourtId(request.courtId),
       principal.userId(),
       memberIds,
     )
@@ -106,7 +110,7 @@ class ReservationController(
 
     return runContext(cancelReservationUseCase.context(principal.userId(), params), model) {
       model.reservationEntity(it.reservation, it.court, it.creator, it.players)
-      "views/reservations/cancel"
+      "views/reservations/delete"
     }
   }
 

@@ -28,7 +28,7 @@ fun Reservation.toModel(court: Court, creator: Member, players: List<Member>) = 
   players.toCollection(),
   mapOf(
     "self" to "/reservations/${this.id.value}",
-    "cancel" to "/reservations/${this.id.value}/cancel",
+    "delete" to "/reservations/${this.id.value}/delete",
   )
 )
 

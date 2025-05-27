@@ -1,0 +1,35 @@
+<th:block th:replace="~{components/title :: title('Deine Reservierungen')}"></th:block>
+
+<div>
+    <th:block th:replace="~{components/button :: nav-button('/reservations/create', 'Neue Reservierung')}"/>
+</div>
+
+<div th:each="reservation : ${reservationCollection.items}"
+     class="text-xs bg-blue-900 text-white rounded p-2 grid grid-cols-1 gap-2">
+    <div>
+        <div class="font-bold">Datum</div>
+        <div th:text="${reservation.date}"></div>
+    </div>
+
+    <div>
+        <div class="font-bold">Platz</div>
+        <div th:text="${reservation.court.name}"></div>
+    </div>
+
+    <div>
+        <div class="font-bold">Start-Zeit</div>
+        <div th:text="${reservation.fromTime}"></div>
+    </div>
+
+    <div>
+        <div class="font-bold">End-Zeit</div>
+        <div th:text="${reservation.toTime}"></div>
+    </div>
+
+    <div>
+        <div class="font-bold">Spieler*innen</div>
+        <div th:each="player: ${reservation.players.items}" th:text="${player.fullname}"></div>
+    </div>
+
+    <th:block th:replace="~{components/button :: item-operations(${reservation})}"/>
+</div>

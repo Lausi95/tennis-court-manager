@@ -5,7 +5,7 @@ import de.lausi.tcm.domain.model.MemberId
 import org.springframework.stereotype.Component
 
 val NOTHING: Nothing? = null
-const val NOT_RESTRICTED = false
+const val NOT_RESTRICTED = true
 
 interface UseCase<CP, CO, C, R, E> {
 

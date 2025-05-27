@@ -9,6 +9,10 @@ fun Model.errors(errors: List<String>) {
   addAttribute("errors", errors)
 }
 
+fun Model.userInfo(principal: Principal) {
+  addAttribute("userId", principal.userId().value)
+}
+
 @Component
 class PageAssembler(private val memberRepository: MemberRepository) {
   fun Model.preparePage(
