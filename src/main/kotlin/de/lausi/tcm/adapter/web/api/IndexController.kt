@@ -20,8 +20,17 @@ class IndexController(
   @GetMapping
   fun getIndex(principal: Principal, model: Model, @RequestParam(required = false) @IsoDate date: LocalDate?): String {
     return with(pageAssembler) {
-      model.preparePage("Occupancy Plan", principal) {
+      model.preparePage("Home", principal) {
         occupancyPlanController.getOccupancyPlan(principal, model, date ?: LocalDate.now())
+      }
+    }
+  }
+
+  @GetMapping("/admin")
+  fun getAdmin(principal: Principal, model: Model): String {
+    return with(pageAssembler) {
+      model.preparePage("Admin", principal) {
+        "views/admin"
       }
     }
   }

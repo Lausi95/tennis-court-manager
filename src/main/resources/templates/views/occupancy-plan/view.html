@@ -1,39 +1,39 @@
-<div>
-    <div class="text-center pt-3 italic text-xs" th:text="${occupancyPlan.dayOfWeek.name}"></div>
+<div class="font-bold gap-1 grid grid-cols-3">
+    <div></div>
+    <div class="text-center italic text-xs" th:text="${occupancyPlan.dayOfWeek.name}"></div>
+    <div></div>
 
-    <div class="pb-3 font-bold gap-4 grid grid-cols-3">
-        <th:block th:switch="${occupancyPlan.links.get('prevPlan') != null}">
-            <a th:case="${true}"
-                    th:href="${occupancyPlan.links.get('prevPlan')}"
-                    class="text-center cursor-pointer bg-gray-100 hover:bg-gray-200 rounded p-1">
-                <i  class="fa-solid fa-arrow-left"></i>
-            </a>
-            <div th:case="${false}"></div>
-        </th:block>
-
-        <input class="bg-gray-100 rounded p-1 text-center text-xs"
-               type="date" name="date" required
-               hx-get="/api/occupancy-plan"
-               hx-trigger="change"
-               hx-target="#view"
-               th:value="${occupancyPlan.planDate}"
-               th:min="${occupancyPlan.todayDate}"/>
-
-        <a class="text-center cursor-pointer bg-gray-100 hover:bg-gray-200 rounded p-1"
-             th:href="${occupancyPlan.links.get('nextPlan')}">
-            <i class="fa-solid fa-arrow-right"></i>
+    <th:block th:switch="${occupancyPlan.links.get('prevPlan') != null}">
+        <a th:case="${true}"
+           th:href="${occupancyPlan.links.get('prevPlan')}"
+           class="text-center cursor-pointer bg-gray-100 hover:bg-gray-200 rounded p-1">
+            <i class="fa-solid fa-arrow-left"></i>
         </a>
-    </div>
+        <div th:case="${false}"></div>
+    </th:block>
 
-    <div class="grid grid-rows-33 gap-1 grid-flow-col p-1">
-        <th:block th:each="plan: ${occupancyPlan.items}">
-            <div class="bg-orange-200 rounded text-center flex items-center justify-center">
-                <span th:text="${plan.courtName}" class="font-bold align-middle"></span>
-            </div>
+    <input class="bg-gray-100 rounded p-1 text-center text-xs"
+           type="date" name="date" required
+           hx-get="/api/occupancy-plan"
+           hx-trigger="change"
+           hx-target="#view"
+           th:value="${occupancyPlan.planDate}"
+           th:min="${occupancyPlan.todayDate}"/>
 
-            <th:block th:each="block: ${plan.blocks}">
-                <th:block th:replace="~{fragments/court :: block(${block})}"></th:block>
-            </th:block>
+    <a class="text-center cursor-pointer bg-gray-100 hover:bg-gray-200 rounded p-1"
+       th:href="${occupancyPlan.links.get('nextPlan')}">
+        <i class="fa-solid fa-arrow-right"></i>
+    </a>
+</div>
+
+<div class="grid grid-rows-33 gap-1 grid-flow-col">
+    <th:block th:each="plan: ${occupancyPlan.items}">
+        <div class="bg-orange-200 rounded text-center flex items-center justify-center">
+            <span th:text="${plan.courtName}" class="font-bold align-middle"></span>
+        </div>
+
+        <th:block th:each="block: ${plan.blocks}">
+            <th:block th:replace="~{fragments/court :: block(${block})}"></th:block>
         </th:block>
-    </div>
+    </th:block>
 </div>

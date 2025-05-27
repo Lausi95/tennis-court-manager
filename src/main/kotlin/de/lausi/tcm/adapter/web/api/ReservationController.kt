@@ -35,7 +35,7 @@ class ReservationController(
   @GetMapping
   fun getView(principal: Principal, model: Model, @RequestParam(required = false) use: String?): String {
     return with(pageAssembler) {
-      model.preparePage("Reservierungen", principal) {
+      model.preparePage("Buchen", principal) {
         return@preparePage if (use == "create") {
           getCreateReservation(principal, model)
         } else {

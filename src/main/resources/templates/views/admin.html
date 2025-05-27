@@ -1,6 +1,6 @@
 <div class="p-2 grid grid-cols-3 gap-2">
     <!-- Event Management -->
-    <th:block th:if="${member.groups.contains('EVENT_MANAGEMENT')}">
+    <th:block th:if="${member.groups.contains('ADMIN') || member.groups.contains('EVENT_MANAGEMENT')}">
         <div class="col-span-3 font-bold text-lg">Event-Management</div>
         <a href="/events" class="p-3 col-span-3 bg-orange-100 text-gray-700 rounded text-center font-bold">
             Events
@@ -8,7 +8,7 @@
     </th:block>
 
     <!-- Team Captains -->
-    <th:block th:if="${member.groups.contains('TEAM_CAPTAIN')}">
+    <th:block th:if="${member.groups.contains('ADMIN') || member.groups.contains('TEAM_CAPTAIN')}">
         <div class="col-span-3 font-bold text-lg">Punktspielverwaltung</div>
         <a href="/matches" class="col-span-2 p-3 bg-orange-100 text-gray-700 rounded text-center font-bold">
             Punktspiele
@@ -19,7 +19,7 @@
     </th:block>
 
     <!-- Trainer -->
-    <th:block th:if="${member.groups.contains('TRAINER')}">
+    <th:block th:if="${member.groups.contains('ADMIN') || member.groups.contains('TRAINER')}">
         <div class="col-span-3 font-bold text-lg">Trainingsplan</div>
         <a href="/trainings" class="col-span-2 p-3 bg-orange-100 text-gray-700 rounded text-center font-bold">
             Trainingsplan

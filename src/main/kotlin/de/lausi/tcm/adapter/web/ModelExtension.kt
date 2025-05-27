@@ -1,5 +1,6 @@
 package de.lausi.tcm.adapter.web
 
+import de.lausi.tcm.adapter.web.api.toModel
 import de.lausi.tcm.domain.model.MemberRepository
 import org.springframework.stereotype.Component
 import org.springframework.ui.Model
@@ -30,6 +31,7 @@ class PageAssembler(private val memberRepository: MemberRepository) {
     addAttribute("links", links)
     addAttribute("currentPage", currentPage)
     addAttribute("view", func(this))
+    addAttribute("member", member.toModel())
 
     return "page"
   }
