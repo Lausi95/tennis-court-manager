@@ -1,7 +1,10 @@
 package de.lausi.tcm.adapter.web.api
 
 import de.lausi.tcm.IsoDate
-import de.lausi.tcm.domain.model.*
+import de.lausi.tcm.domain.model.BlockType
+import de.lausi.tcm.domain.model.CourtRepository
+import de.lausi.tcm.domain.model.OccupancyPlanService
+import de.lausi.tcm.domain.model.Slot
 import de.lausi.tcm.iso
 import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Controller
@@ -10,6 +13,7 @@ import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.ResponseBody
+import java.security.Principal
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
@@ -38,7 +42,7 @@ data class OccupancyPlanModel(
 )
 
 @Controller
-@RequestMapping("/api/occupancy-plan")
+@RequestMapping("/occupancy-plan")
 class OccupancyPlanController(
   private val courtRepository: CourtRepository,
   private val occupancyPlanService: OccupancyPlanService,
@@ -68,7 +72,8 @@ class OccupancyPlanController(
         val blocks = plan.blocksByCourt[it.id]
         blocks?.forEach { block ->
           val user = if (block.type == BlockType.FREE_PLAY) block.description.split(",")[0] else ""
-          val description = if (block.type != BlockType.FREE && block.type != BlockType.FREE_PLAY) block.description else ""
+          val description =
+            if (block.type != BlockType.FREE && block.type != BlockType.FREE_PLAY) block.description else ""
           val slotStartDate = dateIt.iso()
           val slotStartTime = block.fromSlot.formatFromTimeIso()
           val slotEndDate = dateIt.iso()
@@ -94,7 +99,11 @@ class OccupancyPlanController(
   }
 
   @GetMapping
-  fun getOccupancyPlan(model: Model, @RequestParam(name = "date") @IsoDate planDate: LocalDate): String {
+  fun getOccupancyPlan(
+    principal: Principal,
+    model: Model,
+    @RequestParam(name = "date") @IsoDate planDate: LocalDate
+  ): String {
     val dateFormatter = DateTimeFormatter.ISO_DATE
 
     val todayDate = LocalDate.now()
@@ -152,6 +161,6 @@ class OccupancyPlanController(
 
     model.addAttribute("occupancyPlan", occupancyPlanModel)
 
-    return "views/occupancy-plan"
+    return "views/occupancy-plan/view"
   }
 }
