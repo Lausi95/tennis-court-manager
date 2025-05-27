@@ -1,5 +1,6 @@
 package de.lausi.tcm.adapter.web.api
 
+import de.lausi.tcm.adapter.web.PageAssembler
 import de.lausi.tcm.adapter.web.userId
 import de.lausi.tcm.application.reservation.*
 import de.lausi.tcm.domain.model.CourtId
@@ -26,14 +27,24 @@ data class PostReservationParams(
 )
 
 @Controller
-@RequestMapping("/api/reservations")
+@RequestMapping("/reservations")
 class ReservationController(
+  private val pageAssembler: PageAssembler,
   private val getReservationsUseCase: GetReservationsUseCase,
   private val createReservationUseCase: CreateReservationUseCase,
   private val cancelReservationUseCase: CancelReservationUseCase
 ) {
 
   @GetMapping
+  fun getView(principal: Principal, model: Model): String {
+    return with(pageAssembler) {
+      model.preparePage("Reservierungen", principal) {
+        getReservationCollection(principal, model)
+      }
+    }
+  }
+
+  @GetMapping("/collection")
   fun getReservationCollection(principal: Principal, model: Model): String {
     val command = GetReservationsCommand(
       principal.userId(),
@@ -47,7 +58,7 @@ class ReservationController(
         it.creators,
         it.players,
       )
-      "views/reservation/collection"
+      "views/reservations/collection"
     }
   }
 
@@ -60,7 +71,7 @@ class ReservationController(
     return runContext(createReservationUseCase.context(principal.userId(), params), model) {
       model.memberEntity(it.self)
       model.memberCollection(it.members)
-      "views/reservation/create"
+      "views/reservations/create"
     }
   }
 
@@ -87,20 +98,20 @@ class ReservationController(
     }
   }
 
-  @GetMapping("/{reservationId}/cancel")
-  fun getCancelReservation(principal: Principal, model: Model, @PathVariable reservationId: String): String {
+  @GetMapping("/{reservationId}/delete")
+  fun getDeleteReservation(principal: Principal, model: Model, @PathVariable reservationId: String): String {
     val params = CancelReservationContextParams(
       ReservationId(reservationId),
     )
 
     return runContext(cancelReservationUseCase.context(principal.userId(), params), model) {
       model.reservationEntity(it.reservation, it.court, it.creator, it.players)
-      "views/reservation/cancel"
+      "views/reservations/cancel"
     }
   }
 
-  @PostMapping("/{reservationId}/cancel")
-  fun cancelReservation(principal: Principal, model: Model, @PathVariable reservationId: String): String {
+  @PostMapping("/{reservationId}/delete")
+  fun deleteReservation(principal: Principal, model: Model, @PathVariable reservationId: String): String {
     val command = CancelReservationCommand(
       ReservationId(reservationId),
     )
@@ -108,7 +119,7 @@ class ReservationController(
     return runUseCase(
       cancelReservationUseCase.execute(principal.userId(), command),
       model,
-      { getCancelReservation(principal, model, reservationId) }) {
+      { getDeleteReservation(principal, model, reservationId) }) {
       getReservationCollection(principal, model)
     }
   }
