@@ -1,4 +1,0 @@
-<div th:fragment="skipped-day(skippedDate)" class="flex gap-2" hx-target="this" hx-swap="outerHTML">
-    <input type="text" disabled class="flex-grow p-2 bg-blue-100 rounded" th:value="${skippedDate.date}" />
-    <button th:hx-delete="${skippedDate.links.get('delete')}" class="bg-red-900 text-white p-2 px-4 rounded"><i class="fa-solid fa-trash"></i></button>
-</div>

@@ -1,5 +1,10 @@
 <th:block th:replace="~{components/title :: title('Deine Reservierungen')}"></th:block>
 
+<div class="text-xs italic">
+    Tipp: Klicke auf einen freien Slot und gelange direkt zum Buchungs-Dialog.
+    Datum Platz und Startzeit werden direkt vorausgefuellt.
+</div>
+
 <div>
     <th:block th:replace="~{components/button :: nav-button('/reservations/create', 'Neue Reservierung')}"/>
 </div>
