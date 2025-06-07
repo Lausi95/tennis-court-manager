@@ -46,7 +46,7 @@ interface ReservationRepository {
    * @param minDate Min Date for the reservations to load.
    * All reservations should be that date or later.
    */
-  fun findByCreatorIdAndDateGreaterThanEqual(memberId: String, minDate: LocalDate): List<Reservation>
+  fun findByCreatorIdAndDateGreaterThanEqual(memberId: MemberId, minDate: LocalDate): List<Reservation>
 
   fun save(reservation: Reservation): Reservation
 

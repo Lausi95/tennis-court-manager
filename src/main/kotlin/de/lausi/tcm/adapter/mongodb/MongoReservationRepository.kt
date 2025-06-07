@@ -54,12 +54,13 @@ private class ReservationRepositoryImpl(private val mongoRepository: MongoReserv
     return mongoRepository.findByDateAndCourtId(date, courtId.value).map { it.toReservation() }
   }
 
-  override fun findByCreatorIdAndDateGreaterThanEqual(memberId: String, minDate: LocalDate): List<Reservation> {
-    return mongoRepository.findByCreatorIdAndDateGreaterThanEqual(memberId, minDate).map { it.toReservation() }
+  override fun findByCreatorIdAndDateGreaterThanEqual(memberId: MemberId, minDate: LocalDate): List<Reservation> {
+    return mongoRepository.findByCreatorIdAndDateGreaterThanEqual(memberId.value, minDate).map { it.toReservation() }
   }
 
   override fun save(reservation: Reservation): Reservation {
-    return mongoRepository.save(MongoReservation(
+    return mongoRepository.save(
+      MongoReservation(
       reservation.id.value,
       reservation.courtId.value,
       reservation.date,

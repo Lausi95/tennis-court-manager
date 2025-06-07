@@ -88,7 +88,7 @@ class ReservationController(
     val command = CreateReservationCommand(
       request.date,
       request.slotId,
-      request.slotId + request.duration,
+      request.slotId + request.duration - 1,
       CourtId(request.courtId),
       principal.userId(),
       memberIds,

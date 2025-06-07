@@ -135,7 +135,7 @@ class OccupancyPlanController(
           Slot.distance(it.fromSlot, it.toSlot),
           Slot.formatDuration(it.fromSlot, it.toSlot),
           it.description,
-          false, // TODO reinvent core time logic
+          it.fromSlot.isCore(),
           blockLinks,
         )
       }

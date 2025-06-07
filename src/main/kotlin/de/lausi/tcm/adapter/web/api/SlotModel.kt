@@ -15,7 +15,7 @@ fun Slot.toModel(): SlotModel = SlotModel(
   this.index,
   this.formatFromTime(),
   this.formatToTime(),
-  false,
+  this.isCore(),
   mapOf(
     "self" to "/api/slots/$this"
   ),

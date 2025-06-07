@@ -29,30 +29,26 @@ data class CreateReservationResult(
   val reservationId: ReservationId,
 )
 
-enum class CreateReservationError {
-  CURRENT_USER_DOES_NOT_EXIST,
-  FROM_SLOT_DOES_NOT_EXIST,
-  TO_SLOT_DOES_NOT_EXIST,
-}
-
 @Component
 class CreateReservationUseCase(
   private val permissions: Permissions,
   private val reservationRepository: ReservationRepository,
   private val memberRepository: MemberRepository,
+  private val occupancyPlanService: OccupancyPlanService,
+  private val reservationOccupancyPlanResolver: ReservationOccupancyPlanResolver,
 ) : UseCase<
         CreateReservationContextParams,
         CreateReservationContext,
         CreateReservationCommand,
         CreateReservationResult,
-        CreateReservationError> {
+        String> {
 
   override fun checkContextPermission(userId: MemberId, contextParams: CreateReservationContextParams): Boolean =
     NOT_RESTRICTED
 
-  override fun getContext(params: CreateReservationContextParams): Either<CreateReservationContext, CreateReservationError> {
+  override fun getContext(params: CreateReservationContextParams): Either<CreateReservationContext, String> {
     val self = memberRepository.findById(params.selfId)
-      ?: return Either.Error(listOf(CreateReservationError.CURRENT_USER_DOES_NOT_EXIST))
+      ?: return Either.Error(listOf("Nutzer existiert nicht."))
 
     val members = memberRepository.findAll()
 
@@ -76,14 +72,12 @@ class CreateReservationUseCase(
     return true
   }
 
-  override fun handle(command: CreateReservationCommand): Either<CreateReservationResult, CreateReservationError> {
+  override fun handle(command: CreateReservationCommand): Either<CreateReservationResult, String> {
     val fromSlot = SlotRepository.findByIndex(command.fromSlotIndex)
-      ?: return Either.Error(listOf(CreateReservationError.FROM_SLOT_DOES_NOT_EXIST))
+      ?: return Either.Error(listOf("Startzeit existiert nicht"))
 
-    val toSlot = SlotRepository.findByIndex(command.fromSlotIndex)
-      ?: return Either.Error(listOf(CreateReservationError.TO_SLOT_DOES_NOT_EXIST))
-
-    // TODO Validation!
+    val toSlot = SlotRepository.findByIndex(command.toSlotIndex)
+      ?: return Either.Error(listOf("Endzeit existiert nicht"))
 
     val reservation = Reservation(
       command.courtId,
@@ -93,6 +87,38 @@ class CreateReservationUseCase(
       command.creatorId,
       command.playerIds,
     )
+
+    // 1. No Reservation, when something is on the same time
+    val occupancyPlan = occupancyPlanService.getOccupancyPlan(command.date, listOf(command.courtId))
+    val block = with(reservationOccupancyPlanResolver) {
+      reservation.toBlock()
+    }
+    if (!occupancyPlan.canPlace(command.courtId, block)) {
+      return Either.Error("Zur dieser zeit ist der Platz bereits belegt.")
+    }
+
+    // 2. Max 2 Hours
+    if (Slot.distance(fromSlot, toSlot) > 4) {
+      return Either.Error("Du kannst ausserhalb der kernzeit maximal 2 Stunden am Stueck buchen.")
+    }
+
+    // 3. Max 1 Hour in core time
+    if ((fromSlot.isCore() || toSlot.isCore()) && Slot.distance(fromSlot, toSlot) > 2) {
+      return Either.Error("Du kannst innerhalb der Kernzeit maximal 1 Stunde am Stueck buchen.")
+    }
+
+    if (command.date != LocalDate.now()) {
+      if (command.date.isAfter(LocalDate.now().plusDays(14L))) {
+        return Either.Error("Du kannst maximal 14 Tage im vorraus Buchen.")
+      }
+
+      // 5. If you already have a booking
+      if (reservationRepository.findByCreatorIdAndDateGreaterThanEqual(command.creatorId, LocalDate.now())
+          .isNotEmpty()
+      ) {
+        return Either.Error("Du kannst maximal 1 Buchung im vorraus taetigen.")
+      }
+    }
 
     reservationRepository.save(reservation)
 

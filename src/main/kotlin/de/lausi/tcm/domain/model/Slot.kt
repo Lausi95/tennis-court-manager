@@ -4,7 +4,7 @@ const val MIN_SLOT = 14
 const val MAX_SLOT = 43
 
 data class Slot(
-  val index: Int
+  val index: Int,
 ) : Comparable<Slot> {
 
   override fun compareTo(other: Slot): Int {
@@ -55,6 +55,10 @@ data class Slot(
 
   fun plus(duration: Int): Slot {
     return Slot(index + duration - 1)
+  }
+
+  fun isCore(): Boolean {
+    return index >= (17 * 2) && index < (21 * 2)
   }
 }
 
