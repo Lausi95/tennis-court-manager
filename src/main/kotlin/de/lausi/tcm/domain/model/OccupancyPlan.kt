@@ -6,6 +6,7 @@ import java.time.LocalDate
 enum class BlockType(val priority: Int) {
   FREE(0),
   FREE_PLAY(1),
+  BALLMACHINE(1),
   TRAINING(2),
   EVENT(3),
   MATCH(100),
@@ -68,7 +69,7 @@ class OccupancyPlan(courtIds: List<CourtId>) {
 
   fun render(courtId: CourtId): List<Block> {
     val result = mutableListOf<Block>()
-    val blocks = blocksByCourt[courtId] ?: error("$courtId not found")
+    val blocks = (blocksByCourt[courtId] ?: error("$courtId not found")).toList()
 
     SlotRepository.findAll().forEach { slot ->
       val block = blocks.find { it.contains(slot) }
