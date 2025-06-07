@@ -40,3 +40,4 @@ out/
 .kotlin
 
 kls_database.db
+node_modules
