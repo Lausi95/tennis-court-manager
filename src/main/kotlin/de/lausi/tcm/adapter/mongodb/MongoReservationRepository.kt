@@ -15,7 +15,7 @@ data class MongoReservation(
   val fromSlot: Int,
   val toSlot: Int,
   val creatorId: String,
-  val playerIds: List<String>,
+  val memberIds: List<String>,
 ) {
 
   fun toReservation(): Reservation = Reservation(
@@ -24,7 +24,7 @@ data class MongoReservation(
     Slot(fromSlot),
     Slot(toSlot),
     MemberId(creatorId),
-    playerIds.map { MemberId(it) },
+    memberIds.map { MemberId(it) },
     ReservationId(id),
   )
 }
@@ -61,14 +61,14 @@ private class ReservationRepositoryImpl(private val mongoRepository: MongoReserv
   override fun save(reservation: Reservation): Reservation {
     return mongoRepository.save(
       MongoReservation(
-      reservation.id.value,
-      reservation.courtId.value,
-      reservation.date,
-      reservation.fromSlot.index,
-      reservation.toSlot.index,
-      reservation.creatorId.value,
-      reservation.playerIds.map { it.value }
-    )).toReservation()
+        reservation.id.value,
+        reservation.courtId.value,
+        reservation.date,
+        reservation.fromSlot.index,
+        reservation.toSlot.index,
+        reservation.creatorId.value,
+        reservation.playerIds.map { it.value }
+      )).toReservation()
   }
 
   override fun delete(reservationId: ReservationId) {
