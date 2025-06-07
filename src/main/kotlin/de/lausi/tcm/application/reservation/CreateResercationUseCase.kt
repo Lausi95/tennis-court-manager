@@ -14,6 +14,8 @@ data class CreateReservationContextParams(
 data class CreateReservationContext(
   val self: Member,
   val members: List<Member>,
+  val courts: List<Court>,
+  val slots: List<Slot>,
 )
 
 data class CreateReservationCommand(
@@ -36,6 +38,7 @@ class CreateReservationUseCase(
   private val memberRepository: MemberRepository,
   private val occupancyPlanService: OccupancyPlanService,
   private val reservationOccupancyPlanResolver: ReservationOccupancyPlanResolver,
+  private val courtRepository: CourtRepository,
 ) : UseCase<
         CreateReservationContextParams,
         CreateReservationContext,
@@ -51,11 +54,15 @@ class CreateReservationUseCase(
       ?: return Either.Error(listOf("Nutzer existiert nicht."))
 
     val members = memberRepository.findAll()
+    val courts = courtRepository.findAll()
+    val slots = SlotRepository.findAll()
 
     return Either.Success(
       CreateReservationContext(
         self,
-        members
+        members,
+        courts,
+        slots,
       )
     )
   }
@@ -107,17 +114,19 @@ class CreateReservationUseCase(
       return Either.Error("Du kannst innerhalb der Kernzeit maximal 1 Stunde am Stueck buchen.")
     }
 
-    if (command.date != LocalDate.now()) {
-      if (command.date.isAfter(LocalDate.now().plusDays(14L))) {
-        return Either.Error("Du kannst maximal 14 Tage im vorraus Buchen.")
-      }
+    // 4. Cannot book 14 Days into the future
+    if (command.date.isAfter(LocalDate.now().plusDays(14L))) {
+      return Either.Error("Du kannst maximal 14 Tage im vorraus Buchen.")
+    }
 
-      // 5. If you already have a booking
-      if (reservationRepository.findByCreatorIdAndDateGreaterThanEqual(command.creatorId, LocalDate.now())
-          .isNotEmpty()
-      ) {
-        return Either.Error("Du kannst maximal 1 Buchung im vorraus taetigen.")
-      }
+    // 5. If you already have a booking
+    // BUT: Can always book on the same day
+    if (command.date != LocalDate.now() || reservationRepository.findByCreatorIdAndDateGreaterThanEqual(
+        command.creatorId,
+        LocalDate.now()
+      ).isNotEmpty()
+    ) {
+      return Either.Error("Du kannst maximal 1 Buchung im vorraus taetigen.")
     }
 
     reservationRepository.save(reservation)

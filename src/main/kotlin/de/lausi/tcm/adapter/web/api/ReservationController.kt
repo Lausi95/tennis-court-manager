@@ -4,7 +4,9 @@ import de.lausi.tcm.adapter.web.PageAssembler
 import de.lausi.tcm.adapter.web.userId
 import de.lausi.tcm.adapter.web.userInfo
 import de.lausi.tcm.application.reservation.*
-import de.lausi.tcm.domain.model.*
+import de.lausi.tcm.domain.model.CourtId
+import de.lausi.tcm.domain.model.MemberId
+import de.lausi.tcm.domain.model.ReservationId
 import org.springframework.stereotype.Controller
 import org.springframework.ui.Model
 import org.springframework.web.bind.annotation.*
@@ -29,7 +31,6 @@ class ReservationController(
   private val getReservationsUseCase: GetReservationsUseCase,
   private val createReservationUseCase: CreateReservationUseCase,
   private val cancelReservationUseCase: CancelReservationUseCase,
-  private val courtRepository: CourtRepository
 ) {
 
   @GetMapping
@@ -72,8 +73,8 @@ class ReservationController(
     return runContext(createReservationUseCase.context(principal.userId(), params), model) {
       model.memberEntity(it.self)
       model.memberCollection(it.members)
-      model.courtCollection(courtRepository.findAll())
-      model.slotCollection(SlotRepository.findAll())
+      model.courtCollection(it.courts)
+      model.slotCollection(it.slots)
       model.userInfo(principal)
       "views/reservations/create"
     }
