@@ -22,7 +22,7 @@ private data class MongoBallmachineBooking(
     date,
     Slot(slot),
     MemberId(memberId),
-    BallmachineBookingPassCode(passCode),
+    BallmachinePassCode(passCode),
     BallmachineBookingId(id),
   )
 }

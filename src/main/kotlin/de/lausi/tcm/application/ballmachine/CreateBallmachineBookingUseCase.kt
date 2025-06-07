@@ -28,7 +28,8 @@ class CreateBallmachineBookingUseCase(
   private val ballmachineBookingRepository: BallmachineBookingRepository,
   private val occupancyPlanService: OccupancyPlanService,
   private val ballmachineBookingOccupancyPlanResolver: BallmachineBookingOccupancyPlanResolver,
-  private val courtRepository: CourtRepository
+  private val courtRepository: CourtRepository,
+  private val ballmachinePasscodeResolver: BallmachinePasscodeResolver,
 ) :
   UseCase<Nothing?, CreateBallmachineBookingContext, CreateBallmachineBookingCommand, CreateBallmachineBookingResult, String> {
 
@@ -47,7 +48,7 @@ class CreateBallmachineBookingUseCase(
 
   override fun checkCommandPermission(
     userId: MemberId,
-    command: CreateBallmachineBookingCommand
+    command: CreateBallmachineBookingCommand,
   ): Boolean {
     return permissions.assertGroup(userId, MemberGroup.BALLMACHINE)
   }
@@ -60,7 +61,7 @@ class CreateBallmachineBookingUseCase(
       command.date,
       slot,
       command.memberId,
-      BallmachineBookingPassCode("123"), // TODO Passcode
+      ballmachinePasscodeResolver.getPasscode(command.date.dayOfWeek, slot)
     )
 
     // 1. Cannot use ballmachine, when it is preoccupied
@@ -73,24 +74,25 @@ class CreateBallmachineBookingUseCase(
       return Either.Error("Die Ballmaschine ist zur dieser Zeit schon in Benutzung.")
     }
 
-    // 2. Cannot use ballmachine in the coretime
-    if (slot.isCore() || slot.plus(2).isCore()) {
-      return Either.Error("Die Ballmaschine kann nicht in der Kernzeit benutzt werden.")
-    }
 
     // 3. Cannot book 14 Days into the future
     if (command.date.isAfter(LocalDate.now().plusDays(14L))) {
       return Either.Error("Du kannst maximal 14 Tage im vorraus Buchen.")
     }
 
-    // 4. If you already have a booking
     // BUT: Can always book on the same day
-    if (command.date != LocalDate.now() || ballmachineBookingRepository.findByMemberIdAndDateGreaterThanEqual(
-        command.memberId,
-        LocalDate.now()
-      ).isNotEmpty()
-    ) {
-      return Either.Error("Du kannst maximal 1 Buchung im vorraus taetigen.")
+    if (command.date != LocalDate.now()) {
+      // 4. If you already have a booking
+      if (ballmachineBookingRepository.findByMemberIdAndDateGreaterThanEqual(command.memberId, LocalDate.now())
+          .isNotEmpty()
+      ) {
+        return Either.Error("Du kannst maximal 1 Buchung im vorraus taetigen.")
+      }
+
+      // 2. Cannot use ballmachine in the coretime
+      if (slot.isCore() || slot.plus(2).isCore()) {
+        return Either.Error("Die Ballmaschine kann nicht in der Kernzeit benutzt werden.")
+      }
     }
 
     ballmachineBookingRepository.save(ballmachineBooking)
