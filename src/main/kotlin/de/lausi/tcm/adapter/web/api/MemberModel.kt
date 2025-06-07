@@ -14,6 +14,7 @@ data class MemberModel(
   val isEventManager: Boolean,
   val isTrainer: Boolean,
   val isTeamCaptain: Boolean,
+  val isBallmachine: Boolean,
   val links: Map<String, String>,
 )
 
@@ -27,6 +28,7 @@ fun Member.toModel() = MemberModel(
   groups.contains(MemberGroup.EVENT_MANAGEMENT),
   groups.contains(MemberGroup.TRAINER),
   groups.contains(MemberGroup.TEAM_CAPTAIN),
+  groups.contains(MemberGroup.BALLMACHINE),
   mapOf(
     "self" to "/members/${id.value}",
     "edit" to "/members/${id.value}/edit",

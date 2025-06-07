@@ -28,6 +28,11 @@
             <input type="checkbox" id="trainer" name="trainer" th:checked="${member.isTrainer}"/><label
                 for="trainer">Trainer</label>
         </div>
+
+        <div class="flex gap-2">
+            <input type="checkbox" id="ballmachine" name="ballmachine" th:checked="${member.isBallmachine}"/><label
+                for="trainer">Ballmaschine</label>
+        </div>
     </div>
 
     <th:block th:replace="~{components/inputs :: submit('Speichern', '/members/collection')}"/>

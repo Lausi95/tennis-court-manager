@@ -22,6 +22,7 @@ data class UpdateMemberRequest(
   val eventManager: String?,
   val teamCaptain: String?,
   val trainer: String?,
+  val ballmachine: String?,
 )
 
 @Controller
@@ -75,6 +76,7 @@ class MemberController(
         MemberGroup.TEAM_CAPTAIN to (request.teamCaptain == "on"),
         MemberGroup.TRAINER to (request.trainer == "on"),
         MemberGroup.EVENT_MANAGEMENT to (request.eventManager == "on"),
+        MemberGroup.BALLMACHINE to (request.ballmachine == "on"),
       ),
     )
 

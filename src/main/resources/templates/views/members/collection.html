@@ -2,6 +2,13 @@
 
 <div th:each="member: ${memberCollection.items}" class="text-xs bg-blue-900 text-white rounded p-2">
     <div class="font-bold" th:text="${member.fullname}"></div>
+    <div class="italic flex gap-3">
+        <div th:if="${member.isAdmin}">Admin</div>
+        <div th:if="${member.isEventManager}">Event Manager*in</div>
+        <div th:if="${member.isTrainer}">Trainer*in</div>
+        <div th:if="${member.isTeamCaptain}">Team Captain</div>
+        <div th:if="${member.isBallmachine}">Ballmaschine</div>
+    </div>
 
     <th:block th:replace="~{components/button :: item-operations(${member})}"/>
 </div>

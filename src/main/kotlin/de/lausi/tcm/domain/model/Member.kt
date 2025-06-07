@@ -17,6 +17,7 @@ enum class MemberGroup {
   EVENT_MANAGEMENT,
   TEAM_CAPTAIN,
   TRAINER,
+  BALLMACHINE,
 }
 
 data class Member(
