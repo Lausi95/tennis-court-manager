@@ -1,11 +1,7 @@
 package de.lausi.tcm.adapter.web.api
 
 import de.lausi.tcm.domain.model.Court
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
 import org.springframework.ui.Model
-
-private val log: Logger = LoggerFactory.getLogger(CourtModel::class.java)
 
 data class CourtModel(
   val id: String,

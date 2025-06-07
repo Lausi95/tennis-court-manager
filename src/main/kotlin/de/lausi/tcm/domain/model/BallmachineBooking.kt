@@ -51,6 +51,6 @@ class BallmachineBookingOccupancyPlanResolver(
   fun BallmachineBooking.toBlock(): Block {
     val member = memberRepository.findById(this.memberId) ?: error("member not found")
     val description = "Ballmaschine ${member.formatName()}"
-    return Block(BlockType.BALLMACHINE, slot, slot.plus(1), description)
+    return Block(BlockType.BALLMACHINE, slot, slot.plus(2), description)
   }
 }

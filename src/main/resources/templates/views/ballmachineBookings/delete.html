@@ -1,0 +1,8 @@
+<th:block th:replace="~{components/title :: title('Ballmaschinen-Reservierung Stornieren')}"/>
+<th:block th:replace="~{components/error :: error}"/>
+
+<form th:hx-post="${ballmachineBooking.links['delete']}" hx-target="#view" class="grid grid-cols-2 gap-2">
+    Willst du die Ballmaschinen-Reservierung wirklich Stornieren?
+
+    <th:block th:replace="~{components/inputs :: submit('Stornieren', '/ballmachine-bookings/collection')}"/>
+</form>

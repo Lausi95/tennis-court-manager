@@ -12,12 +12,12 @@ data class MemberFirstname(val value: String) : Comparable<MemberFirstname> {
 
 data class MemberLastname(val value: String)
 
-enum class MemberGroup {
-  ADMIN,
-  EVENT_MANAGEMENT,
-  TEAM_CAPTAIN,
-  TRAINER,
-  BALLMACHINE,
+enum class MemberGroup(val adminArea: Boolean) {
+  ADMIN(true),
+  EVENT_MANAGEMENT(true),
+  TEAM_CAPTAIN(true),
+  TRAINER(true),
+  BALLMACHINE(false),
 }
 
 data class Member(

@@ -6,21 +6,16 @@ import de.lausi.tcm.application.UseCaseComponent
 import de.lausi.tcm.domain.model.*
 import java.time.LocalDate
 
-data class CreateBallmachineBookingContextParams(
-  val memberId: MemberId,
-)
-
 data class CreateBallmachineBookingContext(
-  val member: Member,
   val courts: List<Court>,
   val slots: List<Slot>,
 )
 
 data class CreateBallmachineBookingCommand(
+  val memberId: MemberId,
   val courtId: CourtId,
   val date: LocalDate,
   val slotIndex: Int,
-  val memberId: MemberId,
 )
 
 data class CreateBallmachineBookingResult(
@@ -30,26 +25,24 @@ data class CreateBallmachineBookingResult(
 @UseCaseComponent
 class CreateBallmachineBookingUseCase(
   private val permissions: Permissions,
-  private val memberRepository: MemberRepository,
   private val ballmachineBookingRepository: BallmachineBookingRepository,
   private val occupancyPlanService: OccupancyPlanService,
   private val ballmachineBookingOccupancyPlanResolver: BallmachineBookingOccupancyPlanResolver,
   private val courtRepository: CourtRepository
 ) :
-  UseCase<CreateBallmachineBookingContextParams, CreateBallmachineBookingContext, CreateBallmachineBookingCommand, CreateBallmachineBookingResult, String> {
+  UseCase<Nothing?, CreateBallmachineBookingContext, CreateBallmachineBookingCommand, CreateBallmachineBookingResult, String> {
 
   override fun checkContextPermission(
     userId: MemberId,
-    contextParams: CreateBallmachineBookingContextParams
+    contextParams: Nothing?
   ): Boolean {
     return permissions.assertGroup(userId, MemberGroup.BALLMACHINE)
   }
 
-  override fun getContext(params: CreateBallmachineBookingContextParams): Either<CreateBallmachineBookingContext, String> {
-    val member = memberRepository.findById(params.memberId) ?: return Either.Error("Member not found")
+  override fun getContext(params: Nothing?): Either<CreateBallmachineBookingContext, String> {
     val courts = courtRepository.findAll()
     val slots = SlotRepository.findAll()
-    return Either.Success(CreateBallmachineBookingContext(member, courts, slots))
+    return Either.Success(CreateBallmachineBookingContext(courts, slots))
   }
 
   override fun checkCommandPermission(

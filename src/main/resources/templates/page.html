@@ -54,6 +54,19 @@
             </div>
         </th:block>
 
+        <!-- Ballmachine -->
+        <th:block th:if="${links.contains('Ballmachine')}">
+            <div th:if="${currentPage == 'Ballmachine'}" class="border-b-2 p-4 border-gray-500 flex gap-3 items-center">
+                <i class="fa-solid fa-baseball"></i>
+                <a class="font-bold" href="/ballmachine-bookings">Ballmaschine</a>
+            </div>
+            <div th:unless="${currentPage == 'Ballmachine'}"
+                 class="border-b p-4 border-gray-300 flex gap-3 items-center text-gray-500">
+                <i class="fa-solid fa-baseball"></i>
+                <a href="/ballmachine-bookings">Ballmaschine</a>
+            </div>
+        </th:block>
+
         <div class="flex-grow border-b border-gray-300"></div>
         <div></div>
         <a href="/logout" class="border-b border-gray-300 p-4 text-gray-500"><i

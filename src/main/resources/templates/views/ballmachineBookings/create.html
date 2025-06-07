@@ -1,0 +1,18 @@
+<th:block th:replace="~{components/title :: title('Ballmaschine Buchen')}"/>
+<th:block th:replace="~{components/error :: error}"/>
+
+<form hx-post="/ballmachine-bookings/create" hx-target="#view" class="grid grid-cols-2 gap-2">
+    <div class="col-span-2">
+        <th:block th:replace="~{components/inputs :: date('date')}"/>
+    </div>
+
+    <div class="col-span-2">
+        <th:block th:replace="~{components/inputs :: court('courtId')}"/>
+    </div>
+
+    <div class="col-span-2">
+        <th:block th:replace="~{components/inputs :: fromSlot('slotId')}"/>
+    </div>
+
+    <th:block th:replace="~{components/inputs :: submit('Buchen', '/ballmachine-bookings/collection')}"/>
+</form>
