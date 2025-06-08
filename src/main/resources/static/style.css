@@ -237,6 +237,120 @@
   .row-span-12 {
     grid-row: span 12 / span 12;
   }
+  .row-span-13 {
+    grid-row: span 13 / span 13;
+  }
+  .row-span-14 {
+    grid-row: span 14 / span 14;
+  }
+  .row-span-15 {
+    grid-row: span 15 / span 15;
+  }
+  .row-span-16 {
+    grid-row: span 16 / span 16;
+  }
+  .row-span-17 {
+    grid-row: span 17 / span 17;
+  }
+  .row-span-18 {
+    grid-row: span 18 / span 18;
+  }
+  .row-span-19 {
+    grid-row: span 19 / span 19;
+  }
+  .row-span-20 {
+    grid-row: span 20 / span 20;
+  }
+  .row-span-21 {
+    grid-row: span 21 / span 21;
+  }
+  .row-span-22 {
+    grid-row: span 22 / span 22;
+  }
+  .row-span-23 {
+    grid-row: span 23 / span 23;
+  }
+  .row-span-24 {
+    grid-row: span 24 / span 24;
+  }
+  .row-span-25 {
+    grid-row: span 25 / span 25;
+  }
+  .row-span-26 {
+    grid-row: span 26 / span 26;
+  }
+  .row-span-27 {
+    grid-row: span 27 / span 27;
+  }
+  .row-span-28 {
+    grid-row: span 28 / span 28;
+  }
+  .row-span-29 {
+    grid-row: span 29 / span 29;
+  }
+  .row-span-30 {
+    grid-row: span 30 / span 30;
+  }
+  .row-span-31 {
+    grid-row: span 31 / span 31;
+  }
+  .row-span-32 {
+    grid-row: span 32 / span 32;
+  }
+  .row-span-33 {
+    grid-row: span 33 / span 33;
+  }
+  .row-span-34 {
+    grid-row: span 34 / span 34;
+  }
+  .row-span-35 {
+    grid-row: span 35 / span 35;
+  }
+  .row-span-36 {
+    grid-row: span 36 / span 36;
+  }
+  .row-span-37 {
+    grid-row: span 37 / span 37;
+  }
+  .row-span-38 {
+    grid-row: span 38 / span 38;
+  }
+  .row-span-39 {
+    grid-row: span 39 / span 39;
+  }
+  .row-span-40 {
+    grid-row: span 40 / span 40;
+  }
+  .row-span-41 {
+    grid-row: span 41 / span 41;
+  }
+  .row-span-42 {
+    grid-row: span 42 / span 42;
+  }
+  .row-span-43 {
+    grid-row: span 43 / span 43;
+  }
+  .row-span-44 {
+    grid-row: span 44 / span 44;
+  }
+  .row-span-45 {
+    grid-row: span 45 / span 45;
+  }
+  .row-span-46 {
+    grid-row: span 46 / span 46;
+  }
+  .row-span-47 {
+    grid-row: span 47 / span 47;
+  }
+  .row-span-48 {
+    grid-row: span 48 / span 48;
+  }
+  .row-span-49 {
+    grid-row: span 49 / span 49;
+  }
+  .row-span-50 {
+    grid-row: span 50 / span 50;
+  }
   .m-4 {
     margin: calc(var(--spacing) * 4);
   }
@@ -282,8 +396,65 @@
   .grid-cols-3 {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
+  .grid-rows-30 {
+    grid-template-rows: repeat(30, minmax(0, 1fr));
+  }
+  .grid-rows-31 {
+    grid-template-rows: repeat(31, minmax(0, 1fr));
+  }
+  .grid-rows-32 {
+    grid-template-rows: repeat(32, minmax(0, 1fr));
+  }
   .grid-rows-33 {
     grid-template-rows: repeat(33, minmax(0, 1fr));
+  }
+  .grid-rows-34 {
+    grid-template-rows: repeat(34, minmax(0, 1fr));
+  }
+  .grid-rows-35 {
+    grid-template-rows: repeat(35, minmax(0, 1fr));
+  }
+  .grid-rows-36 {
+    grid-template-rows: repeat(36, minmax(0, 1fr));
+  }
+  .grid-rows-37 {
+    grid-template-rows: repeat(37, minmax(0, 1fr));
+  }
+  .grid-rows-38 {
+    grid-template-rows: repeat(38, minmax(0, 1fr));
+  }
+  .grid-rows-39 {
+    grid-template-rows: repeat(39, minmax(0, 1fr));
+  }
+  .grid-rows-40 {
+    grid-template-rows: repeat(40, minmax(0, 1fr));
+  }
+  .grid-rows-41 {
+    grid-template-rows: repeat(41, minmax(0, 1fr));
+  }
+  .grid-rows-42 {
+    grid-template-rows: repeat(42, minmax(0, 1fr));
+  }
+  .grid-rows-43 {
+    grid-template-rows: repeat(43, minmax(0, 1fr));
+  }
+  .grid-rows-44 {
+    grid-template-rows: repeat(44, minmax(0, 1fr));
+  }
+  .grid-rows-45 {
+    grid-template-rows: repeat(45, minmax(0, 1fr));
+  }
+  .grid-rows-46 {
+    grid-template-rows: repeat(46, minmax(0, 1fr));
+  }
+  .grid-rows-47 {
+    grid-template-rows: repeat(47, minmax(0, 1fr));
+  }
+  .grid-rows-48 {
+    grid-template-rows: repeat(48, minmax(0, 1fr));
+  }
+  .grid-rows-49 {
+    grid-template-rows: repeat(49, minmax(0, 1fr));
   }
   .flex-col {
     flex-direction: column;
@@ -528,8 +699,65 @@
 * {
   font-family: "Roboto", sans-serif;
 }
-.grid-rows-33 {
+.grid-rows-30 {
+  grid-template-rows: repeat(30, minmax(0, 1fr));
+}
+.grid-rows-31 {
   grid-template-rows: repeat(31, minmax(0, 1fr));
+}
+.grid-rows-32 {
+  grid-template-rows: repeat(32, minmax(0, 1fr));
+}
+.grid-rows-33 {
+  grid-template-rows: repeat(33, minmax(0, 1fr));
+}
+.grid-rows-34 {
+  grid-template-rows: repeat(34, minmax(0, 1fr));
+}
+.grid-rows-35 {
+  grid-template-rows: repeat(35, minmax(0, 1fr));
+}
+.grid-rows-36 {
+  grid-template-rows: repeat(36, minmax(0, 1fr));
+}
+.grid-rows-37 {
+  grid-template-rows: repeat(37, minmax(0, 1fr));
+}
+.grid-rows-38 {
+  grid-template-rows: repeat(38, minmax(0, 1fr));
+}
+.grid-rows-39 {
+  grid-template-rows: repeat(39, minmax(0, 1fr));
+}
+.grid-rows-40 {
+  grid-template-rows: repeat(40, minmax(0, 1fr));
+}
+.grid-rows-41 {
+  grid-template-rows: repeat(41, minmax(0, 1fr));
+}
+.grid-rows-42 {
+  grid-template-rows: repeat(42, minmax(0, 1fr));
+}
+.grid-rows-43 {
+  grid-template-rows: repeat(43, minmax(0, 1fr));
+}
+.grid-rows-44 {
+  grid-template-rows: repeat(44, minmax(0, 1fr));
+}
+.grid-rows-45 {
+  grid-template-rows: repeat(45, minmax(0, 1fr));
+}
+.grid-rows-46 {
+  grid-template-rows: repeat(46, minmax(0, 1fr));
+}
+.grid-rows-47 {
+  grid-template-rows: repeat(47, minmax(0, 1fr));
+}
+.grid-rows-48 {
+  grid-template-rows: repeat(48, minmax(0, 1fr));
+}
+.grid-rows-49 {
+  grid-template-rows: repeat(49, minmax(0, 1fr));
 }
 @property --tw-border-style {
   syntax: "*";

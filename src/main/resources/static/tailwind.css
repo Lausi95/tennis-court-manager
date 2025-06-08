@@ -9,6 +9,82 @@
     font-family: "Roboto", sans-serif;
 }
 
-.grid-rows-33 {
+.grid-rows-30 {
+    grid-template-rows: repeat(30, minmax(0, 1fr));
+}
+
+.grid-rows-31 {
     grid-template-rows: repeat(31, minmax(0, 1fr));
+}
+
+.grid-rows-32 {
+    grid-template-rows: repeat(32, minmax(0, 1fr));
+}
+
+.grid-rows-33 {
+    grid-template-rows: repeat(33, minmax(0, 1fr));
+}
+
+.grid-rows-34 {
+    grid-template-rows: repeat(34, minmax(0, 1fr));
+}
+
+.grid-rows-35 {
+    grid-template-rows: repeat(35, minmax(0, 1fr));
+}
+
+.grid-rows-36 {
+    grid-template-rows: repeat(36, minmax(0, 1fr));
+}
+
+.grid-rows-37 {
+    grid-template-rows: repeat(37, minmax(0, 1fr));
+}
+
+.grid-rows-38 {
+    grid-template-rows: repeat(38, minmax(0, 1fr));
+}
+
+.grid-rows-39 {
+    grid-template-rows: repeat(39, minmax(0, 1fr));
+}
+
+.grid-rows-40 {
+    grid-template-rows: repeat(40, minmax(0, 1fr));
+}
+
+.grid-rows-41 {
+    grid-template-rows: repeat(41, minmax(0, 1fr));
+}
+
+.grid-rows-42 {
+    grid-template-rows: repeat(42, minmax(0, 1fr));
+}
+
+.grid-rows-43 {
+    grid-template-rows: repeat(43, minmax(0, 1fr));
+}
+
+.grid-rows-44 {
+    grid-template-rows: repeat(44, minmax(0, 1fr));
+}
+
+.grid-rows-45 {
+    grid-template-rows: repeat(45, minmax(0, 1fr));
+}
+
+.grid-rows-46 {
+    grid-template-rows: repeat(46, minmax(0, 1fr));
+}
+
+.grid-rows-47 {
+    grid-template-rows: repeat(47, minmax(0, 1fr));
+}
+
+.grid-rows-48 {
+    grid-template-rows: repeat(48, minmax(0, 1fr));
+}
+
+.grid-rows-49 {
+    grid-template-rows: repeat(49, minmax(0, 1fr));
 }
