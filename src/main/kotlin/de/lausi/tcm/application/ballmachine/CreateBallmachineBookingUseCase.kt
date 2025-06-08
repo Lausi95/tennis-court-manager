@@ -26,10 +26,10 @@ data class CreateBallmachineBookingResult(
 class CreateBallmachineBookingUseCase(
   private val permissions: Permissions,
   private val ballmachineBookingRepository: BallmachineBookingRepository,
-  private val occupancyPlanService: OccupancyPlanService,
   private val ballmachineBookingOccupancyPlanResolver: BallmachineBookingOccupancyPlanResolver,
   private val courtRepository: CourtRepository,
   private val ballmachinePasscodeResolver: BallmachinePasscodeResolver,
+  private val occupancyPlanService: OccupancyPlanService,
 ) :
   UseCase<Nothing?, CreateBallmachineBookingContext, CreateBallmachineBookingCommand, CreateBallmachineBookingResult, String> {
 
@@ -66,14 +66,20 @@ class CreateBallmachineBookingUseCase(
 
     // 1. Cannot use ballmachine, when it is preoccupied
     val courtIds = courtRepository.findAll().map { it.id }
-    val occupancyPlan = occupancyPlanService.getOccupancyPlan(command.date, courtIds)
+    val ballmachineOccupancyPlanService = OccupancyPlanService(listOf(ballmachineBookingOccupancyPlanResolver))
+    val ballmachineOccupancyPlan = ballmachineOccupancyPlanService.getOccupancyPlan(command.date, courtIds)
     val block = with(ballmachineBookingOccupancyPlanResolver) {
       ballmachineBooking.toBlock()
     }
-    if (!courtIds.all { occupancyPlan.canPlace(it, block) }) {
+    if (!courtIds.all { ballmachineOccupancyPlan.canPlace(it, block) }) {
       return Either.Error("Die Ballmaschine ist zur dieser Zeit schon in Benutzung.")
     }
 
+    // 2. Cannot boock when something else is on the court
+    val occupancyPlan = occupancyPlanService.getOccupancyPlan(command.date, courtIds)
+    if (!occupancyPlan.canPlace(command.courtId, block)) {
+      return Either.Error("Der Platz ist um diese Zeit schon belegt.")
+    }
 
     // 3. Cannot book 14 Days into the future
     if (command.date.isAfter(LocalDate.now().plusDays(14L))) {
@@ -89,7 +95,7 @@ class CreateBallmachineBookingUseCase(
         return Either.Error("Du kannst maximal 1 Buchung im vorraus taetigen.")
       }
 
-      // 2. Cannot use ballmachine in the coretime
+      // 5. Cannot use ballmachine in the coretime
       if (slot.isCore() || slot.plus(2).isCore()) {
         return Either.Error("Die Ballmaschine kann nicht in der Kernzeit benutzt werden.")
       }
