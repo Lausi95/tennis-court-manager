@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestMapping
 import java.security.Principal
 import java.time.DayOfWeek
+import java.time.LocalDate
 
 data class CreateTrainingRequest(
   val dayOfWeek: DayOfWeek,
@@ -58,7 +59,7 @@ class TrainingController(
     return runContext(createTraingUseCase.context(principal.userId(), NOTHING), model) {
       model.courtCollection(it.courts)
       model.dayOfWeekCollection()
-      model.slotCollection(SlotRepository.findAll())
+      model.slotCollection(SlotRepository.findAll(), LocalDate.now())
       "views/trainings/create"
     }
   }

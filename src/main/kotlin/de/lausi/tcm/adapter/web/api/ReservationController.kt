@@ -74,7 +74,7 @@ class ReservationController(
       model.memberEntity(it.self)
       model.memberCollection(it.members)
       model.courtCollection(it.courts)
-      model.slotCollection(it.slots)
+      model.slotCollection(it.slots, LocalDate.now())
       model.userInfo(principal)
       "views/reservations/create"
     }

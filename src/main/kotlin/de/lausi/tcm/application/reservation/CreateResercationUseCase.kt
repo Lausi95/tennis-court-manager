@@ -119,7 +119,7 @@ class CreateReservationUseCase(
     if (command.date != LocalDate.now()
     ) {
       // 3. Max 1 Hour in core time
-      if ((fromSlot.isCore() || toSlot.isCore()) && Slot.distance(fromSlot, toSlot) > 2) {
+      if ((fromSlot.isCore(command.date) || toSlot.isCore(command.date)) && Slot.distance(fromSlot, toSlot) > 2) {
         return Either.Error("Du kannst innerhalb der Kernzeit maximal 1 Stunde am Stueck buchen.")
       }
 

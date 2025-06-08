@@ -96,7 +96,7 @@ class CreateBallmachineBookingUseCase(
       }
 
       // 5. Cannot use ballmachine in the coretime
-      if (slot.isCore() || slot.plus(2).isCore()) {
+      if (slot.isCore(command.date) || slot.plus(2).isCore(command.date)) {
         return Either.Error("Die Ballmaschine kann nicht in der Kernzeit benutzt werden.")
       }
     }

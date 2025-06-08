@@ -1,5 +1,8 @@
 package de.lausi.tcm.domain.model
 
+import java.time.DayOfWeek
+import java.time.LocalDate
+
 const val MIN_SLOT = 14
 const val MAX_SLOT = 43
 
@@ -57,7 +60,11 @@ data class Slot(
     return Slot(index + duration - 1)
   }
 
-  fun isCore(): Boolean {
+  fun isCore(date: LocalDate): Boolean {
+    if (date.dayOfWeek == DayOfWeek.SATURDAY || date.dayOfWeek == DayOfWeek.SUNDAY) {
+      return false
+    }
+
     return index >= (17 * 2) && index < (21 * 2)
   }
 }

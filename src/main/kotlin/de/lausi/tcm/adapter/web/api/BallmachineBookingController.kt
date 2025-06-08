@@ -55,7 +55,7 @@ private class BallmachineBookingController(
   fun getCreateBallmachineBooking(principal: Principal, model: Model): String {
     return runContext(createBallmachineBookingUseCase.context(principal.userId(), null), model) {
       model.courtCollection(it.courts)
-      model.slotCollection(it.slots)
+      model.slotCollection(it.slots, LocalDate.now())
       "views/ballmachineBookings/create"
     }
   }

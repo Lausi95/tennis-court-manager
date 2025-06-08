@@ -53,7 +53,7 @@ class EventController(
   @GetMapping("/create")
   fun getCreateEvent(principal: Principal, model: Model): String {
     return runContext(createEventUseCase.context(principal.userId(), NOTHING), model) {
-      model.slotCollection(SlotRepository.findAll())
+      model.slotCollection(SlotRepository.findAll(), LocalDate.now())
       model.courtCollection(it.courts)
       "views/events/create"
     }

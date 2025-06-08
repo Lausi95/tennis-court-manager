@@ -2,6 +2,7 @@ package de.lausi.tcm.adapter.web.api
 
 import de.lausi.tcm.domain.model.Slot
 import org.springframework.ui.Model
+import java.time.LocalDate
 
 data class SlotModel(
   val id: Int,
@@ -11,18 +12,18 @@ data class SlotModel(
   val links: Map<String, String> = mapOf(),
 )
 
-fun Slot.toModel(): SlotModel = SlotModel(
+fun Slot.toModel(date: LocalDate): SlotModel = SlotModel(
   this.index,
   this.formatFromTime(),
   this.formatToTime(),
-  this.isCore(),
+  this.isCore(date),
   mapOf(
     "self" to "/api/slots/$this"
   ),
 )
 
-fun Model.slotEntity(slot: Slot) {
-  addAttribute("slot", slot.toModel())
+fun Model.slotEntity(slot: Slot, date: LocalDate) {
+  addAttribute("slot", slot.toModel(date))
 }
 
 data class SlotCollection(
@@ -30,16 +31,16 @@ data class SlotCollection(
   val links: Map<String, String> = mapOf(),
 )
 
-fun List<Slot>.toCollection(): SlotCollection {
+fun List<Slot>.toCollection(date: LocalDate): SlotCollection {
   return SlotCollection(
-    map { it.toModel() },
+    map { it.toModel(date) },
     mapOf(
       "self" to "/api/slots"
     ),
   )
 }
 
-fun Model.slotCollection(slots: List<Slot>) {
-  addAttribute("slotCollection", slots.toCollection())
+fun Model.slotCollection(slots: List<Slot>, date: LocalDate) {
+  addAttribute("slotCollection", slots.toCollection(date))
 }
 

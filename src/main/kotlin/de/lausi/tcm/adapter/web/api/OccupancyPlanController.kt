@@ -135,7 +135,7 @@ class OccupancyPlanController(
           Slot.distance(it.fromSlot, it.toSlot),
           Slot.formatDuration(it.fromSlot, it.toSlot),
           it.description,
-          it.fromSlot.isCore(),
+          it.fromSlot.isCore(planDate),
           blockLinks,
         )
       }

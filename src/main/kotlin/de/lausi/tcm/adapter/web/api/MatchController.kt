@@ -53,7 +53,7 @@ class MatchController(
     return runContext(createMatchUseCase.context(principal.userId(), NOTHING), model) {
       model.courtCollection(it.courts)
       model.teamCollection(it.teams, it.captains)
-      model.slotCollection(SlotRepository.findAll())
+      model.slotCollection(SlotRepository.findAll(), LocalDate.now())
       "views/matches/create"
     }
   }
