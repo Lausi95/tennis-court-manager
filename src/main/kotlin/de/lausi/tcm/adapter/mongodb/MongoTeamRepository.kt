@@ -10,7 +10,7 @@ import org.springframework.stereotype.Component
 private data class MongoTeam(
   @Id val id: String,
   val name: String,
-  val captainId: String,
+  val captainId: String?,
 ) {
 
   fun toModel(): Team = Team(
