@@ -1,10 +1,6 @@
 package de.lausi.tcm.adapter.mongodb
 
-import de.lausi.tcm.domain.model.Team
-import de.lausi.tcm.domain.model.TeamId
-import de.lausi.tcm.domain.model.TeamName
-import de.lausi.tcm.domain.model.TeamRepository
-import de.lausi.tcm.domain.model.MemberId
+import de.lausi.tcm.domain.model.*
 import org.springframework.data.annotation.Id
 import org.springframework.data.mongodb.core.mapping.Document
 import org.springframework.data.mongodb.repository.MongoRepository
@@ -19,18 +15,18 @@ private data class MongoTeam(
 
   fun toModel(): Team = Team(
     TeamName(name),
-    MemberId(captainId),
+    MemberId("tom.lausmann"),
     TeamId(id),
   )
 }
 
-private interface MongoTeamRepository: MongoRepository<MongoTeam, String> {
+private interface MongoTeamRepository : MongoRepository<MongoTeam, String> {
 
   fun existsByName(name: String): Boolean
 }
 
 @Component
-private class TeamRepositoryImpl(private val mongoRepository: MongoTeamRepository): TeamRepository {
+private class TeamRepositoryImpl(private val mongoRepository: MongoTeamRepository) : TeamRepository {
 
   override fun existsById(teamId: TeamId): Boolean {
     return mongoRepository.existsById(teamId.value)
@@ -49,11 +45,13 @@ private class TeamRepositoryImpl(private val mongoRepository: MongoTeamRepositor
   }
 
   override fun save(team: Team): Team {
-    return mongoRepository.save(MongoTeam(
-      team.id.value,
-      team.name.value,
-      team.captainId.value,
-    )).toModel()
+    return mongoRepository.save(
+      MongoTeam(
+        team.id.value,
+        team.name.value,
+        team.captainId.value,
+      )
+    ).toModel()
   }
 
   override fun delete(teamId: TeamId) {
