@@ -86,6 +86,8 @@ class CreateReservationUseCase(
     val toSlot = SlotRepository.findByIndex(command.toSlotIndex)
       ?: return Either.Error(listOf("Endzeit existiert nicht"))
 
+    val slots = listOf(fromSlot, toSlot)
+
     val reservation = Reservation(
       command.courtId,
       command.date,
@@ -95,7 +97,7 @@ class CreateReservationUseCase(
       command.playerIds,
     )
 
-    // 1. No Reservation, when something is on the same time
+    // No Reservation, when something is on the same time
     val occupancyPlan = occupancyPlanService.getOccupancyPlan(command.date, listOf(command.courtId))
     val block = with(reservationOccupancyPlanResolver) {
       reservation.toBlock()
@@ -104,13 +106,13 @@ class CreateReservationUseCase(
       return Either.Error("Zur dieser zeit ist der Platz bereits belegt.")
     }
 
-    // 2. Max 2 Hours
+    // Max 2 Hours
     if (Slot.distance(fromSlot, toSlot) > 4) {
       return Either.Error("Du kannst ausserhalb der kernzeit maximal 2 Stunden am Stueck buchen.")
     }
 
 
-    // 4. Cannot book 14 Days into the future
+    // Cannot book 14 Days into the future
     if (command.date.isAfter(LocalDate.now().plusDays(14L))) {
       return Either.Error("Du kannst maximal 14 Tage im vorraus Buchen.")
     }
@@ -118,15 +120,31 @@ class CreateReservationUseCase(
     // BUT: Can always book on the same day
     if (command.date != LocalDate.now()
     ) {
-      // 3. Max 1 Hour in core time
+      // Max 1 Hour in core time
       if ((fromSlot.isCore(command.date) || toSlot.isCore(command.date)) && Slot.distance(fromSlot, toSlot) > 2) {
         return Either.Error("Du kannst innerhalb der Kernzeit maximal 1 Stunde am Stueck buchen.")
       }
 
-      // 5. If you already have a booking
-      if (reservationRepository.findByCreatorIdAndDateGreaterThanEqual(command.creatorId, LocalDate.now()).isNotEmpty()
-      ) {
-        return Either.Error("Du kannst maximal 1 Buchung im vorraus taetigen.")
+      // Max 1 Coretime booking
+      val futureReservations =
+        reservationRepository.findByCreatorIdAndDateGreaterThanEqual(command.creatorId, LocalDate.now().plusDays(1L))
+      if (slots.any { it.isCore(command.date) } && futureReservations.any {
+          listOf(
+            it.fromSlot,
+            it.toSlot
+          ).any { slot -> slot.isCore(it.date) }
+        }) {
+        return Either.Error("Du kannst maximal 1 Kernzeitbuchung in der Zukunft haben.")
+      }
+
+      // If you already have a booking
+      if (futureReservations.size >= 2) {
+        return Either.Error("Du kannst maximal 2 Buchungen in der Zukunft haben")
+      }
+
+      // Max one booking on the same day
+      if (futureReservations.any { it.date == command.date }) {
+        return Either.Error("Du kannst maximal 1 Reservierung am selben tag haben.")
       }
     }
 
