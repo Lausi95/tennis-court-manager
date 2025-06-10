@@ -137,11 +137,6 @@ class CreateReservationUseCase(
         return Either.Error("Du kannst maximal 1 Kernzeitbuchung in der Zukunft haben.")
       }
 
-      // If you already have a booking
-      if (futureReservations.size >= 2) {
-        return Either.Error("Du kannst maximal 2 Buchungen in der Zukunft haben")
-      }
-
       // Max one booking on the same day
       if (futureReservations.any { it.date == command.date }) {
         return Either.Error("Du kannst maximal 1 Reservierung am selben tag haben.")
