@@ -64,7 +64,12 @@ class CreateBallmachineBookingUseCase(
       ballmachinePasscodeResolver.getPasscode(command.date.dayOfWeek, slot)
     )
 
-    // 1. Cannot use ballmachine, when it is preoccupied
+    // Cannot book into the past
+    if (command.date.isBefore(LocalDate.now())) {
+      return Either.Error("Du Kannst nicht in die Vergangenheit buchen.")
+    }
+
+    // Cannot use ballmachine, when it is preoccupied
     val courtIds = courtRepository.findAll().map { it.id }
     val ballmachineOccupancyPlanService = OccupancyPlanService(listOf(ballmachineBookingOccupancyPlanResolver))
     val ballmachineOccupancyPlan = ballmachineOccupancyPlanService.getOccupancyPlan(command.date, courtIds)
@@ -75,27 +80,27 @@ class CreateBallmachineBookingUseCase(
       return Either.Error("Die Ballmaschine ist zur dieser Zeit schon in Benutzung.")
     }
 
-    // 2. Cannot boock when something else is on the court
+    // Cannot boock when something else is on the court
     val occupancyPlan = occupancyPlanService.getOccupancyPlan(command.date, courtIds)
     if (!occupancyPlan.canPlace(command.courtId, block)) {
       return Either.Error("Der Platz ist um diese Zeit schon belegt.")
     }
 
-    // 3. Cannot book 14 Days into the future
+    // Cannot book 14 Days into the future
     if (command.date.isAfter(LocalDate.now().plusDays(14L))) {
       return Either.Error("Du kannst maximal 14 Tage im vorraus Buchen.")
     }
 
     // BUT: Can always book on the same day
     if (command.date != LocalDate.now()) {
-      // 4. If you already have a booking
+      // If you already have a booking
       if (ballmachineBookingRepository.findByMemberIdAndDateGreaterThanEqual(command.memberId, LocalDate.now())
           .isNotEmpty()
       ) {
         return Either.Error("Du kannst maximal 1 Buchung im vorraus taetigen.")
       }
 
-      // 5. Cannot use ballmachine in the coretime
+      // Cannot use ballmachine in the coretime
       if (slot.isCore(command.date) || slot.plus(2).isCore(command.date)) {
         return Either.Error("Die Ballmaschine kann nicht in der Kernzeit benutzt werden.")
       }

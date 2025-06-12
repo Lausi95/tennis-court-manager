@@ -43,7 +43,7 @@ private class BallmachineBookingController(
     return runContext(
       getBallmachineBookingsUseCase.execute(
         principal.userId(),
-        GetBallmachinBookingsCommand(principal.userId(), null)
+        GetBallmachinBookingsCommand(principal.userId(), LocalDate.now())
       ), model
     ) {
       model.ballmachineBookingCollection(it.ballmachineBookings, it.courts, it.members)

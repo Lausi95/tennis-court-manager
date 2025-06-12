@@ -4,6 +4,7 @@ import de.lausi.tcm.Either
 import de.lausi.tcm.application.UseCase
 import de.lausi.tcm.application.UseCaseComponent
 import de.lausi.tcm.domain.model.*
+import java.time.LocalDateTime
 
 data class CancelReservationContextParams(
   val reservationId: ReservationId,
@@ -20,12 +21,6 @@ data class CancelReservationCommand(
   val reservationId: ReservationId,
 )
 
-enum class CancelReservationError {
-  RESERVATION_NOT_FOUND,
-  COURT_NOT_FOUND,
-  CREATOR_NOT_FOUND,
-}
-
 @UseCaseComponent
 class CancelReservationUseCase(
   private val permissions: Permissions,
@@ -38,7 +33,7 @@ class CancelReservationUseCase(
           CancelReservationContext,
           CancelReservationCommand,
           Nothing?,
-          CancelReservationError> {
+          String> {
 
   override fun checkContextPermission(userId: MemberId, contextParams: CancelReservationContextParams): Boolean {
     val reservation = reservationRepository.findById(contextParams.reservationId) ?: return false
@@ -49,15 +44,15 @@ class CancelReservationUseCase(
     return true
   }
 
-  override fun getContext(params: CancelReservationContextParams): Either<CancelReservationContext, CancelReservationError> {
+  override fun getContext(params: CancelReservationContextParams): Either<CancelReservationContext, String> {
     val reservation = reservationRepository.findById(params.reservationId)
-      ?: return Either.Error(CancelReservationError.RESERVATION_NOT_FOUND)
+      ?: return Either.Error("Die Reservierung konnte nicht gefunden werden.")
 
     val court = courtRepository.findById(reservation.courtId)
-      ?: return Either.Error(CancelReservationError.COURT_NOT_FOUND)
+      ?: return Either.Error("Der Platz zur Reservierung konnnte nicht gefunden werden.")
 
     val creator = memberRepository.findById(reservation.creatorId)
-      ?: return Either.Error(CancelReservationError.CREATOR_NOT_FOUND)
+      ?: return Either.Error("Der Ersteller der Reservierung konnte nicht gefunden werden.")
 
     val players = memberRepository.findById(reservation.playerIds)
 
@@ -80,9 +75,15 @@ class CancelReservationUseCase(
     return true
   }
 
-  override fun handle(command: CancelReservationCommand): Either<Nothing?, CancelReservationError> {
+  override fun handle(command: CancelReservationCommand): Either<Nothing?, String> {
     val reservation = reservationRepository.findById(command.reservationId)
-      ?: return Either.Error(CancelReservationError.RESERVATION_NOT_FOUND)
+      ?: return Either.Error("Die Reservierung konnte nicht gefunden werden.")
+
+    val maxCancelTime = reservation.date.atTime(reservation.fromSlot.toTime()).minusMinutes(15L)
+    if (LocalDateTime.now().isAfter(maxCancelTime)) {
+      return Either.Error("Die Reservierung kann maximal 15 Minuten vorher stoniert werden.")
+    }
+
 
     // TODO: don't actually delete it. Put a 'cancelled' flag, to see, who and when it got cancelled
     reservationRepository.delete(reservation.id)

@@ -4,6 +4,7 @@ import de.lausi.tcm.Either
 import de.lausi.tcm.application.UseCase
 import de.lausi.tcm.application.UseCaseComponent
 import de.lausi.tcm.domain.model.*
+import java.time.LocalDateTime
 
 data class CancelBallmachineBookingContextParams(
   val ballmachineBookingId: BallmachineBookingId
@@ -63,6 +64,12 @@ class CancelBallmachineBookingUseCase(
   override fun handle(command: CancelBallmachineBookingCommand): Either<Nothing?, String> {
     val ballmachineBooking = ballmachineBookingRepository.findById(command.ballmachineBookingId)
       ?: return Either.Error("Ballmachine booker gefunden werden.")
+
+
+    val maxCancelTime = ballmachineBooking.date.atTime(ballmachineBooking.slot.toTime()).minusHours(2L)
+    if (LocalDateTime.now().isAfter(maxCancelTime)) {
+      return Either.Error("Du kannst die Ballmaschine maximal bis 2h im Vorraus stonieren.")
+    }
 
     ballmachineBookingRepository.delete(ballmachineBooking.id)
 

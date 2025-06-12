@@ -2,6 +2,7 @@ package de.lausi.tcm.domain.model
 
 import java.time.DayOfWeek
 import java.time.LocalDate
+import java.time.LocalTime
 
 const val MIN_SLOT = 14
 const val MAX_SLOT = 43
@@ -66,6 +67,12 @@ data class Slot(
     }
 
     return index >= (17 * 2) && index < (21 * 2)
+  }
+
+  fun toTime(): LocalTime {
+    val hours = (index + 1) / 2
+    val minutes = if ((index + 1) % 2 == 0) 0 else 30
+    return LocalTime.of(hours, minutes)
   }
 }
 
