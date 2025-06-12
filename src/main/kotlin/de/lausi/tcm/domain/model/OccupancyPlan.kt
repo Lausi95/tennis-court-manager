@@ -85,7 +85,7 @@ class OccupancyPlan(courtIds: List<CourtId>) {
     return result
   }
 
-  fun addBlock(date: LocalDate, courtIds: List<CourtId>, occupancyPlanResolver: OccupancyPlanResolver) {
+  fun addBlocks(date: LocalDate, courtIds: List<CourtId>, occupancyPlanResolver: OccupancyPlanResolver) {
     with(occupancyPlanResolver) {
       addBlock(date, courtIds)
     }
@@ -97,7 +97,7 @@ class OccupancyPlanService(private val occupancyPlanResolvers: List<OccupancyPla
 
   fun getOccupancyPlan(date: LocalDate, courtIds: List<CourtId>): OccupancyPlan {
     val occupancyPlan = OccupancyPlan(courtIds)
-    occupancyPlanResolvers.forEach { occupancyPlan.addBlock(date, courtIds, it) }
+    occupancyPlanResolvers.forEach { occupancyPlan.addBlocks(date, courtIds, it) }
     return occupancyPlan
   }
 }
