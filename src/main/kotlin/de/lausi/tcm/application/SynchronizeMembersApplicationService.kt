@@ -17,7 +17,7 @@ class SynchronizeMembersApplicationService(
 
   @Scheduled(fixedDelay = 60 * 10 * 1000L) // Every 10 minutes
   fun synchronizeMembers() {
-    log.info("synchronizing members...")
+    log.debug("synchronizing members...")
 
     val iamUsers = iamUserRepository.findAll()
     val members = memberRepository.findAll()
@@ -27,7 +27,6 @@ class SynchronizeMembersApplicationService(
 
     memberRepository.findAll().forEach {
       if (it.lastname.value == "Lausmann") {
-        log.info("Tom Lausmann is admin!")
         it.groups.add(MemberGroup.ADMIN)
         memberRepository.save(it)
       }
