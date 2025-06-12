@@ -15,7 +15,7 @@ class SynchronizeMembersApplicationService(
 
   private val log: Logger = LoggerFactory.getLogger(SynchronizeMembersApplicationService::class.java)
 
-  @Scheduled(fixedDelay = 60 * 1000L)
+  @Scheduled(fixedDelay = 60 * 10 * 1000L) // Every 10 minutes
   fun synchronizeMembers() {
     log.info("synchronizing members...")
 
