@@ -81,7 +81,7 @@ class CreateBallmachineBookingUseCase(
     }
 
     // Cannot boock when something else is on the court
-    val occupancyPlan = occupancyPlanService.getOccupancyPlan(command.date, courtIds)
+    val occupancyPlan = occupancyPlanService.getOccupancyPlan(command.date, listOf(command.courtId))
     if (!occupancyPlan.canPlace(command.courtId, block)) {
       return Either.Error("Der Platz ist um diese Zeit schon belegt.")
     }

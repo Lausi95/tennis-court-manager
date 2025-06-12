@@ -36,6 +36,8 @@ interface EventRepository {
 @Component
 class EventOccupancyPlanResolver(private val eventRepository: EventRepository) : OccupancyPlanResolver {
 
+  override fun forBlockType() = BlockType.EVENT
+
   override fun OccupancyPlan.addBlock(date: LocalDate, courtIds: List<CourtId>) {
     courtIds.map { courtId ->
       eventRepository.findByCourtIdsContainsAndDate(courtId, date).forEach {

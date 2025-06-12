@@ -41,6 +41,8 @@ class BallmachineBookingOccupancyPlanResolver(
   private val ballmachineBookingRepository: BallmachineBookingRepository,
 ) : OccupancyPlanResolver {
 
+  override fun forBlockType() = BlockType.BALLMACHINE
+
   override fun OccupancyPlan.addBlock(date: LocalDate, courtIds: List<CourtId>) {
     courtIds.forEach { courtId ->
       ballmachineBookingRepository.findByDateAndCourtId(date, courtId).forEach {

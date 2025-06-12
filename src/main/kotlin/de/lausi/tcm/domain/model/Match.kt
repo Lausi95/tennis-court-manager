@@ -40,6 +40,8 @@ class MatchOccupancyPlanResolver(
   private val matchRepository: MatchRepository,
 ) : OccupancyPlanResolver {
 
+  override fun forBlockType() = BlockType.MATCH
+
   override fun OccupancyPlan.addBlock(date: LocalDate, courtIds: List<CourtId>) {
     courtIds.map { courtId ->
       matchRepository.findByCourtIdsContainsAndDate(courtId, date).forEach {

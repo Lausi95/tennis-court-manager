@@ -14,12 +14,7 @@ data class Reservation(
   val creatorId: MemberId,
   val playerIds: List<MemberId>,
   val id: ReservationId = ReservationId(),
-) {
-
-  fun slotAmount(): Int = Slot.distance(fromSlot, toSlot)
-
-  fun isToday(): Boolean = date.isBefore(LocalDate.now().plusDays(2))
-}
+)
 
 /**
  * Interface for a Repository that stores [Reservation] entities.
@@ -60,6 +55,8 @@ class ReservationOccupancyPlanResolver(
   private val memberRepository: MemberRepository,
   private val reservationRepository: ReservationRepository
 ) : OccupancyPlanResolver {
+
+  override fun forBlockType() = BlockType.FREE_PLAY
 
   override fun OccupancyPlan.addBlock(date: LocalDate, courtIds: List<CourtId>) {
     courtIds.forEach { courtId ->

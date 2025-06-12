@@ -31,7 +31,9 @@ data class Block(
   private fun indices(): IntRange = (this.fromSlot.index..this.toSlot.index)
 }
 
-fun interface OccupancyPlanResolver {
+interface OccupancyPlanResolver {
+
+  fun forBlockType(): BlockType
 
   fun OccupancyPlan.addBlock(date: LocalDate, courtIds: List<CourtId>)
 }
@@ -97,7 +99,9 @@ class OccupancyPlanService(private val occupancyPlanResolvers: List<OccupancyPla
 
   fun getOccupancyPlan(date: LocalDate, courtIds: List<CourtId>): OccupancyPlan {
     val occupancyPlan = OccupancyPlan(courtIds)
-    occupancyPlanResolvers.forEach { occupancyPlan.addBlocks(date, courtIds, it) }
+    occupancyPlanResolvers
+      .sortedByDescending { it.forBlockType().priority }
+      .forEach { occupancyPlan.addBlocks(date, courtIds, it) }
     return occupancyPlan
   }
 }

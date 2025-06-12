@@ -64,7 +64,9 @@ interface TrainingRepository {
 }
 
 @Component
-class TeamOccupancyPlanResolver(private val trainingRepository: TrainingRepository) : OccupancyPlanResolver {
+class TrainingOccupancyPlanResolver(private val trainingRepository: TrainingRepository) : OccupancyPlanResolver {
+
+  override fun forBlockType() = BlockType.TRAINING
 
   override fun OccupancyPlan.addBlock(date: LocalDate, courtIds: List<CourtId>) {
     courtIds.forEach { courtId ->
