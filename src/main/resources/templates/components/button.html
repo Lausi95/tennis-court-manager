@@ -10,6 +10,7 @@
 </button>
 
 <div th:fragment="item-operations(entity)" class="flex flex-row-reverse gap-2 text-cs">
+    <th:block th:replace="~{components/button :: item-operation('entity', ${entity}, 'fa-solid fa-eye')}"/>
     <th:block th:replace="~{components/button :: item-operation('edit', ${entity}, 'fa-solid fa-pen-to-square')}"/>
     <th:block th:replace="~{components/button :: item-operation('delete', ${entity}, 'fa-solid fa-trash')}"/>
 </div>
