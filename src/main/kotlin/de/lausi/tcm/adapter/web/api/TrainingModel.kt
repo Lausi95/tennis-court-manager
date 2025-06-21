@@ -65,7 +65,7 @@ fun Training.toModel(court: Court) = TrainingModel(
   this.description.value,
   this.skippedDates.map { it.toSkippedDateModel() },
   mapOf(
-    "edit" to "/trainings/${id.value}/edit",
+    "entity" to "/trainings/${id.value}/entity",
     "delete" to "/trainings/${id.value}/delete",
   )
 )
