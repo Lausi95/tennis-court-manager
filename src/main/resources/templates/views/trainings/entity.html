@@ -1,7 +1,27 @@
 <a href="/trainings">Zurrueck</a>
 <th:block th:replace="~{components/title :: title('Training \'' + ${training.description} + '\'')}"/>
-<div>
-    <b>Wochentag:</b> <span th:text="${training.dayOfWeek.name}"></span>
-    <b>Platz:</b> <span th:text="${training.court.name}"></span>
-    <b>Zeit:</b> <span th:text="${training.fromTime}"></span> - <span th:text="${training.toTime}"></span>
+<div class="p-2 rounded bg-gray-100">
+    <div>
+        <b>Wochentag:</b> <span th:text="${training.dayOfWeek.name}"></span>
+    </div>
+    <div>
+        <b>Platz:</b> <span th:text="${training.court.name}"></span>
+    </div>
+    <div>
+        <b>Zeit:</b> <span th:text="${training.fromTime}"></span> - <span th:text="${training.toTime}"></span>
+    </div>
 </div>
+
+<th:block th:replace="~{components/title :: sub-title('Ausnahmen')}"/>
+
+<div>
+    <th:block
+            th:replace="~{components/button :: nav-button(${training.links['add-skipped-day']}, 'Ausnahme Hinzufuegen')}"/>
+</div>
+
+<th:block th:each="skippedDay : ${training.skippedDays}">
+    <div class="bg-blue-900 rounded p-2 text-white text-xs">
+        <div th:text="${skippedDay.date}"></div>
+        <th:block th:replace="~{components/button :: item-operations(${training})}"/>
+    </div>
+</th:block>
