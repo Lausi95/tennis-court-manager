@@ -3,16 +3,12 @@ package de.lausi.tcm.adapter.web.api
 import de.lausi.tcm.adapter.web.PageAssembler
 import de.lausi.tcm.adapter.web.userId
 import de.lausi.tcm.application.NOTHING
-import de.lausi.tcm.application.training.CreateTraingUseCase
-import de.lausi.tcm.application.training.CreateTrainingCommand
-import de.lausi.tcm.application.training.GetTrainingsUseCase
-import de.lausi.tcm.domain.model.CourtId
-import de.lausi.tcm.domain.model.Slot
-import de.lausi.tcm.domain.model.SlotRepository
-import de.lausi.tcm.domain.model.TrainingDescription
+import de.lausi.tcm.application.training.*
+import de.lausi.tcm.domain.model.*
 import org.springframework.stereotype.Controller
 import org.springframework.ui.Model
 import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestMapping
 import java.security.Principal
@@ -33,6 +29,7 @@ class TrainingController(
   private val pageAssembler: PageAssembler,
   private val getTrainingsUseCase: GetTrainingsUseCase,
   private val createTraingUseCase: CreateTraingUseCase,
+  private val getTrainingUseCase: GetTrainingUseCase,
 ) {
 
   @GetMapping
@@ -51,6 +48,18 @@ class TrainingController(
       model.courtCollection(it.courts)
       model.dayOfWeekCollection()
       "views/trainings/collection"
+    }
+  }
+
+  @GetMapping("/{trainingId}/entity")
+  fun getTrainingEntity(principal: Principal, model: Model, @PathVariable trainingId: String): String {
+    val command = GetTrainingCommand(
+      TrainingId(trainingId)
+    )
+
+    return runContext(getTrainingUseCase.execute(principal.userId(), command), model) {
+      model.trainingEntry(it.training, it.court)
+      "views/trainings/entity"
     }
   }
 
