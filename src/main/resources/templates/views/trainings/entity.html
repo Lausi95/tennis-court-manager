@@ -1,0 +1,7 @@
+<a href="/trainings">Zurrueck</a>
+<th:block th:replace="~{components/title :: title('Training \'' + ${training.description} + '\'')}"/>
+<div>
+    <b>Wochentag:</b> <span th:text="${training.dayOfWeek.name}"></span>
+    <b>Platz:</b> <span th:text="${training.court.name}"></span>
+    <b>Zeit:</b> <span th:text="${training.fromTime}"></span> - <span th:text="${training.toTime}"></span>
+</div>
