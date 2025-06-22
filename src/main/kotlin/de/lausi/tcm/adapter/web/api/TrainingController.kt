@@ -23,6 +23,10 @@ data class CreateTrainingRequest(
   val description: String,
 )
 
+data class AddSkippedDateRequest(
+  val skippedDate: LocalDate,
+)
+
 @Controller
 @RequestMapping("/trainings")
 class TrainingController(
@@ -105,6 +109,18 @@ class TrainingController(
     return runContext(addSkippedDateUseCase.context(principal.userId(), params), model) {
       model.trainingEntry(it.training, it.court)
       "views/trainings/add-skipped-date"
+    }
+  }
+
+  @PostMapping("/{trainingId}/add-skipped-date")
+  fun addSkippedDate(principal: Principal, model: Model, @PathVariable trainingId: String, request: AddSkippedDateRequest): String {
+    val command = AddSkippedDateCommand(
+      TrainingId(trainingId),
+      request.skippedDate,
+    )
+
+    return runUseCase(addSkippedDateUseCase.execute(principal.userId(), command), model, { getAddSkippedDate(principal, model, trainingId) }) {
+      getTrainingCollection(principal, model)
     }
   }
 }
