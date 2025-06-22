@@ -1,0 +1,14 @@
+<th:block th:replace="~{components/title :: title('Ausnahme hinzufuegen')}"/>
+<th:block th:replace="~{components/error :: error}"/>
+
+<form th:hx-post="${training.links['add-skipped-date']}" hx-target="#view" class="grid grid-cols-2 gap-2">
+    <div class="col-span-2">
+        Fuege eine Ausnahme zum Training "<span th:text="${training.description}"></span>" am
+        <span class="font-bold" th:text="${training.dayOfWeek.name}"></span> um
+        <span th:text="${training.fromTime}"></span> hinzu.
+    </div>
+    <div class="col-span-2">
+        <th:block th:replace="~{components/inputs :: date('skippedDate')}"/>
+    </div>
+    <th:block th:replace="~{components/inputs :: submit('Hinzufuegen', ${training.links['entity']})}"/>
+</form>
