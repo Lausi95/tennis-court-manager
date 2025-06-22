@@ -34,20 +34,6 @@ data class Training(
       other.fromSlot
     ) || toSlot.isInBoundariesOfSlots(other.fromSlot, other.toSlot)
   }
-
-  fun addSkippedDate(date: LocalDate) {
-    if (skippedDates.contains(date)) {
-      error("Date already in skipped dates.")
-    }
-    skippedDates.add(date)
-  }
-
-  fun removeSkippedDate(date: LocalDate) {
-    if (!skippedDates.contains(date)) {
-      error("Date is not in skipped dates.")
-    }
-    skippedDates.remove(date)
-  }
 }
 
 interface TrainingRepository {
