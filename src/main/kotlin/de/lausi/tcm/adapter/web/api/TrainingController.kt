@@ -30,6 +30,7 @@ class TrainingController(
   private val getTrainingsUseCase: GetTrainingsUseCase,
   private val createTraingUseCase: CreateTraingUseCase,
   private val getTrainingUseCase: GetTrainingUseCase,
+  private val addSkippedDateUseCase: AddSkippedDateUseCase,
 ) {
 
   @GetMapping
@@ -95,5 +96,15 @@ class TrainingController(
 
   // TODO: Edit Use Case
 
-  // TODO: Exception Dates Use Case
+  @GetMapping("/{trainingId}/add-skipped-date")
+  fun getAddSkippedDate(principal: Principal, model: Model, @PathVariable trainingId: String): String {
+    val params = AddSkippedDateContextParams(
+      TrainingId(trainingId)
+    )
+
+    return runContext(addSkippedDateUseCase.context(principal.userId(), params), model) {
+      model.trainingEntry(it.training, it.court)
+      "views/trainings/add-skipped-date"
+    }
+  }
 }
