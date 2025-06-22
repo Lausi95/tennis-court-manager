@@ -6,7 +6,6 @@ on:
 jobs:
   build:
     name: Build
-    needs: [ unit-tests ]
     runs-on: ubuntu-latest
     env:
       DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
