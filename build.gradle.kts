@@ -28,12 +28,14 @@ dependencies {
   implementation("org.springframework.boot:spring-boot-devtools")
   implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
   implementation("org.jetbrains.kotlin:kotlin-reflect")
-  developmentOnly("org.springframework.boot:spring-boot-devtools")
-  testImplementation("org.springframework.boot:spring-boot-starter-test")
-
   implementation("com.squareup.retrofit2:retrofit:2.11.0")
   implementation("com.squareup.retrofit2:converter-jackson:2.11.0")
   implementation("io.github.serpro69:kotlin-faker:1.16.0")
+
+  developmentOnly("org.springframework.boot:spring-boot-devtools")
+
+  testImplementation("org.springframework.boot:spring-boot-starter-test")
+  testImplementation("org.mockito.kotlin:mockito-kotlin:5.4.0")
 }
 
 tasks.withType<KotlinCompile> {
