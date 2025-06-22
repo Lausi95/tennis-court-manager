@@ -15,13 +15,12 @@
 <th:block th:replace="~{components/title :: sub-title('Ausnahmen')}"/>
 
 <div>
-    <th:block
-            th:replace="~{components/button :: nav-button(${training.links['add-skipped-day']}, 'Ausnahme Hinzufuegen')}"/>
+    <th:block th:replace="~{components/button :: nav-button(${training.links['add-skipped-date']}, 'Ausnahme Hinzufuegen')}"/>
 </div>
 
 <th:block th:each="skippedDay : ${training.skippedDays}">
     <div class="bg-blue-900 rounded p-2 text-white text-xs">
         <div th:text="${skippedDay.date}"></div>
-        <th:block th:replace="~{components/button :: item-operations(${training})}"/>
+        <th:block th:replace="~{components/button :: item-operations(${skippedDay})}"/>
     </div>
 </th:block>

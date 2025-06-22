@@ -67,6 +67,7 @@ fun Training.toModel(court: Court) = TrainingModel(
   mapOf(
     "entity" to "/trainings/${id.value}/entity",
     "delete" to "/trainings/${id.value}/delete",
+    "add-skipped-date" to "/trainings/${id.value}/add-skipped-date",
   )
 )
 
