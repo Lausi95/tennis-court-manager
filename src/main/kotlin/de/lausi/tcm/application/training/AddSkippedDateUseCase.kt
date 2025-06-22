@@ -12,6 +12,7 @@ data class AddSkippedDateContextParams(
 
 data class AddSkippedDateContext(
   val training: Training,
+  val court: Court,
 )
 
 data class AddSkippedDateCommand(
@@ -20,7 +21,11 @@ data class AddSkippedDateCommand(
 )
 
 @UseCaseComponent
-class AddSkippedDateUseCase(private val permissions: Permissions, private val trainingRepository: TrainingRepository) :
+class AddSkippedDateUseCase(
+  private val permissions: Permissions,
+  private val trainingRepository: TrainingRepository,
+  private val courtRepository: CourtRepository
+) :
   UseCase<
           AddSkippedDateContextParams,
           AddSkippedDateContext,
@@ -39,7 +44,10 @@ class AddSkippedDateUseCase(private val permissions: Permissions, private val tr
     val training = trainingRepository.findById(params.trainingId)
       ?: return Either.Error("Das Training konnte nicht gefunden werden.")
 
-    return Either.Success(AddSkippedDateContext(training))
+    val court = courtRepository.findById(training.courtId)
+      ?: return Either.Error("Der Court des Trainings konnte nicht gefunden werden.")
+
+    return Either.Success(AddSkippedDateContext(training, court))
   }
 
   override fun checkCommandPermission(

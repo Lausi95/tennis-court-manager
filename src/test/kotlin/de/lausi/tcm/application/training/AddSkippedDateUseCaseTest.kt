@@ -25,16 +25,31 @@ class AddSkippedDateUseCaseTest {
   @Mock
   private lateinit var trainingRepository: TrainingRepository
 
+  @Mock
+  private lateinit var courtRepository: CourtRepository
+
   private lateinit var addSkippedDateUseCase: AddSkippedDateUseCase
 
   @BeforeEach
   fun setUp() {
-    addSkippedDateUseCase = AddSkippedDateUseCase(permissions, trainingRepository)
+    addSkippedDateUseCase = AddSkippedDateUseCase(permissions, trainingRepository, courtRepository)
   }
 
   @Nested
   @DisplayName("getContext()")
   inner class CheckContext {
+
+    @Test
+    fun `should return success, when training exists`() {
+      val court = Court(CourtName("Test"))
+      courtRepository.stub { on { findById(court.id) } doReturn court }
+
+      val training = Training(DayOfWeek.SATURDAY, court.id, Slot(10), Slot(12), TrainingDescription("Foo"), mutableSetOf())
+      trainingRepository.stub { on { findById(training.id) } doReturn training }
+
+      val params = AddSkippedDateContextParams(training.id)
+      addSkippedDateUseCase.getContext(params).assertSuccess()
+    }
 
     @Test
     fun `should return error, when training does not exist`() {
@@ -44,16 +59,14 @@ class AddSkippedDateUseCaseTest {
     }
 
     @Test
-    fun `should return success, when training exists`() {
-      val training =
-        Training(DayOfWeek.SATURDAY, CourtId(), Slot(10), Slot(12), TrainingDescription("Foo"), mutableSetOf())
-
-      trainingRepository.stub {
-        on { findById(training.id) } doReturn training
-      }
+    fun `shoud return error, when court of training does not exist`() {
+      val training = Training(DayOfWeek.SATURDAY, CourtId(), Slot(10), Slot(12), TrainingDescription("Foo"), mutableSetOf())
+      trainingRepository.stub { on { findById(training.id) } doReturn training }
 
       val params = AddSkippedDateContextParams(training.id)
-      addSkippedDateUseCase.getContext(params).assertSuccess()
+      val errors = addSkippedDateUseCase.getContext(params).assertError()
+
+      assertThat(errors).contains("Der Court des Trainings konnte nicht gefunden werden.")
     }
   }
 
@@ -62,12 +75,9 @@ class AddSkippedDateUseCaseTest {
   inner class Handle {
     @Test
     fun `should add skipped date to training`() {
-      val training =
-        Training(DayOfWeek.SATURDAY, CourtId(), Slot(10), Slot(12), TrainingDescription("Foo"), mutableSetOf())
+      val training = Training(DayOfWeek.SATURDAY, CourtId(), Slot(10), Slot(12), TrainingDescription("Foo"), mutableSetOf())
 
-      trainingRepository.stub {
-        on { findById(training.id) } doReturn training
-      }
+      trainingRepository.stub { on { findById(training.id) } doReturn training }
 
       val command = AddSkippedDateCommand(training.id, LocalDate.of(2025, 6, 21))
       addSkippedDateUseCase.handle(command).assertSuccess()
