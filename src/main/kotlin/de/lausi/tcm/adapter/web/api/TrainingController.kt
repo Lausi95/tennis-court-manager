@@ -96,10 +96,6 @@ class TrainingController(
     }
   }
 
-  // TODO: Delte Use Case
-
-  // TODO: Edit Use Case
-
   @GetMapping("/{trainingId}/add-skipped-date")
   fun getAddSkippedDate(principal: Principal, model: Model, @PathVariable trainingId: String): String {
     val params = AddSkippedDateContextParams(
@@ -120,7 +116,7 @@ class TrainingController(
     )
 
     return runUseCase(addSkippedDateUseCase.execute(principal.userId(), command), model, { getAddSkippedDate(principal, model, trainingId) }) {
-      getTrainingCollection(principal, model)
+      getTrainingEntity(principal, model, trainingId)
     }
   }
 }
