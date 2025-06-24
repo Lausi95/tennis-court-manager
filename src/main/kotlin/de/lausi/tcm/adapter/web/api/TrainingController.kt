@@ -1,16 +1,15 @@
 package de.lausi.tcm.adapter.web.api
 
+import de.lausi.tcm.IsoDate
 import de.lausi.tcm.adapter.web.PageAssembler
 import de.lausi.tcm.adapter.web.userId
 import de.lausi.tcm.application.NOTHING
 import de.lausi.tcm.application.training.*
 import de.lausi.tcm.domain.model.*
+import de.lausi.tcm.iso
 import org.springframework.stereotype.Controller
 import org.springframework.ui.Model
-import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.PathVariable
-import org.springframework.web.bind.annotation.PostMapping
-import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.*
 import java.security.Principal
 import java.time.DayOfWeek
 import java.time.LocalDate
@@ -27,6 +26,10 @@ data class AddSkippedDateRequest(
   val skippedDate: LocalDate,
 )
 
+data class RemoveSkippedDateRequest(
+  @IsoDate val skippedDate: LocalDate,
+)
+
 @Controller
 @RequestMapping("/trainings")
 class TrainingController(
@@ -35,6 +38,7 @@ class TrainingController(
   private val createTraingUseCase: CreateTraingUseCase,
   private val getTrainingUseCase: GetTrainingUseCase,
   private val addSkippedDateUseCase: AddSkippedDateUseCase,
+  private val removeSkippedDateUseCase: RemoveSkippedDateUseCase,
 ) {
 
   @GetMapping
@@ -116,6 +120,32 @@ class TrainingController(
     )
 
     return runUseCase(addSkippedDateUseCase.execute(principal.userId(), command), model, { getAddSkippedDate(principal, model, trainingId) }) {
+      getTrainingEntity(principal, model, trainingId)
+    }
+  }
+
+  @GetMapping("/{trainingId}/remove-skipped-date")
+  fun getRemoveSkippedDate(principal: Principal, model: Model, @PathVariable trainingId: String, @RequestParam @IsoDate skippedDateToRemove: LocalDate): String {
+    val params = RemoveSkippedDateContextParams(
+      TrainingId(trainingId),
+      skippedDateToRemove,
+    )
+
+    return runContext(removeSkippedDateUseCase.context(principal.userId(), params), model) {
+      model.trainingEntry(it.training, it.court)
+      model.addAttribute("dateToRemove", it.skippedDateToRemove.iso())
+      "view/trainings/remove-skipped-date"
+    }
+  }
+
+  @PostMapping("/{trainingId}/remove-skipped-date")
+  fun removeSkippedDate(principal: Principal, model: Model, @PathVariable trainingId: String, request: RemoveSkippedDateRequest): String {
+    val command = RemoveSkippedDateCommand(
+      TrainingId(trainingId),
+      request.skippedDate,
+    )
+
+    return runUseCase(removeSkippedDateUseCase.execute(principal.userId(), command), model, { getRemoveSkippedDate(principal, model, trainingId, request.skippedDate) }) {
       getTrainingEntity(principal, model, trainingId)
     }
   }
