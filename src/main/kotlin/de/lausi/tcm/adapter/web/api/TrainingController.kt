@@ -6,7 +6,6 @@ import de.lausi.tcm.adapter.web.userId
 import de.lausi.tcm.application.NOTHING
 import de.lausi.tcm.application.training.*
 import de.lausi.tcm.domain.model.*
-import de.lausi.tcm.iso
 import org.springframework.stereotype.Controller
 import org.springframework.ui.Model
 import org.springframework.web.bind.annotation.*
@@ -27,7 +26,7 @@ data class AddSkippedDateRequest(
 )
 
 data class RemoveSkippedDateRequest(
-  @IsoDate val skippedDate: LocalDate,
+  @IsoDate val skippedDateToRemove: LocalDate,
 )
 
 @Controller
@@ -133,8 +132,8 @@ class TrainingController(
 
     return runContext(removeSkippedDateUseCase.context(principal.userId(), params), model) {
       model.trainingEntry(it.training, it.court)
-      model.addAttribute("dateToRemove", it.skippedDateToRemove.iso())
-      "view/trainings/remove-skipped-date"
+      model.skippedDate(it.skippedDateToRemove, it.training)
+      "views/trainings/remove-skipped-date"
     }
   }
 
@@ -142,10 +141,10 @@ class TrainingController(
   fun removeSkippedDate(principal: Principal, model: Model, @PathVariable trainingId: String, request: RemoveSkippedDateRequest): String {
     val command = RemoveSkippedDateCommand(
       TrainingId(trainingId),
-      request.skippedDate,
+      request.skippedDateToRemove,
     )
 
-    return runUseCase(removeSkippedDateUseCase.execute(principal.userId(), command), model, { getRemoveSkippedDate(principal, model, trainingId, request.skippedDate) }) {
+    return runUseCase(removeSkippedDateUseCase.execute(principal.userId(), command), model, { getRemoveSkippedDate(principal, model, trainingId, request.skippedDateToRemove) }) {
       getTrainingEntity(principal, model, trainingId)
     }
   }
