@@ -4,6 +4,7 @@ import de.lausi.tcm.domain.model.Court
 import de.lausi.tcm.domain.model.Training
 import de.lausi.tcm.domain.model.TrainingId
 import de.lausi.tcm.ger
+import de.lausi.tcm.iso
 import org.springframework.ui.Model
 import java.time.DayOfWeek
 import java.time.LocalDate
@@ -40,9 +41,11 @@ data class SkippedDateModel(
   val links: Map<String, String>,
 )
 
-fun LocalDate.toSkippedDateModel() = SkippedDateModel(
+fun LocalDate.toSkippedDateModel(training: Training) = SkippedDateModel(
   this.ger(),
-  mapOf(),
+  mapOf(
+    "delete" to "/trainings/${training.id.value}/remove-skipped-date?skippedDateToRemove=${iso()}",
+  ),
 )
 
 data class TrainingModel(
@@ -63,7 +66,7 @@ fun Training.toModel(court: Court) = TrainingModel(
   this.fromSlot.formatFromTime(),
   this.toSlot.formatToTime(),
   this.description.value,
-  this.skippedDates.map { it.toSkippedDateModel() },
+  this.skippedDates.map { it.toSkippedDateModel(this) },
   mapOf(
     "entity" to "/trainings/${id.value}/entity",
     "delete" to "/trainings/${id.value}/delete",
