@@ -38,15 +38,21 @@ fun Model.dayOfWeekCollection(daysOfWeek: List<DayOfWeek>) {
 
 data class SkippedDateModel(
   val date: String,
+  val isoDate: String,
   val links: Map<String, String>,
 )
 
 fun LocalDate.toSkippedDateModel(training: Training) = SkippedDateModel(
   this.ger(),
+  this.iso(),
   mapOf(
     "delete" to "/trainings/${training.id.value}/remove-skipped-date?skippedDateToRemove=${iso()}",
   ),
 )
+
+fun Model.skippedDate(date: LocalDate, training: Training) {
+  addAttribute("skippedDate", date.toSkippedDateModel(training))
+}
 
 data class TrainingModel(
   val id: String,

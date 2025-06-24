@@ -1,0 +1,10 @@
+<th:block th:replace="~{components/title :: title('Ausnahme entfernen?')}"></th:block>
+<th:block th:replace="~{components/error :: error}"/>
+
+<form th:hx-post="${skippedDate.links['delete']}" hx-target="#view" class="grid grid-cols-1 gap-2">
+    <input type="hidden" th:value="${skippedDate.isoDate}" name="skippedDateToRemove"/>
+    <div>
+        Willt du die Ausnahme am <span th:text="${skippedDate.date}"></span> wirklich entfernen?
+    </div>
+    <th:block th:replace="~{components/inputs :: submit('Entfernen', ${training.links['entity']})}"/>
+</form>
