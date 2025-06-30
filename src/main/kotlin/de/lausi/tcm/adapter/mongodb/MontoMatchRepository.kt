@@ -31,7 +31,7 @@ private interface MongoMatchRepository : MongoRepository<MongoMatch, String> {
 
   fun findByDateGreaterThanEqual(date: LocalDate): List<MongoMatch>
 
-  fun findByCourtIdsContainsAndDate(courtId: CourtId, date: LocalDate): List<MongoMatch>
+  fun findByCourtIdsContainsAndDate(courtId: String, date: LocalDate): List<MongoMatch>
 }
 
 @Component
@@ -42,7 +42,7 @@ private class MatchRepositoryImpl(private val mongoRepository: MongoMatchReposit
   }
 
   override fun findByCourtIdsContainsAndDate(courtId: CourtId, date: LocalDate): List<Match> {
-    return mongoRepository.findByCourtIdsContainsAndDate(courtId, date).map { it.toMatch() }
+    return mongoRepository.findByCourtIdsContainsAndDate(courtId.value, date).map { it.toMatch() }
   }
 
   override fun save(match: Match): Match {

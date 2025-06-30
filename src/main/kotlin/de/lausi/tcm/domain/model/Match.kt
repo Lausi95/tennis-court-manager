@@ -51,7 +51,7 @@ class MatchOccupancyPlanResolver(
   }
 
   fun Match.toBlock(): Block {
-    val teamName = teamRepository.findById(teamId)?.name ?: "???"
-    return Block(BlockType.MATCH, fromSlot, toSlot(), "$teamName vs. $opponentTeamName")
+    val teamName = teamRepository.findById(teamId)?.name?.value ?: "???"
+    return Block(BlockType.MATCH, fromSlot, toSlot(), "$teamName vs. ${opponentTeamName.value}")
   }
 }
