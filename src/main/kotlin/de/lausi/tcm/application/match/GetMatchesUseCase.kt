@@ -4,6 +4,7 @@ import de.lausi.tcm.Either
 import de.lausi.tcm.application.ReadUseCase
 import de.lausi.tcm.application.UseCaseComponent
 import de.lausi.tcm.domain.model.*
+import java.time.LocalDate
 
 data class GetMatchesResponse(
   val matches: List<Match>,
@@ -25,7 +26,7 @@ class GetMatchesUseCase(
   }
 
   override fun handle(command: Nothing?): Either<GetMatchesResponse, Nothing> {
-    val matches = matchRepository.findAll()
+    val matches = matchRepository.findByDateGreaterThanEqual(LocalDate.now())
 
     val courts = mutableMapOf<MatchId, List<Court>>()
     val teams = mutableMapOf<MatchId, Team>()

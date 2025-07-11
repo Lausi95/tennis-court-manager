@@ -42,7 +42,7 @@ class EventController(
 
   @GetMapping("/collection")
   fun getEventCollection(principal: Principal, model: Model): String {
-    val command = GetEventsCommand(null)
+    val command = GetEventsCommand(LocalDate.now())
 
     return runContext(getEventsUseCase.execute(principal.userId(), command), model) {
       model.eventCollection(it.events, it.courts)
