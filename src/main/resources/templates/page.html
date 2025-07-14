@@ -10,6 +10,27 @@
 
     <script src="https://unpkg.com/htmx.org@1.9.11"></script>
     <script src="https://kit.fontawesome.com/2e37175346.js" crossorigin="anonymous"></script>
+
+    <!-- Sentry.io -->
+    <script src="https://js-de.sentry-cdn.com/081bffbf5f041cc606d659cd773b3f3a.min.js" crossorigin="anonymous"></script>
+    <script>
+        window.sentryOnLoad = function () {
+            Sentry.init({
+                // add other configuration here
+            });
+
+            Sentry.lazyLoadIntegration("feedbackIntegration")
+                .then((feedbackIntegration) => {
+                    Sentry.addIntegration(feedbackIntegration({
+                        // User Feedback configuration options
+                    }));
+                })
+                .catch(() => {
+                    // this can happen if e.g. a network error occurs,
+                    // in this case User Feedback will not be enabled
+                });
+        };
+    </script>
 </head>
 
 <body>

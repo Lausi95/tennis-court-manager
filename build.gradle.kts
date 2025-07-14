@@ -5,6 +5,7 @@ plugins {
   id("io.spring.dependency-management") version "1.1.5"
   kotlin("jvm") version "1.9.24"
   kotlin("plugin.spring") version "1.9.24"
+  id("io.sentry.jvm.gradle") version "5.8.0"
 }
 
 group = "de.lausi"
@@ -16,6 +17,12 @@ java {
 
 repositories {
   mavenCentral()
+}
+
+buildscript {
+  repositories {
+    mavenCentral()
+  }
 }
 
 dependencies {
@@ -51,4 +58,11 @@ tasks.withType<Test> {
 
 tasks.bootJar {
   archiveFileName = "application.jar"
+}
+
+sentry {
+  includeSourceContext = true
+  org = "borussia-friedrichsfelde"
+  projectName = "java-spring-boot"
+  authToken = System.getenv("SENTRY_AUTH_TOKEN")
 }
