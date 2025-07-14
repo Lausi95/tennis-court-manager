@@ -33,3 +33,4 @@ sentry:
   dsn: https://081bffbf5f041cc606d659cd773b3f3a@o4509666161786880.ingest.de.sentry.io/4509666164998224
   send-default-pii: true
   environment: development
+  logs.enabled: true
