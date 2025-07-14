@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <title th:text="TCM"></title>
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link rel="stylesheet" href="/style.css"/>
+    <link rel="icon" type="image/x-icon" href="/assets/logo.png">
+
+    <!-- Sentry.io -->
+    <script src="https://js-de.sentry-cdn.com/081bffbf5f041cc606d659cd773b3f3a.min.js" crossorigin="anonymous"></script>
+    <script>
+        window.sentryOnLoad = function () {
+            Sentry.init({
+                // add other configuration here
+            });
+
+            Sentry.lazyLoadIntegration("feedbackIntegration")
+                .then((feedbackIntegration) => {
+                    Sentry.addIntegration(feedbackIntegration({
+                        // User Feedback configuration options
+                    }));
+                })
+                .catch(() => {
+                    // this can happen if e.g. a network error occurs,
+                    // in this case User Feedback will not be enabled
+                });
+        };
+    </script>
+</head>
+
+<body>
+<nav class="p-3 font-bold gap-4 shadow-md flex items-center z-50 relative">
+    <img src="/assets/logo.png" class="h-[30px]" alt="Borussia Friedrichsfelde - Vereins Logo"/>
+    <div class="text-xs">Borussia Friedrichsfelde 1920 e.V. - Abteilung Tennis</div>
+</nav>
+
+<div class="text-center m-4 font-bold text-red-900">Etwas ist schief gelaufen. Bitte versuche es erneut oder sende ein Bug-Ticket.</div>
+<div class="text-center m-4 font-bold text-red-900">Something went wrong. Please try again or submit a bug report.</div>
+
+<div class="text-center m-4">
+    <a class="p-2 bg-blue-100 rounded text-xs font-bold" href="/">Neu Laden</a>
+</div>
+</body>
+</html>
