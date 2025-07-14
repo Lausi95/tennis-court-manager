@@ -1,3 +1,5 @@
+ARG SENTRY_AUTH_TOKEN
+
 FROM gradle:jdk21 AS builder
 
 WORKDIR /src
