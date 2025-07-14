@@ -21,11 +21,8 @@
     <!-- Trainer -->
     <th:block th:if="${member.groups.contains('ADMIN') || member.groups.contains('TRAINER')}">
         <div class="col-span-3 font-bold text-lg">Trainingsplan</div>
-        <a href="/trainings" class="col-span-2 p-3 bg-orange-100 text-gray-700 rounded text-center font-bold">
+        <a href="/trainings" class="col-span-3 p-3 bg-orange-100 text-gray-700 rounded text-center font-bold">
             Trainingsplan
-        </a>
-        <a href="/unique-trainings" class="p-3 bg-orange-100 text-gray-700 rounded text-center font-bold">
-            Einzeltraining
         </a>
     </th:block>
 
