@@ -38,6 +38,7 @@ dependencies {
   implementation("com.squareup.retrofit2:retrofit:2.11.0")
   implementation("com.squareup.retrofit2:converter-jackson:2.11.0")
   implementation("io.github.serpro69:kotlin-faker:1.16.0")
+  implementation 'io.sentry:sentry-logback:8.17.0'
 
   developmentOnly("org.springframework.boot:spring-boot-devtools")
 
