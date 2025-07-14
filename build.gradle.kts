@@ -63,6 +63,6 @@ tasks.bootJar {
 sentry {
   includeSourceContext = true
   org = "borussia-friedrichsfelde"
-  projectName = "java-spring-boot"
+  projectName = "tennis-court-manager"
   authToken = System.getenv("SENTRY_AUTH_TOKEN")
 }
