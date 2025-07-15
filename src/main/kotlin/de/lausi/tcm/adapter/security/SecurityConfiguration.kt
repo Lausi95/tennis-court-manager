@@ -31,6 +31,7 @@ class SecurityConfiguration {
   @Bean
   fun resourceServerFilterChain(http: HttpSecurity, logoutHandler: KeycloakLogoutHandler): SecurityFilterChain {
     // general auth settings
+    http.authorizeHttpRequests { it.requestMatchers("/actuator/health").permitAll() }
     http.authorizeHttpRequests { it.anyRequest().authenticated() }
     http.cors { it.disable() }
     http.csrf { it.disable() }
