@@ -1,8 +1,8 @@
 services:
   tcm:
     image: lausi95/tennis-court-manager
-    networks: [traefik]
-    env_file: [tcm.env]
+    networks: [ traefik ]
+    env_file: [ tcm.env ]
     restart: unless-stopped
     labels:
       - traefik.enable=true
@@ -12,15 +12,15 @@ services:
 
   mongodb:
     image: mongo
-    networks: [traefik]
-    env_file: [mongo.env]
-    volumes: [tcm-mongodb:/etc/mongodb]
+    networks: [ traefik ]
+    env_file: [ mongo.env ]
+    volumes: [ tcm-mongodb:/etc/mongodb ]
     restart: unless-stopped
-    labels:
-      - traefik.enable=true
-      - traefik.tcp.routers.mongodb.rule=HostSNI(`*`)
-      - traefik.tcp.routers.mongodb.entrypoints=mongodb
-      - traefik.tcp.routers.mongodb.tls=false
+#    labels:
+#      - traefik.enable=true
+#      - traefik.tcp.routers.mongodb.rule=HostSNI(`*`)
+#      - traefik.tcp.routers.mongodb.entrypoints=mongodb
+#      - traefik.tcp.routers.mongodb.tls=false
 
 networks:
   traefik:
