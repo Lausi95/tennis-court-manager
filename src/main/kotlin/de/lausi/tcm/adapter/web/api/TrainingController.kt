@@ -38,6 +38,7 @@ class TrainingController(
   private val getTrainingUseCase: GetTrainingUseCase,
   private val addSkippedDateUseCase: AddSkippedDateUseCase,
   private val removeSkippedDateUseCase: RemoveSkippedDateUseCase,
+  private val deleteTrainingUseCase: DeleteTrainingUseCase,
 ) {
 
   @GetMapping
@@ -146,6 +147,29 @@ class TrainingController(
 
     return runUseCase(removeSkippedDateUseCase.execute(principal.userId(), command), model, { getRemoveSkippedDate(principal, model, trainingId, request.skippedDateToRemove) }) {
       getTrainingEntity(principal, model, trainingId)
+    }
+  }
+
+  @GetMapping("/{trainingId}/delete")
+  fun getDeleteTraining(principal: Principal, model: Model, @PathVariable trainingId: String): String {
+    val params = DeleteTrainingContextParams(
+      TrainingId(trainingId),
+    )
+
+    return runContext(deleteTrainingUseCase.context(principal.userId(), params), model) {
+      model.trainingEntry(it.training, it.court)
+      "views/trainings/delete"
+    }
+  }
+
+  @PostMapping("/{trainingId}/delete")
+  fun deleteTraining(principal: Principal, model: Model, @PathVariable trainingId: String): String {
+    val command = DeleteTrainingCommand(
+      TrainingId(trainingId),
+    )
+
+    return runUseCase(deleteTrainingUseCase.execute(principal.userId(), command), model, { getDeleteTraining(principal, model, trainingId) }) {
+      getTrainingCollection(principal, model)
     }
   }
 }
