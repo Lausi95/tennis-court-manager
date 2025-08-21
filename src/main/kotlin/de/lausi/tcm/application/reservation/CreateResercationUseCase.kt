@@ -111,23 +111,24 @@ class CreateReservationUseCase(
       return Either.Error("Du kannst ausserhalb der kernzeit maximal 2 Stunden am Stueck buchen.")
     }
 
-
     // Cannot book 14 Days into the future
     if (command.date.isAfter(LocalDate.now().plusDays(14L))) {
       return Either.Error("Du kannst maximal 14 Tage im vorraus Buchen.")
     }
 
     // BUT: Can always book on the same day
-    if (command.date != LocalDate.now()
-    ) {
+    if (command.date != LocalDate.now()) {
+      if ((fromSlot.isCore(command.date) || toSlot.isCore(command.date)) && reservation.playerIds.size < 2) {
+        return Either.Error("In der Kernzeit kannst du nicht alleine spielen.")
+      }
+      
       // Max 1 Hour in core time
       if ((fromSlot.isCore(command.date) || toSlot.isCore(command.date)) && Slot.distance(fromSlot, toSlot) > 2) {
         return Either.Error("Du kannst innerhalb der Kernzeit maximal 1 Stunde am Stueck buchen.")
       }
 
       // Max 1 Coretime booking
-      val futureReservations =
-        reservationRepository.findByCreatorIdAndDateGreaterThanEqual(command.creatorId, LocalDate.now().plusDays(1L))
+      val futureReservations = reservationRepository.findByCreatorIdAndDateGreaterThanEqual(command.creatorId, LocalDate.now().plusDays(1L))
       if (slots.any { it.isCore(command.date) } && futureReservations.any {
           listOf(
             it.fromSlot,
