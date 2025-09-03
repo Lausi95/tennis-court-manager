@@ -1,9 +1,8 @@
-FROM gradle:jdk21 AS builder
-ARG SENTRY_AUTH_TOKEN
+FROM openjdk:21-slim AS builder
 
 WORKDIR /src
 COPY . .
-RUN gradle build -x test
+RUN ./gradlew build -x test
 
 FROM openjdk:21-slim
 
