@@ -54,6 +54,7 @@ class CreateReservationUseCase(
       ?: return Either.Error(listOf("Nutzer existiert nicht."))
 
     val members = memberRepository.findAll()
+      .sortedWith(compareBy({ it.firstname.value }, { it.lastname.value }))
     val courts = courtRepository.findAll()
     val slots = SlotRepository.findAll()
 
@@ -121,7 +122,7 @@ class CreateReservationUseCase(
       if ((fromSlot.isCore(command.date) || toSlot.isCore(command.date)) && reservation.playerIds.size < 2) {
         return Either.Error("In der Kernzeit kannst du nicht alleine spielen.")
       }
-      
+
       // Max 1 Hour in core time
       if ((fromSlot.isCore(command.date) || toSlot.isCore(command.date)) && Slot.distance(fromSlot, toSlot) > 2) {
         return Either.Error("Du kannst innerhalb der Kernzeit maximal 1 Stunde am Stueck buchen.")
