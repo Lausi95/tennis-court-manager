@@ -54,7 +54,7 @@ class CreateReservationUseCase(
       ?: return Either.Error(listOf("Nutzer existiert nicht."))
 
     val members = memberRepository.findAll()
-      .sortedWith(compareBy({ it.firstname.value }, { it.lastname.value }))
+      .sortedWith(compareBy({ it.firstname.value.uppercase() }, { it.lastname.value.uppercase() }))
     val courts = courtRepository.findAll()
     val slots = SlotRepository.findAll()
 
