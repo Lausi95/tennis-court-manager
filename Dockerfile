@@ -1,10 +1,10 @@
-FROM openjdk:21-slim AS builder
+FROM openjdk:21-rc-slim AS builder
 
 WORKDIR /src
 COPY . .
 RUN ./gradlew build -x test
 
-FROM openjdk:21-slim
+FROM openjdk:21-rc-slim
 
 WORKDIR /application
 EXPOSE 8080
