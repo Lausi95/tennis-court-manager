@@ -26,6 +26,8 @@ interface BallmachineBookingRepository {
 
   fun findByDateAndCourtId(date: LocalDate, courtId: CourtId): List<BallmachineBooking>
 
+  fun findByDateBetween(fromDate: LocalDate, toDate: LocalDate): List<BallmachineBooking>
+
   fun findByMemberIdAndDateGreaterThanEqual(memberId: MemberId, minDate: LocalDate): List<BallmachineBooking>
 
   fun save(ballmachineBooking: BallmachineBooking): BallmachineBooking

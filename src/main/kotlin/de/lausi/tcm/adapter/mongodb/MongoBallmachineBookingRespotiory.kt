@@ -33,6 +33,8 @@ private interface MongoBallmachineBookingRepository : MongoRepository<MongoBallm
 
   fun findByDateAndCourtId(date: LocalDate, courtId: String): List<MongoBallmachineBooking>
 
+  fun findByDateBetween(dateAfter: LocalDate, dateBefore: LocalDate): List<MongoBallmachineBooking>
+
   fun findByMemberIdAndDateGreaterThanEqual(memberId: String, minDate: LocalDate): List<MongoBallmachineBooking>
 }
 
@@ -54,6 +56,13 @@ private class BallmachineBookingRepositoryImpl(
     courtId: CourtId
   ): List<BallmachineBooking> {
     return mongoRepository.findByDateAndCourtId(date, courtId.value).map { it.toBallmachineBooking() }
+  }
+
+  override fun findByDateBetween(
+    fromDate: LocalDate,
+    toDate: LocalDate
+  ): List<BallmachineBooking> {
+    return mongoRepository.findByDateBetween(fromDate, toDate).map { it.toBallmachineBooking() }
   }
 
   override fun findByMemberIdAndDateGreaterThanEqual(
